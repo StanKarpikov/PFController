@@ -1,0 +1,32 @@
+BasedOnStyle: Google
+TabWidth: 4
+IndentWidth: 4
+ColumnLimit: 0
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: false
+IndentCaseLabels: true
+BreakBeforeBraces: Allman
+AlignConsecutiveMacros: true
+
+Language: Cpp
+Standard: Cpp11
+DisableFormat:   false
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterCaseLabel:  false
+  AfterClass:      true
+  AfterControlStatement: true
+  AfterEnum:       true
+  AfterFunction:   true
+  AfterNamespace:  true
+  AfterObjCDeclaration: true
+  AfterStruct:     true
+  AfterUnion:      true
+  AfterExternBlock: false
+  BeforeCatch:     true
+  BeforeElse:      true
+  IndentBraces:    false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false

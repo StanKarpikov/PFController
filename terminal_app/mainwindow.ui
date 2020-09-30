@@ -1,0 +1,2339 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1067</width>
+    <height>696</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Панель управления ККМ</string>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <property name="styleSheet">
+    <string notr="true"/>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QGroupBox" name="groupBox_State">
+        <property name="minimumSize">
+         <size>
+          <width>200</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="title">
+         <string>Состояние</string>
+        </property>
+        <property name="checkable">
+         <bool>false</bool>
+        </property>
+        <widget class="QLabel" name="label_WorkState">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>171</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>14</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Состояние</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QRadioButton" name="radioButton_Connection">
+         <property name="geometry">
+          <rect>
+           <x>60</x>
+           <y>60</y>
+           <width>82</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Есть связь</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_ver">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>270</y>
+           <width>181</width>
+           <height>41</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>8</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_STOP">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>90</y>
+           <width>81</width>
+           <height>61</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>СТОП</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_Start">
+         <property name="geometry">
+          <rect>
+           <x>100</x>
+           <y>90</y>
+           <width>81</width>
+           <height>61</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Запуск</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_Save">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>220</y>
+           <width>81</width>
+           <height>23</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Сохр.настр.</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="checkBox_channelA">
+         <property name="geometry">
+          <rect>
+           <x>20</x>
+           <y>250</y>
+           <width>31</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>A</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="checkBox_channelB">
+         <property name="geometry">
+          <rect>
+           <x>80</x>
+           <y>250</y>
+           <width>31</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>B</string>
+         </property>
+        </widget>
+        <widget class="QCheckBox" name="checkBox_channelC">
+         <property name="geometry">
+          <rect>
+           <x>140</x>
+           <y>250</y>
+           <width>31</width>
+           <height>17</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>C</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_CHARGE_ON">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>170</y>
+           <width>81</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Заряд вкл.</string>
+         </property>
+        </widget>
+        <widget class="QPushButton" name="pushButton_CHARGE_OFF">
+         <property name="geometry">
+          <rect>
+           <x>100</x>
+           <y>170</y>
+           <width>81</width>
+           <height>21</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>Заряд выкл.</string>
+         </property>
+        </widget>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_net">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+         </font>
+        </property>
+        <property name="title">
+         <string>Сеть</string>
+        </property>
+        <widget class="QLabel" name="label_Ua">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>20</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Console</family>
+           <pointsize>13</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 170, 0);</string>
+         </property>
+         <property name="text">
+          <string>0 В</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_3">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>20</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Напряжение А:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_Ub">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>50</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Console</family>
+           <pointsize>13</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 170, 0);</string>
+         </property>
+         <property name="text">
+          <string>0 В</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_5">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>50</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Напряжение B:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_Uc">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>80</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Console</family>
+           <pointsize>13</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 170, 0);</string>
+         </property>
+         <property name="text">
+          <string>0 В</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_7">
+         <property name="geometry">
+          <rect>
+           <x>10</x>
+           <y>80</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Напряжение C:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_I_A">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>130</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Console</family>
+           <pointsize>13</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 170, 0);</string>
+         </property>
+         <property name="text">
+          <string>0 А</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_19">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>130</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Ток A:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_20">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>160</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Ток B:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_I_B">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>160</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Console</family>
+           <pointsize>13</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 170, 0);</string>
+         </property>
+         <property name="text">
+          <string>0 А</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_48">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>190</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Ток C:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_I_C">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>190</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Console</family>
+           <pointsize>13</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 170, 0);</string>
+         </property>
+         <property name="text">
+          <string>0 А</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_temperature2">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>270</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Console</family>
+           <pointsize>13</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 170, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_53">
+         <property name="geometry">
+          <rect>
+           <x>0</x>
+           <y>240</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Температура:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_temperature1">
+         <property name="geometry">
+          <rect>
+           <x>110</x>
+           <y>240</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Console</family>
+           <pointsize>13</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 170, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>1</number>
+      </property>
+      <widget class="QWidget" name="tab_net">
+       <attribute name="title">
+        <string>Состояние</string>
+       </attribute>
+       <widget class="QGroupBox" name="groupBox_5">
+        <property name="geometry">
+         <rect>
+          <x>10</x>
+          <y>210</y>
+          <width>301</width>
+          <height>121</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Коэффициент гармонических искажений напряжения</string>
+        </property>
+        <widget class="QLabel" name="label_30">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>20</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Фаза А:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_31">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>50</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Фаза B:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_thdu_C">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>80</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Console</family>
+           <pointsize>13</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 170, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_thdu_A">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>20</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Console</family>
+           <pointsize>13</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 170, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_32">
+         <property name="geometry">
+          <rect>
+           <x>50</x>
+           <y>80</y>
+           <width>101</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Фаза C:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_thdu_B">
+         <property name="geometry">
+          <rect>
+           <x>150</x>
+           <y>50</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Console</family>
+           <pointsize>13</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 170, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QGroupBox" name="groupBox_8">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>10</y>
+          <width>301</width>
+          <height>121</height>
+         </rect>
+        </property>
+        <property name="title">
+         <string>Смещение фаз напряжения</string>
+        </property>
+        <widget class="QLabel" name="label_22">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>60</y>
+           <width>141</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Фаза напряжения B-C:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_21">
+         <property name="geometry">
+          <rect>
+           <x>30</x>
+           <y>30</y>
+           <width>141</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <pointsize>10</pointsize>
+           <weight>50</weight>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="text">
+          <string>Фаза напряжения А-B:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_U_phase_B">
+         <property name="geometry">
+          <rect>
+           <x>180</x>
+           <y>30</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Console</family>
+           <pointsize>13</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 170, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+        <widget class="QLabel" name="label_U_phase_C">
+         <property name="geometry">
+          <rect>
+           <x>180</x>
+           <y>60</y>
+           <width>81</width>
+           <height>31</height>
+          </rect>
+         </property>
+         <property name="font">
+          <font>
+           <family>Lucida Console</family>
+           <pointsize>13</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color: rgb(0, 170, 0);</string>
+         </property>
+         <property name="text">
+          <string>0</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </widget>
+       <widget class="QLabel" name="label_18">
+        <property name="geometry">
+         <rect>
+          <x>20</x>
+          <y>150</y>
+          <width>101</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <weight>50</weight>
+          <bold>false</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Частота:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_freq">
+        <property name="geometry">
+         <rect>
+          <x>120</x>
+          <y>150</y>
+          <width>121</width>
+          <height>31</height>
+         </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Lucida Console</family>
+          <pointsize>13</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">color: rgb(0, 170, 0);</string>
+        </property>
+        <property name="text">
+         <string>0</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="tab_main">
+       <attribute name="title">
+        <string>Управление</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QToolBox" name="toolBox">
+          <property name="font">
+           <font>
+            <pointsize>10</pointsize>
+           </font>
+          </property>
+          <property name="currentIndex">
+           <number>3</number>
+          </property>
+          <widget class="QWidget" name="pageCalibrations">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>89</width>
+             <height>89</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Настройка подключения к сети</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="0" column="0">
+             <widget class="QTableWidget" name="tableWidget_settings_calibrations">
+              <row>
+               <property name="text">
+                <string>Смещение Ud</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Смещение Ua</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Смещение Ub</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Смещение Uc</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Смещение Ia</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Смещение Ib</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Смещение Ic</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Смещение Iet</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Смещение temp1</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Смещение temp2</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Смещение EMS a</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Смещение EMS b</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Смещение EMS c</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Смещение EMS I</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах Ud</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах Ua</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах Ub</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах Uc</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах Ia</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах Ib</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах Ic</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах Et</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах temp1</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах temp2</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах EMS A</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах EMS B</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах EMS C</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Размах EMS I</string>
+               </property>
+              </row>
+              <column>
+               <property name="text">
+                <string>Значение</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Авто</string>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Расчёт</string>
+               </property>
+              </column>
+              <item row="0" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="1" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="2" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="3" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="4" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="5" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="6" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="7" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="8" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="9" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="10" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="11" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="12" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="13" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="14" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="15" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="16" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="17" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="18" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="19" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="20" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="21" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="22" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="23" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="24" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="25" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="26" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="27" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="pageFilters">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>89</width>
+             <height>89</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Фильтрация</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_6">
+            <item row="0" column="0">
+             <widget class="QTableWidget" name="tableWidget_settings_filters">
+              <property name="showGrid">
+               <bool>true</bool>
+              </property>
+              <row>
+               <property name="text">
+                <string>Коэффициент фильтра тока</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Коэффициент фильтра напряжения</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Коэффициент фильтра напряжения конденсаторов</string>
+               </property>
+              </row>
+              <column>
+               <property name="text">
+                <string>Значение</string>
+               </property>
+               <property name="textAlignment">
+                <set>AlignCenter</set>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Номинал</string>
+               </property>
+               <property name="textAlignment">
+                <set>AlignCenter</set>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Примечание</string>
+               </property>
+               <property name="textAlignment">
+                <set>AlignCenter</set>
+               </property>
+              </column>
+              <item row="0" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="0" column="1">
+               <property name="text">
+                <string>0.95</string>
+               </property>
+              </item>
+              <item row="0" column="2">
+               <property name="text">
+                <string>0..0.9999</string>
+               </property>
+              </item>
+              <item row="1" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="1" column="1">
+               <property name="text">
+                <string>0.95</string>
+               </property>
+              </item>
+              <item row="1" column="2">
+               <property name="text">
+                <string>0..0.9999</string>
+               </property>
+              </item>
+              <item row="2" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="2" column="1">
+               <property name="text">
+                <string>0.95</string>
+               </property>
+              </item>
+              <item row="2" column="2">
+               <property name="text">
+                <string>0..0.9999</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="pageCapacitors">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>100</width>
+             <height>30</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Заряд конденсаторов</string>
+           </attribute>
+           <widget class="QProgressBar" name="progressBar_Ud1">
+            <property name="geometry">
+             <rect>
+              <x>160</x>
+              <y>40</y>
+              <width>71</width>
+              <height>281</height>
+             </rect>
+            </property>
+            <property name="maximum">
+             <number>1000</number>
+            </property>
+            <property name="value">
+             <number>0</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+           </widget>
+           <widget class="QDoubleSpinBox" name="doubleSpinBox_cap_nominal">
+            <property name="geometry">
+             <rect>
+              <x>270</x>
+              <y>100</y>
+              <width>62</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="maximum">
+             <double>999.990000000000009</double>
+            </property>
+           </widget>
+           <widget class="Line" name="line_2">
+            <property name="geometry">
+             <rect>
+              <x>140</x>
+              <y>110</y>
+              <width>118</width>
+              <height>3</height>
+             </rect>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_2">
+            <property name="geometry">
+             <rect>
+              <x>30</x>
+              <y>90</y>
+              <width>101</width>
+              <height>41</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Номинальное напряжение</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_Ud1">
+            <property name="geometry">
+             <rect>
+              <x>170</x>
+              <y>10</y>
+              <width>51</width>
+              <height>21</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>0 В</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_8">
+            <property name="geometry">
+             <rect>
+              <x>330</x>
+              <y>100</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>В</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+           <widget class="QGroupBox" name="groupBox_4">
+            <property name="geometry">
+             <rect>
+              <x>370</x>
+              <y>20</y>
+              <width>341</width>
+              <height>131</height>
+             </rect>
+            </property>
+            <property name="title">
+             <string>Коэффициенты накачки</string>
+            </property>
+            <widget class="QLabel" name="label_11">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>90</y>
+               <width>131</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Дифференциальный</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_capacitors_Kp">
+             <property name="geometry">
+              <rect>
+               <x>160</x>
+               <y>30</y>
+               <width>121</width>
+               <height>22</height>
+              </rect>
+             </property>
+             <property name="decimals">
+              <number>6</number>
+             </property>
+             <property name="minimum">
+              <double>-9999.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>9999.000000000000000</double>
+             </property>
+            </widget>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_capacitors_Ki">
+             <property name="geometry">
+              <rect>
+               <x>160</x>
+               <y>60</y>
+               <width>121</width>
+               <height>22</height>
+              </rect>
+             </property>
+             <property name="decimals">
+              <number>6</number>
+             </property>
+             <property name="minimum">
+              <double>-9999.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>9999.000000000000000</double>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_10">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>60</y>
+               <width>131</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Интегральный</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_capacitors_Kd">
+             <property name="geometry">
+              <rect>
+               <x>160</x>
+               <y>90</y>
+               <width>121</width>
+               <height>22</height>
+              </rect>
+             </property>
+             <property name="decimals">
+              <number>6</number>
+             </property>
+             <property name="minimum">
+              <double>-9999.000000000000000</double>
+             </property>
+             <property name="maximum">
+              <double>9999.000000000000000</double>
+             </property>
+            </widget>
+            <widget class="QLabel" name="label_9">
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>30</y>
+               <width>131</width>
+               <height>20</height>
+              </rect>
+             </property>
+             <property name="text">
+              <string>Пропорциональный</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </widget>
+           <widget class="QDoubleSpinBox" name="doubleSpinBox_cap_precharge">
+            <property name="geometry">
+             <rect>
+              <x>270</x>
+              <y>240</y>
+              <width>62</width>
+              <height>22</height>
+             </rect>
+            </property>
+            <property name="maximum">
+             <double>999.990000000000009</double>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_12">
+            <property name="geometry">
+             <rect>
+              <x>330</x>
+              <y>240</y>
+              <width>31</width>
+              <height>20</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>В</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+           <widget class="Line" name="line_3">
+            <property name="geometry">
+             <rect>
+              <x>140</x>
+              <y>250</y>
+              <width>118</width>
+              <height>3</height>
+             </rect>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+           <widget class="QLabel" name="label_13">
+            <property name="geometry">
+             <rect>
+              <x>30</x>
+              <y>230</y>
+              <width>101</width>
+              <height>41</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string>Уровень предзаряда</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+            </property>
+            <property name="wordWrap">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </widget>
+          <widget class="QWidget" name="pageProtection">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>808</width>
+             <height>473</height>
+            </rect>
+           </property>
+           <attribute name="label">
+            <string>Защиты</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0">
+             <widget class="QTableWidget" name="tableWidget_settings_protection">
+              <property name="showGrid">
+               <bool>true</bool>
+              </property>
+              <row>
+               <property name="text">
+                <string>Ud min</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Ud max</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>Температура</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>U min</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>U max</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>F min</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>F max</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>I max RMS</string>
+               </property>
+              </row>
+              <row>
+               <property name="text">
+                <string>I max peak</string>
+               </property>
+              </row>
+              <column>
+               <property name="text">
+                <string>Значение</string>
+               </property>
+               <property name="textAlignment">
+                <set>AlignCenter</set>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Номинал</string>
+               </property>
+               <property name="textAlignment">
+                <set>AlignCenter</set>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Единицы измерения</string>
+               </property>
+               <property name="textAlignment">
+                <set>AlignCenter</set>
+               </property>
+              </column>
+              <column>
+               <property name="text">
+                <string>Примечание</string>
+               </property>
+               <property name="textAlignment">
+                <set>AlignCenter</set>
+               </property>
+              </column>
+              <item row="0" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="0" column="1">
+               <property name="text">
+                <string>320</string>
+               </property>
+              </item>
+              <item row="0" column="2">
+               <property name="text">
+                <string>В</string>
+               </property>
+              </item>
+              <item row="0" column="3">
+               <property name="text">
+                <string>Минимально допустимое напряжение на одном из конденсаторов</string>
+               </property>
+              </item>
+              <item row="1" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="1" column="1">
+               <property name="text">
+                <string>420</string>
+               </property>
+              </item>
+              <item row="1" column="2">
+               <property name="text">
+                <string>В</string>
+               </property>
+              </item>
+              <item row="1" column="3">
+               <property name="text">
+                <string>Максимально допустимое напряжение на одном из конденсаторов</string>
+               </property>
+              </item>
+              <item row="2" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="2" column="1">
+               <property name="text">
+                <string>50</string>
+               </property>
+              </item>
+              <item row="2" column="2">
+               <property name="text">
+                <string>ºС</string>
+               </property>
+              </item>
+              <item row="2" column="3">
+               <property name="text">
+                <string>Максимально допустимая температура</string>
+               </property>
+              </item>
+              <item row="3" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="3" column="1">
+               <property name="text">
+                <string>200</string>
+               </property>
+              </item>
+              <item row="3" column="2">
+               <property name="text">
+                <string>В</string>
+               </property>
+              </item>
+              <item row="3" column="3">
+               <property name="text">
+                <string>Минимально допустимое напряжение сети по одной фазе</string>
+               </property>
+              </item>
+              <item row="4" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="4" column="1">
+               <property name="text">
+                <string>250</string>
+               </property>
+              </item>
+              <item row="4" column="2">
+               <property name="text">
+                <string>В</string>
+               </property>
+              </item>
+              <item row="4" column="3">
+               <property name="text">
+                <string>Максимально допустимое напряжение сети по одной фазе</string>
+               </property>
+              </item>
+              <item row="5" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="5" column="1">
+               <property name="text">
+                <string>45</string>
+               </property>
+              </item>
+              <item row="5" column="2">
+               <property name="text">
+                <string>Гц</string>
+               </property>
+              </item>
+              <item row="5" column="3">
+               <property name="text">
+                <string>Минимально допустимая частота сети</string>
+               </property>
+              </item>
+              <item row="6" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="6" column="1">
+               <property name="text">
+                <string>55</string>
+               </property>
+              </item>
+              <item row="6" column="2">
+               <property name="text">
+                <string>Гц</string>
+               </property>
+              </item>
+              <item row="6" column="3">
+               <property name="text">
+                <string>Максимально допустимая частота сети</string>
+               </property>
+              </item>
+              <item row="7" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="7" column="1">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="7" column="2">
+               <property name="text">
+                <string>А</string>
+               </property>
+              </item>
+              <item row="7" column="3">
+               <property name="text">
+                <string>Максимальный ток АДФ среднеквадратический</string>
+               </property>
+              </item>
+              <item row="8" column="0">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="8" column="1">
+               <property name="text">
+                <string/>
+               </property>
+              </item>
+              <item row="8" column="2">
+               <property name="text">
+                <string>А</string>
+               </property>
+              </item>
+              <item row="8" column="3">
+               <property name="text">
+                <string>Максимальный ток АДФ мгновенный</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_log">
+       <attribute name="title">
+        <string>Лог работы</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_7">
+        <item row="0" column="1">
+         <widget class="QPushButton" name="pushButton_2">
+          <property name="text">
+           <string>Очистить</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="1" colspan="2">
+         <widget class="QListWidget" name="listWidget"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_oscillog">
+       <attribute name="title">
+        <string>Осциллограммы</string>
+       </attribute>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="title">
+           <string>Вид</string>
+          </property>
+          <widget class="QCheckBox" name="checkBox_osc_Ua">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>20</y>
+             <width>70</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Ua</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_osc_Ub">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>40</y>
+             <width>70</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Ub</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_osc_Uc">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>60</y>
+             <width>70</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Uc</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_osc_I_a">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>100</y>
+             <width>70</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>I_a</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_osc_I_b">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>120</y>
+             <width>70</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>I_b</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_osc_I_c">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>140</y>
+             <width>70</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>I_c</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="QPushButton" name="pushButton">
+           <property name="geometry">
+            <rect>
+             <x>4</x>
+             <y>450</y>
+             <width>91</width>
+             <height>23</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Автомасштаб</string>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_osc_Ud">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>250</y>
+             <width>70</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Ud</string>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_osc_Icomp_a">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>320</y>
+             <width>70</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Icomp_a</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_osc_Icomp_c">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>360</y>
+             <width>70</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Icomp_c</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="QCheckBox" name="checkBox_osc_Icomp_b">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>340</y>
+             <width>70</width>
+             <height>17</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Icomp_b</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+          <widget class="QSlider" name="horizontalSlider_filter">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>430</y>
+             <width>91</width>
+             <height>19</height>
+            </rect>
+           </property>
+           <property name="maximum">
+            <number>999</number>
+           </property>
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+          </widget>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCustomPlot" name="OscillogPlot" native="true"/>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1067</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuCalls">
+    <property name="title">
+     <string>Calls</string>
+    </property>
+    <addaction name="actionConnect"/>
+    <addaction name="actionDisconnect"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+    <addaction name="actionConfigure"/>
+    <addaction name="actionClear"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionAbout"/>
+    <addaction name="actionAboutQt"/>
+   </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+   </widget>
+   <addaction name="menuCalls"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuHelp"/>
+   <addaction name="menuOptions"/>
+  </widget>
+  <widget class="QStatusBar" name="statusBar"/>
+  <action name="actionAbout">
+   <property name="text">
+    <string>&amp;About</string>
+   </property>
+   <property name="toolTip">
+    <string>About program</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+A</string>
+   </property>
+  </action>
+  <action name="actionAboutQt">
+   <property name="text">
+    <string>About Qt</string>
+   </property>
+  </action>
+  <action name="actionConnect">
+   <property name="icon">
+    <iconset resource="terminal_KKM.qrc">
+     <normaloff>:/images/connect.png</normaloff>:/images/connect.png</iconset>
+   </property>
+   <property name="text">
+    <string>C&amp;onnect</string>
+   </property>
+   <property name="toolTip">
+    <string>Connect to serial port</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
+  </action>
+  <action name="actionDisconnect">
+   <property name="icon">
+    <iconset resource="terminal_KKM.qrc">
+     <normaloff>:/images/disconnect.png</normaloff>:/images/disconnect.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Disconnect</string>
+   </property>
+   <property name="toolTip">
+    <string>Disconnect from serial port</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionConfigure">
+   <property name="icon">
+    <iconset resource="terminal_KKM.qrc">
+     <normaloff>:/images/settings.png</normaloff>:/images/settings.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Configure</string>
+   </property>
+   <property name="toolTip">
+    <string>Configure serial port</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+C</string>
+   </property>
+  </action>
+  <action name="actionClear">
+   <property name="icon">
+    <iconset resource="terminal_KKM.qrc">
+     <normaloff>:/images/clear.png</normaloff>:/images/clear.png</iconset>
+   </property>
+   <property name="text">
+    <string>C&amp;lear</string>
+   </property>
+   <property name="toolTip">
+    <string>Clear data</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+L</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="icon">
+    <iconset resource="terminal_KKM.qrc">
+     <normaloff>:/images/application-exit.png</normaloff>:/images/application-exit.png</iconset>
+   </property>
+   <property name="text">
+    <string>&amp;Quit</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="terminal_KKM.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -35,6 +35,16 @@ Fig.3. Input currents
 
 ### Requirements
 
+Keil uVision 5.
+
+### Dependencies
+
+## Control software
+
+### Requirements
+Qt Creator 4+
+
+
 ### Dependencies
 
 
