@@ -52,3 +52,8 @@ compile_commands.json
 *creator.user*
 firmware/MDK-ARM/RTE
 firmware/MDK-ARM/DebugConfig
+firmware/project/RTE
+firmware/project/PFC
+firmware/project/DebugConfig
+*.uvguix*
+firmware/project/PFC.uvoptx
