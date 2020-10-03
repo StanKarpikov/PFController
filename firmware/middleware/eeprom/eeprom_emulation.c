@@ -1,6 +1,5 @@
 #include "EEPROM_emulation.h"
-
-#include "main.h"
+#include "stm32f7xx_hal.h"
 
 uint32_t PageBase0;
 uint32_t PageBase1;

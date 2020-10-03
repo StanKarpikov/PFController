@@ -1,30 +1,30 @@
 #include "device.h"
 
 #include "clogic.h"
-#include "main.h"
 #include "settings.h"
+#include "BSP/debug.h"
 //================================================================================
 //================================================================================
 //================================================================================
 uint64_t currentTime = 0;
-struct _kkm KKM;
+struct _kkm PFC;
 float OSC_DATA[OSC_CHANNEL_NUMBER][OSCILLOG_TRANSFER_SIZE];
 
 void kkm_switch_on(void)
 {
-    if (KKM.status == KKM_STATE_STOP)
+    if (PFC.status == PFC_STATE_STOP)
     {
-        clogic_set_state(KKM_STATE_SYNC);
+        clogic_set_state(PFC_STATE_SYNC);
     }
-    else if (KKM.status == KKM_STATE_FAULTBLOCK)
+    else if (PFC.status == PFC_STATE_FAULTBLOCK)
     {
-        clogic_set_state(KKM_STATE_SYNC);
+        clogic_set_state(PFC_STATE_SYNC);
     }
 }
 
 void kkm_switch_off(void)
 {
-    clogic_set_state(KKM_STATE_STOPPING);
+    clogic_set_state(PFC_STATE_STOPPING);
 }
 //================================================================================
 //================================================================================
@@ -67,7 +67,7 @@ pack->result = 1;
 switch (req->command)
 {
     case COMMAND_WORK_ON:
-        if (KKM.status == KKM_STATE_STOP)
+        if (PFC.status == PFC_STATE_STOP)
         {
             kkm_switch_on();
         }
@@ -76,31 +76,31 @@ switch (req->command)
         kkm_switch_off();
         break;
     case COMMAND_CHARGE_ON:
-        if (KKM.status == KKM_STATE_WORK)
+        if (PFC.status == PFC_STATE_WORK)
         {
-            clogic_set_state(KKM_STATE_CHARGE);
+            clogic_set_state(PFC_STATE_CHARGE);
         }
         break;
     case COMMAND_CHARGE_OFF:
-        if (KKM.status == KKM_STATE_CHARGE)
+        if (PFC.status == PFC_STATE_CHARGE)
         {
-            clogic_set_state(KKM_STATE_WORK);
+            clogic_set_state(PFC_STATE_WORK);
         }
         break;
     case COMMAND_SETTINGS_SAVE:
-        if (KKM.status == KKM_STATE_STOP)
+        if (PFC.status == PFC_STATE_STOP)
         {
-            SaveSettings(&KKM.settings);
+            SaveSettings(&PFC.settings);
         }
         break;
     case COMMAND_CHANNEL0_DATA:
-        KKM.settings.PWM.activeChannels[0] = req->data;
+        PFC.settings.PWM.activeChannels[0] = req->data;
         break;
     case COMMAND_CHANNEL1_DATA:
-        KKM.settings.PWM.activeChannels[1] = req->data;
+        PFC.settings.PWM.activeChannels[1] = req->data;
         break;
     case COMMAND_CHANNEL2_DATA:
-        KKM.settings.PWM.activeChannels[2] = req->data;
+        PFC.settings.PWM.activeChannels[2] = req->data;
         break;
     default:
         pack->result = 0;
@@ -110,59 +110,59 @@ END_HANDLER(SWITCH_ON_OFF)
 //================================================================================
 HANDLER(GET_ADC_ACTIVE)
 
-pack->ADC_UD = KKM.adc.active[ADC_UD];
-pack->ADC_U_A = KKM.adc.active[ADC_EMS_A];  //TODO:
-pack->ADC_U_B = KKM.adc.active[ADC_EMS_B];
-pack->ADC_U_C = KKM.adc.active[ADC_EMS_C];
-pack->ADC_I_A = KKM.adc.active[ADC_I_A];
-pack->ADC_I_B = KKM.adc.active[ADC_I_B];
-pack->ADC_I_C = KKM.adc.active[ADC_I_C];
-pack->ADC_I_ET = KKM.adc.active[ADC_I_ET];
-pack->ADC_I_TEMP1 = KKM.adc.active[ADC_I_TEMP1];
-pack->ADC_I_TEMP2 = KKM.adc.active[ADC_I_TEMP2];
-pack->ADC_EMS_A = KKM.adc.active[ADC_EMS_A];
-pack->ADC_EMS_B = KKM.adc.active[ADC_EMS_B];
-pack->ADC_EMS_C = KKM.adc.active[ADC_EMS_C];
-pack->ADC_EMS_I = KKM.adc.active[ADC_EMS_I];
-pack->ADC_MATH_A = KKM.adc.active[ADC_EMS_A];  //TODO:
-pack->ADC_MATH_B = KKM.adc.active[ADC_EMS_B];
-pack->ADC_MATH_C = KKM.adc.active[ADC_EMS_C];
+pack->ADC_UD = PFC.adc.active[ADC_UD];
+pack->ADC_U_A = PFC.adc.active[ADC_EMS_A];  //TODO:
+pack->ADC_U_B = PFC.adc.active[ADC_EMS_B];
+pack->ADC_U_C = PFC.adc.active[ADC_EMS_C];
+pack->ADC_I_A = PFC.adc.active[ADC_I_A];
+pack->ADC_I_B = PFC.adc.active[ADC_I_B];
+pack->ADC_I_C = PFC.adc.active[ADC_I_C];
+pack->ADC_I_ET = PFC.adc.active[ADC_I_ET];
+pack->ADC_I_TEMP1 = PFC.adc.active[ADC_I_TEMP1];
+pack->ADC_I_TEMP2 = PFC.adc.active[ADC_I_TEMP2];
+pack->ADC_EMS_A = PFC.adc.active[ADC_EMS_A];
+pack->ADC_EMS_B = PFC.adc.active[ADC_EMS_B];
+pack->ADC_EMS_C = PFC.adc.active[ADC_EMS_C];
+pack->ADC_EMS_I = PFC.adc.active[ADC_EMS_I];
+pack->ADC_MATH_A = PFC.adc.active[ADC_EMS_A];  //TODO:
+pack->ADC_MATH_B = PFC.adc.active[ADC_EMS_B];
+pack->ADC_MATH_C = PFC.adc.active[ADC_EMS_C];
 END_HANDLER(GET_ADC_ACTIVE)
 
 //================================================================================
 HANDLER(GET_NET_PARAMS)
-pack->period_fact = KKM.period_fact;
-pack->U0Hz_A = KKM.U_0Hz[0];  //Постоянная составляющая
-pack->U0Hz_B = KKM.U_0Hz[1];
-pack->U0Hz_C = KKM.U_0Hz[2];
-pack->I0Hz_A = KKM.I_0Hz[0];  //Постоянная составляющая
-pack->I0Hz_B = KKM.I_0Hz[1];
-pack->I0Hz_C = KKM.I_0Hz[2];
+pack->period_fact = PFC.period_fact;
+pack->U0Hz_A = PFC.U_0Hz[0];  //Постоянная составляющая
+pack->U0Hz_B = PFC.U_0Hz[1];
+pack->U0Hz_C = PFC.U_0Hz[2];
+pack->I0Hz_A = PFC.I_0Hz[0];  //Постоянная составляющая
+pack->I0Hz_B = PFC.I_0Hz[1];
+pack->I0Hz_C = PFC.I_0Hz[2];
 
-pack->thdu_A = KKM.thdu[0];
-pack->thdu_B = KKM.thdu[1];
-pack->thdu_C = KKM.thdu[2];
+pack->thdu_A = PFC.thdu[0];
+pack->thdu_B = PFC.thdu[1];
+pack->thdu_C = PFC.thdu[2];
 
-pack->U_phase_A = KKM.U_phase[0];
-pack->U_phase_B = KKM.U_phase[1];
-pack->U_phase_C = KKM.U_phase[2];
+pack->U_phase_A = PFC.U_phase[0];
+pack->U_phase_B = PFC.U_phase[1];
+pack->U_phase_C = PFC.U_phase[2];
 END_HANDLER(GET_NET_PARAMS)
 //================================================================================
 HANDLER(GET_ADC_ACTIVE_RAW)
-pack->ADC_UD = KKM.adc.active_raw[ADC_UD];
-pack->ADC_U_A = KKM.adc.active_raw[ADC_U_A];
-pack->ADC_U_B = KKM.adc.active_raw[ADC_U_B];
-pack->ADC_U_C = KKM.adc.active_raw[ADC_U_C];
-pack->ADC_I_A = KKM.adc.active_raw[ADC_I_A];
-pack->ADC_I_B = KKM.adc.active_raw[ADC_I_B];
-pack->ADC_I_C = KKM.adc.active_raw[ADC_I_C];
-pack->ADC_I_ET = KKM.adc.active_raw[ADC_I_ET];
-pack->ADC_I_TEMP1 = KKM.adc.active_raw[ADC_I_TEMP1];
-pack->ADC_I_TEMP2 = KKM.adc.active_raw[ADC_I_TEMP2];
-pack->ADC_EMS_A = KKM.adc.active_raw[ADC_EMS_A];
-pack->ADC_EMS_B = KKM.adc.active_raw[ADC_EMS_B];
-pack->ADC_EMS_C = KKM.adc.active_raw[ADC_EMS_C];
-pack->ADC_EMS_I = KKM.adc.active_raw[ADC_EMS_I];
+pack->ADC_UD = PFC.adc.active_raw[ADC_UD];
+pack->ADC_U_A = PFC.adc.active_raw[ADC_U_A];
+pack->ADC_U_B = PFC.adc.active_raw[ADC_U_B];
+pack->ADC_U_C = PFC.adc.active_raw[ADC_U_C];
+pack->ADC_I_A = PFC.adc.active_raw[ADC_I_A];
+pack->ADC_I_B = PFC.adc.active_raw[ADC_I_B];
+pack->ADC_I_C = PFC.adc.active_raw[ADC_I_C];
+pack->ADC_I_ET = PFC.adc.active_raw[ADC_I_ET];
+pack->ADC_I_TEMP1 = PFC.adc.active_raw[ADC_I_TEMP1];
+pack->ADC_I_TEMP2 = PFC.adc.active_raw[ADC_I_TEMP2];
+pack->ADC_EMS_A = PFC.adc.active_raw[ADC_EMS_A];
+pack->ADC_EMS_B = PFC.adc.active_raw[ADC_EMS_B];
+pack->ADC_EMS_C = PFC.adc.active_raw[ADC_EMS_C];
+pack->ADC_EMS_I = PFC.adc.active_raw[ADC_EMS_I];
 END_HANDLER(GET_ADC_ACTIVE_RAW)
 //================================================================================
 HANDLER(GET_WORK_STATE)
@@ -173,10 +173,10 @@ if (currentTime > 4133894400000)
     currentTime = 0;
 }
 EINT;
-pack->state = KKM.status;
-pack->activeChannels[0] = KKM.settings.PWM.activeChannels[0];
-pack->activeChannels[1] = KKM.settings.PWM.activeChannels[1];
-pack->activeChannels[2] = KKM.settings.PWM.activeChannels[2];
+pack->state = PFC.status;
+pack->activeChannels[0] = PFC.settings.PWM.activeChannels[0];
+pack->activeChannels[1] = PFC.settings.PWM.activeChannels[1];
+pack->activeChannels[2] = PFC.settings.PWM.activeChannels[2];
 END_HANDLER(GET_WORK_STATE)
 //================================================================================
 #include "fw_ver.h"
@@ -220,14 +220,14 @@ for (int i = 0; i < OSCILLOG_TRANSFER_SIZE; i++)
     if (OSC_DATA[req->num][i] > oscillog_max) oscillog_max = OSC_DATA[req->num][i];
     if (OSC_DATA[req->num][i] < oscillog_min) oscillog_min = OSC_DATA[req->num][i];
 }
-float astep = 0.0;
+float astep = 0.0f;
 if ((oscillog_max - oscillog_min) == 0)
 {
-    astep = 255.0;
+    astep = 255.0f;
 }
 else
 {
-    astep = 255.0 / (oscillog_max - oscillog_min);
+    astep = 255.0f / (oscillog_max - oscillog_min);
 }
 for (int i = 0; i < OSCILLOG_TRANSFER_SIZE; i++)
 {
@@ -242,8 +242,8 @@ HANDLER(GET_SETTINGS_CALIBRATIONS)
 int i;
 for (i = 0; i < ADC_CHANNEL_NUMBER; i++)
 {
-    pack->calibration[i] = KKM.settings.CALIBRATIONS.calibration[i];  //!< Калибровки для каналов
-    pack->offset[i] = KKM.settings.CALIBRATIONS.offset[i];            //!< Смещения для каналов
+    pack->calibration[i] = PFC.settings.CALIBRATIONS.calibration[i];  //!< Калибровки для каналов
+    pack->offset[i] = PFC.settings.CALIBRATIONS.offset[i];            //!< Смещения для каналов
 }
 END_HANDLER(GET_SETTINGS_CALIBRATIONS)
 //================================================================================
@@ -251,61 +251,61 @@ HANDLER(SET_SETTINGS_CALIBRATIONS)
 int i;
 for (i = 0; i < ADC_CHANNEL_NUMBER; i++)
 {
-    KKM.settings.CALIBRATIONS.calibration[i] = req->calibration[i];  //!< Калибровки для каналов
-    KKM.settings.CALIBRATIONS.offset[i] = req->offset[i];            //!< Смещения для каналов
+    PFC.settings.CALIBRATIONS.calibration[i] = req->calibration[i];  //!< Калибровки для каналов
+    PFC.settings.CALIBRATIONS.offset[i] = req->offset[i];            //!< Смещения для каналов
 }
 END_HANDLER(SET_SETTINGS_CALIBRATIONS)
 //================================================================================
 HANDLER(GET_SETTINGS_PROTECTION)
-pack->Ud_min = KKM.settings.PROTECTION.Ud_min;            //!< Граничные значения для Ud
-pack->Ud_max = KKM.settings.PROTECTION.Ud_max;            //!< Граничные значения для Ud
-pack->temperature = KKM.settings.PROTECTION.temperature;  //!< Граничные значения для Температуры
-pack->U_min = KKM.settings.PROTECTION.U_min;              //!< Граничные значения для напряжения
-pack->U_max = KKM.settings.PROTECTION.U_max;
-pack->Fnet_min = KKM.settings.PROTECTION.Fnet_min;      //!< минимальная частота сети
-pack->Fnet_max = KKM.settings.PROTECTION.Fnet_max;      //!< максимальная частота сети
-pack->I_max_rms = KKM.settings.PROTECTION.I_max_rms;    //!< Максимальное граничное значение тока фильтра по RMS
-pack->I_max_peak = KKM.settings.PROTECTION.I_max_peak;  //!< Максимальное граничное мгновенное значение тока фильтра
+pack->Ud_min = PFC.settings.PROTECTION.Ud_min;            //!< Граничные значения для Ud
+pack->Ud_max = PFC.settings.PROTECTION.Ud_max;            //!< Граничные значения для Ud
+pack->temperature = PFC.settings.PROTECTION.temperature;  //!< Граничные значения для Температуры
+pack->U_min = PFC.settings.PROTECTION.U_min;              //!< Граничные значения для напряжения
+pack->U_max = PFC.settings.PROTECTION.U_max;
+pack->Fnet_min = PFC.settings.PROTECTION.Fnet_min;      //!< минимальная частота сети
+pack->Fnet_max = PFC.settings.PROTECTION.Fnet_max;      //!< максимальная частота сети
+pack->I_max_rms = PFC.settings.PROTECTION.I_max_rms;    //!< Максимальное граничное значение тока фильтра по RMS
+pack->I_max_peak = PFC.settings.PROTECTION.I_max_peak;  //!< Максимальное граничное мгновенное значение тока фильтра
 END_HANDLER(GET_SETTINGS_CALIBRATIONS)
 //================================================================================
 HANDLER(SET_SETTINGS_PROTECTION)
-KKM.settings.PROTECTION.Ud_min = req->Ud_min;            //!< Граничные значения для Ud
-KKM.settings.PROTECTION.Ud_max = req->Ud_max;            //!< Граничные значения для Ud
-KKM.settings.PROTECTION.temperature = req->temperature;  //!< Граничные значения для Температуры
-KKM.settings.PROTECTION.U_min = req->U_min;              //!< Граничные значения для напряжения
-KKM.settings.PROTECTION.U_max = req->U_max;
-KKM.settings.PROTECTION.Fnet_min = req->Fnet_min;      //!< минимальная частота сети
-KKM.settings.PROTECTION.Fnet_max = req->Fnet_max;      //!< максимальная частота сети
-KKM.settings.PROTECTION.I_max_rms = req->I_max_rms;    //!< Максимальное граничное значение тока фильтра по RMS
-KKM.settings.PROTECTION.I_max_peak = req->I_max_peak;  //!< Максимальное граничное мгновенное значение тока фильтра
+PFC.settings.PROTECTION.Ud_min = req->Ud_min;            //!< Граничные значения для Ud
+PFC.settings.PROTECTION.Ud_max = req->Ud_max;            //!< Граничные значения для Ud
+PFC.settings.PROTECTION.temperature = req->temperature;  //!< Граничные значения для Температуры
+PFC.settings.PROTECTION.U_min = req->U_min;              //!< Граничные значения для напряжения
+PFC.settings.PROTECTION.U_max = req->U_max;
+PFC.settings.PROTECTION.Fnet_min = req->Fnet_min;      //!< минимальная частота сети
+PFC.settings.PROTECTION.Fnet_max = req->Fnet_max;      //!< максимальная частота сети
+PFC.settings.PROTECTION.I_max_rms = req->I_max_rms;    //!< Максимальное граничное значение тока фильтра по RMS
+PFC.settings.PROTECTION.I_max_peak = req->I_max_peak;  //!< Максимальное граничное мгновенное значение тока фильтра
 END_HANDLER(SET_SETTINGS_CALIBRATIONS)
 //================================================================================
 HANDLER(GET_SETTINGS_CAPACITORS)
-pack->ctrlUd_Kp = KKM.settings.CAPACITORS.ctrlUd_Kp;
-pack->ctrlUd_Ki = KKM.settings.CAPACITORS.ctrlUd_Ki;
-pack->ctrlUd_Kd = KKM.settings.CAPACITORS.ctrlUd_Kd;
-pack->Ud_nominal = KKM.settings.CAPACITORS.Ud_nominal;
-pack->Ud_precharge = KKM.settings.CAPACITORS.Ud_precharge;
+pack->ctrlUd_Kp = PFC.settings.CAPACITORS.ctrlUd_Kp;
+pack->ctrlUd_Ki = PFC.settings.CAPACITORS.ctrlUd_Ki;
+pack->ctrlUd_Kd = PFC.settings.CAPACITORS.ctrlUd_Kd;
+pack->Ud_nominal = PFC.settings.CAPACITORS.Ud_nominal;
+pack->Ud_precharge = PFC.settings.CAPACITORS.Ud_precharge;
 END_HANDLER(GET_SETTINGS_CALIBRATIONS)
 //================================================================================
 HANDLER(SET_SETTINGS_CAPACITORS)
-KKM.settings.CAPACITORS.ctrlUd_Kp = req->ctrlUd_Kp;
-KKM.settings.CAPACITORS.ctrlUd_Ki = req->ctrlUd_Ki;
-KKM.settings.CAPACITORS.ctrlUd_Kd = req->ctrlUd_Kd;
-KKM.settings.CAPACITORS.Ud_nominal = req->Ud_nominal;
-KKM.settings.CAPACITORS.Ud_precharge = req->Ud_precharge;
+PFC.settings.CAPACITORS.ctrlUd_Kp = req->ctrlUd_Kp;
+PFC.settings.CAPACITORS.ctrlUd_Ki = req->ctrlUd_Ki;
+PFC.settings.CAPACITORS.ctrlUd_Kd = req->ctrlUd_Kd;
+PFC.settings.CAPACITORS.Ud_nominal = req->Ud_nominal;
+PFC.settings.CAPACITORS.Ud_precharge = req->Ud_precharge;
 END_HANDLER(SET_SETTINGS_CALIBRATIONS)
 //================================================================================
 HANDLER(GET_SETTINGS_FILTERS)
-pack->K_I = KKM.settings.FILTERS.K_I;
-pack->K_U = KKM.settings.FILTERS.K_U;
-pack->K_UD = KKM.settings.FILTERS.K_UD;
+pack->K_I = PFC.settings.FILTERS.K_I;
+pack->K_U = PFC.settings.FILTERS.K_U;
+pack->K_UD = PFC.settings.FILTERS.K_UD;
 END_HANDLER(GET_SETTINGS_FILTERS)
 //================================================================================
 HANDLER(SET_SETTINGS_FILTERS)
-KKM.settings.FILTERS.K_I = req->K_I;
-KKM.settings.FILTERS.K_U = req->K_U;
-KKM.settings.FILTERS.K_UD = req->K_UD;
+PFC.settings.FILTERS.K_I = req->K_I;
+PFC.settings.FILTERS.K_U = req->K_U;
+PFC.settings.FILTERS.K_UD = req->K_UD;
 END_HANDLER(SET_SETTINGS_FILTERS)
 //================================================================================
 #include "events.h"
@@ -359,5 +359,5 @@ void prothandlers_init(SciPort *_port)
     pr_handlers[P_AFG_COMMAND_GET_EVENTS] =
         (prot_handler)protocol_command_GET_EVENTS;
 
-    protocol_init(&KKM.protocol, p_mode_client, pr_handlers, lenP_AFG_COMMANDS, _port);
+    protocol_init(&PFC.protocol, p_mode_client, pr_handlers, lenP_AFG_COMMANDS, _port);
 }

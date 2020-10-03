@@ -1,4 +1,5 @@
 #include "events_process.h"
+#include "math.h"
 
 #define ADC_MARGIN                  100
 #define IS_ADC_VALUE_NEAR_BOUNDS(x) ((x) > (4095 - ADC_MARGIN) || (x) < ADC_MARGIN)
@@ -61,8 +62,8 @@ char events_was_CT_overload(float *adc_values)
 uint16_t overUDTicks;
 int events_check_Ud(float Ud)
 {
-    if (KKM.status >= KKM_STATE_STOPPING || KKM.status <= KKM_STATE_STOP) return 0;
-    if (Ud > KKM.settings.PROTECTION.Ud_max)
+    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return 0;
+    if (Ud > PFC.settings.PROTECTION.Ud_max)
     {
         overUDTicks++;
         if (overUDTicks > 3)
@@ -78,7 +79,7 @@ int events_check_Ud(float Ud)
     {
         overUDTicks = 0;
     }
-    if (KKM.status >= KKM_STATE_CHARGE && Ud < KKM.settings.PROTECTION.Ud_min)
+    if (PFC.status >= PFC_STATE_CHARGE && Ud < PFC.settings.PROTECTION.Ud_min)
     {
         NEWEVENT(
             EVENT_TYPE_PROTECTION,
@@ -92,14 +93,14 @@ int events_check_Ud(float Ud)
 
 void events_check_temperature(void)
 {
-    if (KKM.status >= KKM_STATE_STOPPING || KKM.status <= KKM_STATE_STOP) return;
-    if (KKM.temperature > KKM.settings.PROTECTION.temperature /* TEMPERATURE_HW_MAX */)
+    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return;
+    if (PFC.temperature > PFC.settings.PROTECTION.temperature /* TEMPERATURE_HW_MAX */)
     {
         NEWEVENT(
             EVENT_TYPE_PROTECTION,
             SUB_EVENT_TYPE_PROTECTION_TEMPERATURE,
             0,
-            KKM.temperature);
+            PFC.temperature);
     }
 }
 
@@ -107,20 +108,20 @@ void events_check_voltage_RMS(void)
 {
     int i;
 
-    if (KKM.status >= KKM_STATE_STOPPING || KKM.status <= KKM_STATE_STOP) return;
+    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return;
 
-    for (i = 0; i < KKM_NCHAN; i++)
+    for (i = 0; i < PFC_NCHAN; i++)
     {
 #ifdef ONLY_A_CHANNEL
         if (i > 0) return;
 #endif
-        if (KKM.adc.active[ADC_U_A + i] < KKM.settings.PROTECTION.U_min)
+        if (PFC.adc.active[ADC_U_A + i] < PFC.settings.PROTECTION.U_min)
         {
             NEWEVENT(
                 EVENT_TYPE_PROTECTION,
                 SUB_EVENT_TYPE_PROTECTION_U_MIN,
                 i,
-                KKM.adc.active[ADC_U_A + i]);
+                PFC.adc.active[ADC_U_A + i]);
         }
     }
 }
@@ -128,18 +129,18 @@ void events_check_voltage_RMS(void)
 #define SQRT_OF_2             (1 / 1.4142135623730950488016887242097)
 #define RMS_TO_INSTANT_SIN(r) ((r)*SQRT_OF_2)
 
-uint16_t overVoltageTicks[KKM_NCHAN] = {0, 0, 0};
+uint16_t overVoltageTicks[PFC_NCHAN] = {0, 0, 0};
 void events_check_overvoltage_transient(float *U)
 {
     int channel;
 
-    if (KKM.status >= KKM_STATE_STOPPING || KKM.status <= KKM_STATE_STOP) return;
-    for (channel = 0; channel < KKM_NCHAN; channel++)
+    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return;
+    for (channel = 0; channel < PFC_NCHAN; channel++)
     {
 #ifdef ONLY_A_CHANNEL
         if (channel > 0) return;
 #endif
-        if (fabs(RMS_TO_INSTANT_SIN(U[channel])) > KKM.settings.PROTECTION.U_max)
+        if (fabs(RMS_TO_INSTANT_SIN(U[channel])) > PFC.settings.PROTECTION.U_max)
         {
             overVoltageTicks[channel]++;
             if (overVoltageTicks[channel] > 3)
@@ -162,41 +163,41 @@ int events_check_overcurrent_rms(void)
 {
     char i;
 
-    if (KKM.status >= KKM_STATE_STOPPING || KKM.status <= KKM_STATE_STOP) return EVENT_OK;
-    for (i = 0; i < KKM_NCHAN; i++)
+    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return EVENT_OK;
+    for (i = 0; i < PFC_NCHAN; i++)
     {
 #ifdef ONLY_A_CHANNEL
         if (i > 0) return 0;
 #endif
-        if (KKM.adc.active[ADC_I_A + i] > KKM.settings.PROTECTION.I_max_rms)
+        if (PFC.adc.active[ADC_I_A + i] > PFC.settings.PROTECTION.I_max_rms)
         {
             NEWEVENT(
                 EVENT_TYPE_PROTECTION,
                 SUB_EVENT_TYPE_PROTECTION_IAFG_MAX_RMS,
                 i,
-                KKM.adc.active[ADC_I_A + i]);
+                PFC.adc.active[ADC_I_A + i]);
         }
     }
     return EVENT_OK;
 }
 
-int events_check_overcurrent_peak(float *IKKM)
+int events_check_overcurrent_peak(float *IPFC)
 {
     int channel;
 
-    if (KKM.status >= KKM_STATE_STOPPING || KKM.status <= KKM_STATE_STOP) return EVENT_OK;
-    for (channel = 0; channel < KKM_NCHAN; channel++)
+    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return EVENT_OK;
+    for (channel = 0; channel < PFC_NCHAN; channel++)
     {
 #ifdef ONLY_A_CHANNEL
         if (channel > 0) return 0;
 #endif
-        if (fabs(IKKM[channel]) > KKM.settings.PROTECTION.I_max_peak)
+        if (fabs(IPFC[channel]) > PFC.settings.PROTECTION.I_max_peak)
         {
             NEWEVENT(
                 EVENT_TYPE_PROTECTION,
                 SUB_EVENT_TYPE_PROTECTION_IAFG_MAX_PEAK,
                 channel,
-                IKKM[channel]);
+                IPFC[channel]);
         }
     }
 
@@ -206,10 +207,10 @@ int events_check_overcurrent_peak(float *IKKM)
 void events_check_period(unsigned int period_length)
 {
     if (period_length == 0) return;
-    float freq = 1 / ((float)period_length / 1000000.0);
+    float freq = 1.0f / ((float)period_length / 1000000.0f);
 
-    if (KKM.status >= KKM_STATE_STOPPING || KKM.status <= KKM_STATE_STOP) return;
-    if (freq > KKM.settings.PROTECTION.Fnet_max)
+    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return;
+    if (freq > PFC.settings.PROTECTION.Fnet_max)
     {
         NEWEVENT(
             EVENT_TYPE_PROTECTION,
@@ -217,7 +218,7 @@ void events_check_period(unsigned int period_length)
             0,
             freq);
     }
-    if (freq < KKM.settings.PROTECTION.Fnet_min)
+    if (freq < PFC.settings.PROTECTION.Fnet_min)
     {
         NEWEVENT(
             EVENT_TYPE_PROTECTION,
@@ -225,12 +226,12 @@ void events_check_period(unsigned int period_length)
             0,
             freq);
     } /*TODO:
-	if(KKM.status>=KKM_STATE_PRECHARGE_PREPARE && fabs(KKM.U_50Hz[0].phase-MATH_PI/2)>0.1){
+	if(PFC.status>=PFC_STATE_PRECHARGE_PREPARE && fabs(PFC.U_50Hz[0].phase-MATH_PI/2)>0.1){
 		NEWEVENT(
 					EVENT_TYPE_PROTECTION,
 					SUB_EVENT_TYPE_PROTECTION_BAD_SYNC,
 					0,
-					KKM.U_50Hz[0].phase
+					PFC.U_50Hz[0].phase
 				);
 	}*/
 }

@@ -5,21 +5,17 @@
 #include "protocol.h"
 #include "settings.h"
 
-#define UD (KKM.adc.active[ADC_UD])
+#define UD (PFC.adc.active[ADC_UD])
 
 extern uint8_t last_buffer;
 extern uint8_t current_buffer;
 extern uint16_t symbol;
 extern uint8_t newPeriod;
-extern float sinusoid[2000];
+
 extern float OSC_DATA[OSC_CHANNEL_NUMBER][OSCILLOG_TRANSFER_SIZE];
 extern uint16_t ADC_DMA_buf[ADC_CHANNEL_NUMBER];
 extern float VLet_1;  //прошлое значение ошибок
 extern float VLIt_1;  //прошлое значение интегральной составляющей
-//extern float Idet_1;//прошлое значение ошибок
-//extern float IdIt_1;//прошлое значение интегральной составляющей
-//extern float Iqet_1;//прошлое значение ошибок
-//extern float IqIt_1;//прошлое значение интегральной составляющей
 extern float Ia_e_1;   //прошлое значение ошибок
 extern float Ia_It_1;  //прошлое значение интегральной составляющей
 extern float Ib_e_1;   //прошлое значение ошибок
@@ -30,11 +26,7 @@ extern float Ic_It_1;  //прошлое значение интегрально�
 struct _adc
 {
     float ch[BUF_NUM][ADC_CHANNEL_NUMBER + ADC_MATH_NUMBER][ADC_VAL_NUM];
-    /*
-	float I[BUF_NUM][KKM_NCHAN][ADC_VAL_NUM];
-	float U[BUF_NUM][KKM_NCHAN][ADC_VAL_NUM];
-	float Ud[BUF_NUM][ADC_VAL_NUM];
-*/
+
     float active[ADC_CHANNEL_NUMBER + ADC_MATH_NUMBER];  //RMS or mean value with correction
     uint16_t active_raw[ADC_CHANNEL_NUMBER];             //RMS or mean value without correction
 
@@ -48,21 +40,21 @@ struct _kkm
 {
     PROTOCOL_CONTEXT protocol;  //!< Контекст работы протокола по serial порту (Связь с графическим интерфейсом).
     SETTINGS settings;          //!< Указатель на настройки
-    KKM_STATUS status;          //!< Текущее состояние работы
+    PFC_STATUS status;          //!< Текущее состояние работы
     kADC adc;
 
-    ComplexAmpPhase U_50Hz[KKM_NCHAN];  //!< Амплитуда и фаза гармоники для 50Гц напряжения (для каждой фазы)
+    ComplexAmpPhase U_50Hz[PFC_NCHAN];  //!< Амплитуда и фаза гармоники для 50Гц напряжения (для каждой фазы)
     float period_delta;
 
     float period_fact;
-    float U_0Hz[KKM_NCHAN];  //!< Величина постоянной составляющей в напряжении (для каждой фазы)
-    float I_0Hz[KKM_NCHAN];  //!< Величина постоянной составляющей тока (для каждой фазы)
-    float U_phase[KKM_NCHAN];
-    float thdu[KKM_NCHAN];
+    float U_0Hz[PFC_NCHAN];  //!< Величина постоянной составляющей в напряжении (для каждой фазы)
+    float I_0Hz[PFC_NCHAN];  //!< Величина постоянной составляющей тока (для каждой фазы)
+    float U_phase[PFC_NCHAN];
+    float thdu[PFC_NCHAN];
 
     float temperature;
 };
-extern struct _kkm KKM;
+extern struct _kkm PFC;
 //========================================================
 //================== INTERFACE ===========================
 //========================================================

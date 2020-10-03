@@ -11,6 +11,12 @@
 #include "BSP/debug.h"
 #include "stm32f7xx_hal.h"
 
+/*------------------  PRIVATE DEFINES  ---------------------------------------*/
+
+#undef ENABLE_WATCHDOG
+
+/*------------------  PUBLIC FUNCTIONS  --------------------------------------*/
+
 IWDG_HandleTypeDef hiwdg;
 
 /**
@@ -18,15 +24,10 @@ IWDG_HandleTypeDef hiwdg;
   * @param None
   * @retval None
   */
-void MX_IWDG_Init(void)
+void iwdg_init(void)
 {
-    /* USER CODE BEGIN IWDG_Init 0 */
-    return;
-    /* USER CODE END IWDG_Init 0 */
-
-    /* USER CODE BEGIN IWDG_Init 1 */
-    //10 sec
-    /* USER CODE END IWDG_Init 1 */
+#if defined(ENABLE_WATCHDOG)
+		/* Approx. 10 sec */ 
     hiwdg.Instance = IWDG;
     hiwdg.Init.Prescaler = IWDG_PRESCALER_128;
     hiwdg.Init.Window = 4095;
@@ -35,7 +36,5 @@ void MX_IWDG_Init(void)
     {
         Error_Handler();
     }
-    /* USER CODE BEGIN IWDG_Init 2 */
-
-    /* USER CODE END IWDG_Init 2 */
+#endif
 }

@@ -144,7 +144,7 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
   * @param None
   * @retval None
   */
-void MX_USART1_UART_Init(void)
+void uart_init(void)
 {
     /* USER CODE BEGIN USART1_Init 0 */
 
@@ -170,4 +170,28 @@ void MX_USART1_UART_Init(void)
     /* USER CODE BEGIN USART1_Init 2 */
 
     /* USER CODE END USART1_Init 2 */
+}
+
+/**
+  * @brief This function handles USART1 global interrupt.
+  */
+void USART1_IRQHandler(void)
+{
+  HAL_UART_IRQHandler(&huart1);
+}
+
+/**
+  * @brief This function handles DMA2 stream5 global interrupt.
+  */
+void DMA2_Stream5_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(&hdma_usart1_rx);
+}
+
+/**
+  * @brief This function handles DMA2 stream7 global interrupt.
+  */
+void DMA2_Stream7_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(&hdma_usart1_tx);
 }

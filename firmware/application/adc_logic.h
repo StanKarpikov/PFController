@@ -13,6 +13,6 @@
 
 /*------------------  PUBLIC FUNCTIONS  --------------------------------------*/
 
-status_t adc_start(void);
+status_t adc_logic_start(void);
 
 #endif /* _ADC_LOGIC_H */

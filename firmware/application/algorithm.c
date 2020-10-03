@@ -1,10 +1,12 @@
 #include "algorithm.h"
-
+#include "BSP/system.h"
+#include "BSP/timer.h"
 #include "clogic.h"
 #include "device.h"
 #include "events_process.h"
-#include "main.h"
 #include "settings.h"
+#include "string.h"
+#include "math.h"
 float KphaseS = -1.0f;
 #define CENTER 0.0f
 float K_filter_x = 0.5f;
@@ -35,10 +37,10 @@ float autoCorrelationFreq(const float *in)
             maxpos = i;
         }
     }
-    float dy = 0.5 * (out[maxpos - 1] - out[maxpos + 1]);
-    float d2y = 2.0 * max - out[maxpos - 1] - out[maxpos + 1];
+    float dy = 0.5f * (out[maxpos - 1] - out[maxpos + 1]);
+    float d2y = 2.0f * max - out[maxpos - 1] - out[maxpos + 1];
     float mp = maxpos + dy / d2y;
-    return mp / 128.0 * 20000.0;
+    return mp / 128.0f * 20000.0f;
 }
 
 void algorithm_work(void)
@@ -46,12 +48,12 @@ void algorithm_work(void)
     if (newPeriod)
     {
         //---------------------------------------
-        float K_I = (KKM.settings.FILTERS.K_I);
-        float K_U = (KKM.settings.FILTERS.K_U);
-        float K_UD = (KKM.settings.FILTERS.K_UD);
-        float K_Iinv = (1 - KKM.settings.FILTERS.K_I);
-        float K_Uinv = (1 - KKM.settings.FILTERS.K_U);
-        float K_UDinv = (1 - KKM.settings.FILTERS.K_UD);
+        float K_I = (PFC.settings.FILTERS.K_I);
+        float K_U = (PFC.settings.FILTERS.K_U);
+        float K_UD = (PFC.settings.FILTERS.K_UD);
+        float K_Iinv = (1 - PFC.settings.FILTERS.K_I);
+        float K_Uinv = (1 - PFC.settings.FILTERS.K_U);
+        float K_UDinv = (1 - PFC.settings.FILTERS.K_UD);
 
         float umax[3] = {-1000000};
         float umin[3] = {1000000};
@@ -59,53 +61,53 @@ void algorithm_work(void)
         for (int i = 0; i < ADC_VAL_NUM; i++)
         {
             //------------- Math channels -------------
-            float Uab = KKM.adc.ch[last_buffer][ADC_EMS_B][i] - KKM.adc.ch[last_buffer][ADC_EMS_A][i];
-            float Ubc = KKM.adc.ch[last_buffer][ADC_EMS_C][i] - KKM.adc.ch[last_buffer][ADC_EMS_B][i];
-            float Uca = KKM.adc.ch[last_buffer][ADC_EMS_A][i] - KKM.adc.ch[last_buffer][ADC_EMS_C][i];
+            float Uab = PFC.adc.ch[last_buffer][ADC_EMS_B][i] - PFC.adc.ch[last_buffer][ADC_EMS_A][i];
+            float Ubc = PFC.adc.ch[last_buffer][ADC_EMS_C][i] - PFC.adc.ch[last_buffer][ADC_EMS_B][i];
+            float Uca = PFC.adc.ch[last_buffer][ADC_EMS_A][i] - PFC.adc.ch[last_buffer][ADC_EMS_C][i];
 
             float Uan = (2 * Uab + Ubc) / 3;
             float Ubn = (-Uab + Ubc) / 3;
             float Ucn = -(Uan + Ubn);
 
-            KKM.adc.ch[last_buffer][ADC_MATH_A][i] = Uan;
-            KKM.adc.ch[last_buffer][ADC_MATH_B][i] = Ubn;
-            KKM.adc.ch[last_buffer][ADC_MATH_C][i] = Ucn;
+            PFC.adc.ch[last_buffer][ADC_MATH_A][i] = Uan;
+            PFC.adc.ch[last_buffer][ADC_MATH_B][i] = Ubn;
+            PFC.adc.ch[last_buffer][ADC_MATH_C][i] = Ucn;
             //---------------------------------------
             for (int i_isr = 0; i_isr < ADC_CHANNEL_NUMBER + ADC_MATH_NUMBER; i_isr++)
             {
                 if (needSquare[i_isr])
                 {
-                    KKM.adc.sum_raw_sqr[last_buffer][i_isr] += SQUARE_F(KKM.adc.ch[last_buffer][i_isr][i]);  // для переменных токов/напряжений считаем действующее
+                    PFC.adc.sum_raw_sqr[last_buffer][i_isr] += SQUARE_F(PFC.adc.ch[last_buffer][i_isr][i]);  // для переменных токов/напряжений считаем действующее
                 }
                 else
                 {
-                    KKM.adc.sum_raw_sqr[last_buffer][i_isr] += KKM.adc.ch[last_buffer][i_isr][i];  // для постоянных величин - считаем среднее
+                    PFC.adc.sum_raw_sqr[last_buffer][i_isr] += PFC.adc.ch[last_buffer][i_isr][i];  // для постоянных величин - считаем среднее
                 }
             }
             //------------- Filter U and I ----------
-            for (int i_isr = 0; i_isr < KKM_NCHAN; i_isr++)
+            for (int i_isr = 0; i_isr < PFC_NCHAN; i_isr++)
             {
                 IIR_1ORDER(
-                    KKM.adc.ch[last_buffer][ADC_EMS_A + i_isr][i],
-                    KKM.adc.ch[current_buffer][ADC_EMS_A + i_isr][i],
-                    KKM.adc.ch[last_buffer][ADC_EMS_A + i_isr][i],
+                    PFC.adc.ch[last_buffer][ADC_EMS_A + i_isr][i],
+                    PFC.adc.ch[current_buffer][ADC_EMS_A + i_isr][i],
+                    PFC.adc.ch[last_buffer][ADC_EMS_A + i_isr][i],
                     K_U,
                     K_Uinv);
 
                 IIR_1ORDER(
-                    KKM.adc.ch[last_buffer][ADC_I_A + i_isr][i],
-                    KKM.adc.ch[current_buffer][ADC_I_A + i_isr][i],
-                    KKM.adc.ch[last_buffer][ADC_I_A + i_isr][i],
+                    PFC.adc.ch[last_buffer][ADC_I_A + i_isr][i],
+                    PFC.adc.ch[current_buffer][ADC_I_A + i_isr][i],
+                    PFC.adc.ch[last_buffer][ADC_I_A + i_isr][i],
                     K_I,
                     K_Iinv);
 
-                if (umax[i_isr] < KKM.adc.ch[last_buffer][ADC_EMS_A + i_isr][i]) umax[i_isr] = KKM.adc.ch[last_buffer][ADC_EMS_A + i_isr][i];
-                if (umin[i_isr] > KKM.adc.ch[last_buffer][ADC_EMS_A + i_isr][i]) umin[i_isr] = KKM.adc.ch[last_buffer][ADC_EMS_A + i_isr][i];
+                if (umax[i_isr] < PFC.adc.ch[last_buffer][ADC_EMS_A + i_isr][i]) umax[i_isr] = PFC.adc.ch[last_buffer][ADC_EMS_A + i_isr][i];
+                if (umin[i_isr] > PFC.adc.ch[last_buffer][ADC_EMS_A + i_isr][i]) umin[i_isr] = PFC.adc.ch[last_buffer][ADC_EMS_A + i_isr][i];
             }
             IIR_1ORDER(
-                KKM.adc.ch[last_buffer][ADC_UD][i],
-                KKM.adc.ch[current_buffer][ADC_UD][i],
-                KKM.adc.ch[last_buffer][ADC_UD][i],
+                PFC.adc.ch[last_buffer][ADC_UD][i],
+                PFC.adc.ch[current_buffer][ADC_UD][i],
+                PFC.adc.ch[last_buffer][ADC_UD][i],
                 K_UD,
                 K_UDinv);
         }
@@ -114,13 +116,13 @@ void algorithm_work(void)
         {
             if (needSquare[i_isr])
             {
-                KKM.adc.active[i_isr] = sqrt(KKM.adc.sum_raw_sqr[last_buffer][i_isr] / ((float)ADC_VAL_NUM));
+                PFC.adc.active[i_isr] = sqrt(PFC.adc.sum_raw_sqr[last_buffer][i_isr] / ((float)ADC_VAL_NUM));
             }
             else
             {
-                KKM.adc.active[i_isr] = KKM.adc.sum_raw_sqr[last_buffer][i_isr] / ((float)ADC_VAL_NUM);
+                PFC.adc.active[i_isr] = PFC.adc.sum_raw_sqr[last_buffer][i_isr] / ((float)ADC_VAL_NUM);
             }
-            KKM.adc.sum_raw_sqr[last_buffer][i_isr] = 0;
+            PFC.adc.sum_raw_sqr[last_buffer][i_isr] = 0;
         }
         //------------------------------------
         for (int i = 0; i < ADC_VAL_NUM; i++)
@@ -131,13 +133,13 @@ void algorithm_work(void)
 			#define w (2.0f*MATH_PI*50.0f)
 			float Th=(float)j/128.0f*(2.0f*MATH_PI);
 			float Ud=UD;
-			float Ua=//sin(Th)*sqrt(2.0f)*KKM.adc.active[ADC_EMS_A];
-				KKM.adc.ch[last_buffer][ADC_MATH_A][j];
-			float Ub=//sin(Th+2.0f*MATH_PI/3.0f)*sqrt(2.0f)*KKM.adc.active[ADC_EMS_B];
-				KKM.adc.ch[last_buffer][ADC_MATH_B][j];
+			float Ua=//sin(Th)*sqrt(2.0f)*PFC.adc.active[ADC_EMS_A];
+				PFC.adc.ch[last_buffer][ADC_MATH_A][j];
+			float Ub=//sin(Th+2.0f*MATH_PI/3.0f)*sqrt(2.0f)*PFC.adc.active[ADC_EMS_B];
+				PFC.adc.ch[last_buffer][ADC_MATH_B][j];
 			if(Ud==0)Ud=1e-6;
 			
-			float VL=(KKM.settings.CAPACITORS.Ud_nominal-Ud)*KKM.settings.CAPACITORS.ctrlUd_Kp;
+			float VL=(PFC.settings.CAPACITORS.Ud_nominal-Ud)*PFC.settings.CAPACITORS.ctrlUd_Kp;
 			if(VL>50)VL=50;
 			if(VL<-50)VL=-50;
 			
@@ -155,34 +157,34 @@ void algorithm_work(void)
 			if(vb<(-1.0f+EPS))vb=-1.0f+EPS;
 			if(vc<(-1.0f+EPS))vc=-1.0f+EPS;*/
 
-            //KKM.adc.ch[current_buffer][ADC_MATH_C_A][i]=-va;
-            //KKM.adc.ch[current_buffer][ADC_MATH_C_B][i]=-vb;
-            //KKM.adc.ch[current_buffer][ADC_MATH_C_C][i]=-vc;
+            //PFC.adc.ch[current_buffer][ADC_MATH_C_A][i]=-va;
+            //PFC.adc.ch[current_buffer][ADC_MATH_C_B][i]=-vb;
+            //PFC.adc.ch[current_buffer][ADC_MATH_C_C][i]=-vc;
         }
         //---------------------------------------
         //HAL_GPIO_TogglePin(GPIOD, LED_1_Pin);
-        for (int i = 0; i < KKM_NCHAN; i++)
+        for (int i = 0; i < PFC_NCHAN; i++)
         {
-            memcpy(OSC_DATA[OSC_U_A + i], KKM.adc.ch[last_buffer][ADC_MATH_A + i], sizeof(OSC_DATA[OSC_U_A + i]));
-            memcpy(OSC_DATA[OSC_I_A + i], KKM.adc.ch[last_buffer][ADC_I_A + i], sizeof(OSC_DATA[OSC_I_A + i]));
-            memcpy(OSC_DATA[OSC_COMP_A + i], KKM.adc.ch[last_buffer][ADC_MATH_C_A + i], sizeof(OSC_DATA[OSC_COMP_A + i]));
+            memcpy(OSC_DATA[OSC_U_A + i], PFC.adc.ch[last_buffer][ADC_MATH_A + i], sizeof(OSC_DATA[OSC_U_A + i]));
+            memcpy(OSC_DATA[OSC_I_A + i], PFC.adc.ch[last_buffer][ADC_I_A + i], sizeof(OSC_DATA[OSC_I_A + i]));
+            memcpy(OSC_DATA[OSC_COMP_A + i], PFC.adc.ch[last_buffer][ADC_MATH_C_A + i], sizeof(OSC_DATA[OSC_COMP_A + i]));
         }
-        memcpy(OSC_DATA[OSC_UD], KKM.adc.ch[last_buffer][ADC_UD], sizeof(OSC_DATA[OSC_UD]));
+        memcpy(OSC_DATA[OSC_UD], PFC.adc.ch[last_buffer][ADC_UD], sizeof(OSC_DATA[OSC_UD]));
         //---------------------------------------
         events_check_overcurrent_rms();
         events_check_voltage_RMS();
-        events_check_period(KKM.period_fact);
+        events_check_period(PFC.period_fact);
         //------------FREQ-----------------------
-        /*float f=autoCorrelationFreq(KKM.adc.ch[last_buffer][ADC_EMS_A]);
+        /*float f=autoCorrelationFreq(PFC.adc.ch[last_buffer][ADC_EMS_A]);
 					IIR_1ORDER(
-							KKM.period_fact,
+							PFC.period_fact,
 							f,
-							KKM.period_fact,							
+							PFC.period_fact,							
 							(1.0f-K_filter_F),
 							K_filter_F
 						);
 			*/
-        float x = KKM.adc.ch[last_buffer][ADC_MATH_A][0];
+        float x = PFC.adc.ch[last_buffer][ADC_MATH_A][0];
         float x_last = x;
 
         float cntr = 0;  //(umax[0]-umin[0])/2;
@@ -192,7 +194,7 @@ void algorithm_work(void)
         {
             IIR_1ORDER(
                 x,
-                KKM.adc.ch[last_buffer][ADC_MATH_A][j],
+                PFC.adc.ch[last_buffer][ADC_MATH_A][j],
                 x,
                 (1.0f - K_filter_x),
                 K_filter_x);
@@ -202,12 +204,12 @@ void algorithm_work(void)
                 P = ((float)j - 1.0f) + ((float)x_last - cntr) / ((float)x_last - (float)x);
                 if ((P - Plast) > (128 / 4 * 3))
                 {
-                    float last_period = KKM.period_fact;
+                    float last_period = PFC.period_fact;
 
                     IIR_1ORDER(
-                        KKM.period_fact,
-                        (P - Plast) * (1.0f / 128.0f) * KKM.period_fact,
-                        KKM.period_fact,
+                        PFC.period_fact,
+                        (P - Plast) * (1.0f / 128.0f) * PFC.period_fact,
+                        PFC.period_fact,
                         (1.0f - K_filter_F),
                         K_filter_F);
 
@@ -221,31 +223,30 @@ void algorithm_work(void)
                         K_filter_P);
                     if (diff > 10) diff = 10;
                     if (diff < -10) diff = -10;
-                    KKM.period_fact -= diff * KphaseS;
-                    KKM.period_delta = KKM.period_fact - last_period;
+                    PFC.period_fact -= diff * KphaseS;
+                    PFC.period_delta = PFC.period_fact - last_period;
                 }
             }
             x_last = x;
         }
         Plast -= ADC_VAL_NUM;
         //---------------------
-        if (KKM.period_fact > (20000 + 1000)) KKM.period_fact = (20000 + 1000);
-        if (KKM.period_fact < (20000 - 1000)) KKM.period_fact = (20000 - 1000);
-        __disable_irq();
-        TIM2->ARR = (200000000.0f / 2.0f / 128.0f * (KKM.period_fact / 1000000.0f));
-        TIM2->EGR = TIM_EGR_UG;
-        __enable_irq();
+        if (PFC.period_fact > (20000 + 1000)) PFC.period_fact = (20000 + 1000);
+        if (PFC.period_fact < (20000 - 1000)) PFC.period_fact = (20000 - 1000);
+				
+				uint32_t arr = (200000000.0f / 2.0f / 128.0f * (PFC.period_fact / 1000000.0f));
+				timer_correct_period(arr);
         //---------------------
         clogic_do();
         //---------------------
         //---------------------
         static uint32_t lastprint = 0;
-        if ((HAL_GetTick() - lastprint) > 500)
+        if ((system_get_time() - lastprint) > 500)
         {
-            lastprint = HAL_GetTick();
+            lastprint = system_get_time();
             //HAL_GPIO_TogglePin(GPIOD, LED_3_Pin);
             //HAL_GPIO_TogglePin(RE_485_GPIO_Port, RE_485_Pin);
-            //printf("\n\nKKM program, %s %s\n",__DATE__,__TIME__);
+            //printf("\n\nPFC program, %s %s\n",__DATE__,__TIME__);
         }
         //---------------------
         newPeriod = 0;

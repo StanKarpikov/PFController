@@ -335,7 +335,7 @@
             <v6WtE>0</v6WtE>
             <v6Rtti>0</v6Rtti>
             <VariousControls>
-              <MiscControls>--unaligned_access</MiscControls>
+              <MiscControls>--unaligned_access --diag_error=warning</MiscControls>
               <Define>USE_HAL_DRIVER,STM32F765xx</Define>
               <Undefine></Undefine>
               <IncludePath>../drivers;../drivers/STM32F7xx_HAL_Driver/Inc;../drivers/STM32F7xx_HAL_Driver/Inc/Legacy;../drivers/CMSIS/Device/ST/STM32F7xx/Include;../drivers/CMSIS/Include;../application;../hardware;../middleware/eeprom;../middleware/serial_interface</IncludePath>
@@ -396,11 +396,6 @@
               <FileName>stm32f7xx_hal_conf.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\hardware\stm32f7xx_hal_conf.h</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f7xx_hal_msp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\hardware\stm32f7xx_hal_msp.c</FilePath>
             </File>
             <File>
               <FileName>stm32f7xx_it.c</FileName>
@@ -626,11 +621,6 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\main.c</FilePath>
-            </File>
-            <File>
-              <FileName>main.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\application\main.h</FilePath>
             </File>
             <File>
               <FileName>settings.c</FileName>

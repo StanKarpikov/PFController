@@ -7,24 +7,12 @@
 #include "adc_logic.h"
 
 #include "BSP/timer.h"
+#include "BSP/adc.h"
+#include "BSP/gpio.h"
 #include "clogic.h"
 #include "device.h"
 #include "events_process.h"
-#include "main.h"
-
-extern ADC_HandleTypeDef hadc1;
-extern DMA_HandleTypeDef hdma_adc1;
-extern TIM_HandleTypeDef htim1;
-
-status_t adc_start(void)
-{
-    HAL_ADC_Start(&hadc1);
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADC_DMA_buf, ADC_CHANNEL_NUMBER);
-
-    timer_start_adc_timer();
-
-    return PFC_SUCCESS;
-}
+#include "string.h"
 
 uint16_t ADC_DMA_buf[ADC_CHANNEL_NUMBER];
 float adc_values[ADC_CHANNEL_NUMBER + ADC_MATH_NUMBER];
@@ -71,10 +59,12 @@ uint8_t needSquare[] = {
 //ADC_MATH_C_A,
 //ADC_MATH_C_B,
 //ADC_MATH_C_C
-void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
+		
+void adc_cplt_callback(void)
 {
     memcpy(adc_values_raw, ADC_DMA_buf, sizeof(ADC_DMA_buf) / 2);
 }
+
 //Расчёт ПИД регулятора
 float PID(float et, float* et_1, float Kp, float Ki, float Kd, float* It_1)
 {
@@ -101,15 +91,18 @@ float Ic_e_1 = 0;        //прошлое значение ошибок
 float Ic_It_1 = 0;       //прошлое значение интегральной составляющей
 float Kp = 0, Ki = 0.2;  //Ki=0.0003;
 float ia = 0;
-void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+
+
+void adc_half_cplt_callback(void)
 {
-    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_SET);
+		gpio_pwm_test_on();
     int i_isr;
     //HAL_ADC_Stop(&hadc1);
-    HAL_ADC_Stop_DMA(&hadc1);
+		
+		adc_stop();
     memcpy(&adc_values_raw[8], &ADC_DMA_buf[8], sizeof(ADC_DMA_buf) / 2);
-    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)ADC_DMA_buf, 14);
-
+		adc_start((uint32_t*)ADC_DMA_buf, sizeof(ADC_DMA_buf));
+	
     for (i_isr = 0; i_isr < ADC_CHANNEL_NUMBER; i_isr++)
     {
         adc_values[i_isr] = adc_values_raw[i_isr];
@@ -121,15 +114,15 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     for (i_isr = 0; i_isr < ADC_CHANNEL_NUMBER; i_isr++)
     {
         /* Каналы переменного тока/напряжения смещаем на UREF */
-        adc_values[i_isr] -= KKM.settings.CALIBRATIONS.offset[i_isr];
-        adc_values[i_isr] *= KKM.settings.CALIBRATIONS.calibration[i_isr];
+        adc_values[i_isr] -= PFC.settings.CALIBRATIONS.offset[i_isr];
+        adc_values[i_isr] *= PFC.settings.CALIBRATIONS.calibration[i_isr];
         //=======================================================
-        KKM.adc.ch[current_buffer][i_isr][symbol] = adc_values[i_isr];
+        PFC.adc.ch[current_buffer][i_isr][symbol] = adc_values[i_isr];
     }
     //=======================================================
     //events_check_overcurrent_peak(&adc_values[ADC_I_A]);
     //events_check_overvoltage_transient(&adc_values[ADC_U_A]);
-    if (KKM.status >= KKM_STATE_CHARGE && KKM.status < KKM_STATE_FAULTBLOCK)
+    if (PFC.status >= PFC_STATE_CHARGE && PFC.status < PFC_STATE_FAULTBLOCK)
     {
         events_check_Ud(adc_values[ADC_UD]);
     }
@@ -148,18 +141,18 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
     else
     {
         float VL = PID(
-            KKM.settings.CAPACITORS.Ud_nominal - UD,
+            PFC.settings.CAPACITORS.Ud_nominal - UD,
             &VLet_1,
-            KKM.settings.CAPACITORS.ctrlUd_Kp,
-            KKM.settings.CAPACITORS.ctrlUd_Ki,
+            PFC.settings.CAPACITORS.ctrlUd_Kp,
+            PFC.settings.CAPACITORS.ctrlUd_Ki,
             0,
             &VLIt_1);
 
-        float IvlA = VL * KKM.adc.ch[last_buffer][ADC_MATH_A][symbol] / KKM.adc.active[ADC_MATH_A]; /*sin(symbol/128.0*2.0*MATH_PI)*/
+        float IvlA = VL * PFC.adc.ch[last_buffer][ADC_MATH_A][symbol] / PFC.adc.active[ADC_MATH_A]; /*sin(symbol/128.0*2.0*MATH_PI)*/
         ;
-        float IvlB = VL * KKM.adc.ch[last_buffer][ADC_MATH_B][symbol] / KKM.adc.active[ADC_MATH_B]; /*sin(symbol/128.0*2.0*MATH_PI+2.0*MATH_PI/3.0)*/
+        float IvlB = VL * PFC.adc.ch[last_buffer][ADC_MATH_B][symbol] / PFC.adc.active[ADC_MATH_B]; /*sin(symbol/128.0*2.0*MATH_PI+2.0*MATH_PI/3.0)*/
         ;
-        float IvlC = VL * KKM.adc.ch[last_buffer][ADC_MATH_C][symbol] / KKM.adc.active[ADC_MATH_C]; /*sin(symbol/128.0*2.0*MATH_PI+4.0*MATH_PI/3.0)*/
+        float IvlC = VL * PFC.adc.ch[last_buffer][ADC_MATH_C][symbol] / PFC.adc.active[ADC_MATH_C]; /*sin(symbol/128.0*2.0*MATH_PI+4.0*MATH_PI/3.0)*/
         ;
         /*
 		IIR_1ORDER(
@@ -171,29 +164,29 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 			);*/
 
         float va = PID(
-            IvlA - adc_values[ADC_I_A] + KKM.adc.active[ADC_I_A],
+            IvlA - adc_values[ADC_I_A] + PFC.adc.active[ADC_I_A],
             &Ia_e_1,
             0,
             Ki,
             0,
             &Ia_It_1);
         float vb = PID(
-            IvlB - adc_values[ADC_I_B] + KKM.adc.active[ADC_I_B],
+            IvlB - adc_values[ADC_I_B] + PFC.adc.active[ADC_I_B],
             &Ib_e_1,
             0,
             Ki,
             0,
             &Ib_It_1);
         float vc = PID(
-            IvlC - adc_values[ADC_I_C] + KKM.adc.active[ADC_I_C],
+            IvlC - adc_values[ADC_I_C] + PFC.adc.active[ADC_I_C],
             &Ic_e_1,
             0,
             Ki,
             0,
             &Ic_It_1);
-        Ia_It_1 *= 0.995;
-        Ib_It_1 *= 0.995;
-        Ic_It_1 *= 0.995;
+        Ia_It_1 *= 0.995f;
+        Ib_It_1 *= 0.995f;
+        Ic_It_1 *= 0.995f;
 
         if (Ia_It_1 > (1.0f)) Ia_It_1 = 1.0f;
         if (Ib_It_1 > (1.0f)) Ib_It_1 = 1.0f;
@@ -210,13 +203,14 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
         if (vb < (-1.0f + EPS)) vb = -1.0f + EPS;
         if (vc < (-1.0f + EPS)) vc = -1.0f + EPS;
 
-        TIM1->CCR1 = (float)PWM_PERIOD * (-va * 0.5f + 0.5f);
-        TIM1->CCR2 = (float)PWM_PERIOD * (-vb * 0.5f + 0.5f);
-        TIM1->CCR3 = (float)PWM_PERIOD * (-vc * 0.5f + 0.5f);
+				uint32_t ccr1 = (float)PWM_PERIOD * (-va * 0.5f + 0.5f);
+        uint32_t ccr2 = (float)PWM_PERIOD * (-vb * 0.5f + 0.5f);
+        uint32_t ccr3 = (float)PWM_PERIOD * (-vc * 0.5f + 0.5f);
+				timer_write_pwm(ccr1, ccr2, ccr3);
 
-        KKM.adc.ch[current_buffer][ADC_MATH_C_A][symbol] = va;
-        KKM.adc.ch[current_buffer][ADC_MATH_C_B][symbol] = vb;
-        KKM.adc.ch[current_buffer][ADC_MATH_C_C][symbol] = vc;
+        PFC.adc.ch[current_buffer][ADC_MATH_C_A][symbol] = va;
+        PFC.adc.ch[current_buffer][ADC_MATH_C_B][symbol] = vb;
+        PFC.adc.ch[current_buffer][ADC_MATH_C_C][symbol] = vc;
     }
     //=======================================================
     symbol++;
@@ -228,121 +222,30 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
         last_buffer = !current_buffer;
         newPeriod = 1;
 
-        if (KKM.status == KKM_STATE_CHARGE)
+        if (PFC.status == PFC_STATE_CHARGE)
         {
             pulse++;
             if (pulse >= 4)
             {
                 pulse = 0;
-                KKM.status = KKM_STATE_WORK;
+                PFC.status = PFC_STATE_WORK;
             }
         }
     }
     //=======================================================
     //=======================================================
     //=======================================================
-    HAL_GPIO_WritePin(GPIOD, GPIO_PIN_13, GPIO_PIN_RESET);
+    gpio_pwm_test_off();
 }
 
-////arm_park_f32(Iabc,wt)
-//			float Ia=adc_values[ADC_I_A];
-//			float Ib=adc_values[ADC_I_B];
-//			float Ic=adc_values[ADC_I_C];
-//			float wt=(float)symbol/128.0*2.0*MATH_PI;
 
-//      float Ialpha =  Ia*(1*2/3)+
-//											Ib*(-0.5*2/3)+
-//											Ic*(-0.5*2/3);
-//      float Ibeta  =  Ia*0+
-//											Ib*(sqrt(3)/2*2/3)+
-//											Ic*(-sqrt(3)/2*2/3);
-//
-//      float cosVal=cos(wt-MATH_PI/2);
-//      float sinVal=sin(wt-MATH_PI/2);
-//
-//      // Calculate pId using the equation, pId = Ialpha * cosVal + Ibeta * sinVal
-//      float Id = Ialpha * cosVal + Ibeta * sinVal;
+status_t adc_logic_start(void)
+{
+	adc_register_callbacks(adc_cplt_callback, adc_half_cplt_callback);
+	
+	adc_start((uint32_t*)ADC_DMA_buf, sizeof(ADC_DMA_buf));
 
-//      // Calculate pIq using the equation, pIq = - Ialpha * sinVal + Ibeta * cosVal
-//      float Iq = -Ialpha * sinVal + Ibeta * cosVal;
-////=============*************==========================================
-//			float VL=PID(
-//				KKM.settings.CAPACITORS.Ud_nominal-adc_values[ADC_UD],//текущая ошибка
-//				&VLet_1,//прошлая ошибка
-//				0,//Kp
-//				0,//Ki
-//				0,//Kd
-//				&VLIt_1//прошлая интегральная составляющая
-//			);
-//			Id=PID(
-//				VL-Iq,//текущая ошибка
-//				&Idet_1,//прошлая ошибка
-//				0.1,//Kp
-//				0.01,//Ki
-//				0,//Kd
-//				&IdIt_1//прошлая интегральная составляющая
-//			)*(-2.0);
-//			Iq=PID(
-//				0-Iq,//текущая ошибка
-//				&Iqet_1,//прошлая ошибка
-//				0.1,//Kp
-//				0.01,//Ki
-//				0,//Kd
-//				&IqIt_1//прошлая интегральная составляющая
-//			)*(-2.0);
-////=============*************==========================================
-////arm_inv_park_f32(Id,Iq,wt)
+	timer_start_adc_timer();
 
-////Calculate pIalpha using the equation, pIalpha = Id * cosVal - Iq * sinVal
-//    Ialpha = Id * cosVal - Iq * sinVal;
-//
-//// Calculate pIbeta using the equation, pIbeta = Id * sinVal + Iq * cosVal
-//    Ibeta  = Id * sinVal + Iq * cosVal;
-//
-//    Ia=Ialpha*(1)      +   Ibeta*(0);
-//    Ib=Ialpha*(-0.5)   +   Ibeta*(sqrt(3)/2);
-//    Ic=Ialpha*(-0.5)   +   Ibeta*(-sqrt(3)/2);
-//
-//		float va=Ia;
-//		float vb=Ib;
-//		float vc=Ic;
-//
-//			#define EPS 0.01f
-//
-//			if(va>(1.0f-EPS))va=1.0f-EPS;
-//			if(vb>(1.0f-EPS))vb=1.0f-EPS;
-//			if(vc>(1.0f-EPS))vc=1.0f-EPS;
-//
-//			if(va<(-1.0f+EPS))va=-1.0f+EPS;
-//			if(vb<(-1.0f+EPS))vb=-1.0f+EPS;
-//			if(vc<(-1.0f+EPS))vc=-1.0f+EPS;
-//
-//		/*
-//		float va=KKM.adc.ch[last_buffer][ADC_MATH_C_A][symbol];
-//		float vb=KKM.adc.ch[last_buffer][ADC_MATH_C_B][symbol];
-//		float vc=KKM.adc.ch[last_buffer][ADC_MATH_C_C][symbol];
-//		if(va>1 || va<-1){
-//			TIM1->CCER &=~ (TIM_CCER_CC1E);
-//			TIM1->CCER &=~ (TIM_CCER_CC1NE);
-//		}
-//		else{
-//			TIM1->CCER |= (TIM_CCER_CC1E);
-//			TIM1->CCER |= (TIM_CCER_CC1NE);
-//		}
-//		if(vb>1 || vb<-1){
-//			TIM1->CCER &=~ (TIM_CCER_CC2E);
-//			TIM1->CCER &=~ (TIM_CCER_CC2NE);
-//		}
-//		else{
-//			TIM1->CCER |= (TIM_CCER_CC2E);
-//			TIM1->CCER |= (TIM_CCER_CC2NE);
-//		}
-//		if(vc>1 || vc<-1){
-//			TIM1->CCER &=~ (TIM_CCER_CC3E);
-//			TIM1->CCER &=~ (TIM_CCER_CC3NE);
-//		}
-//		else{
-//			TIM1->CCER |= (TIM_CCER_CC3E);
-//			TIM1->CCER |= (TIM_CCER_CC3NE);
-//		}*/
-//
+	return PFC_SUCCESS;
+}

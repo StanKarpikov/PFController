@@ -13,6 +13,6 @@
 
 /*------------------  PUBLIC FUNCTIONS  --------------------------------------*/
 
-void MX_DMA_Init(void);
+void dma_init(void);
 
 #endif /* _DMA_H */

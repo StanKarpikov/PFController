@@ -276,13 +276,7 @@ struct __attribute__((__packed__)) sANSWER_GET_EVENTS
     uint16_t num;
     struct sEventRecord events[MAX_NUM_TRANSFERED_EVENTS];
 };
-enum
-{
-    EVENT_TYPE_POWER,
-    EVENT_TYPE_CHANGESTATE,
-    EVENT_TYPE_PROTECTION,
-    EVENT_TYPE_EVENT
-};
+
 enum
 {
     SUB_EVENT_TYPE_POWER_ON

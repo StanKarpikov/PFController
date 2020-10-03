@@ -13,18 +13,17 @@ struct __attribute__((__packed__)) sEventRecord
     uint32_t info;
     float value;
 };
+typedef enum
+{
+    EVENT_TYPE_POWER,
+    EVENT_TYPE_CHANGESTATE,
+    EVENT_TYPE_PROTECTION,
+    EVENT_TYPE_EVENT
+}event_type_t;
+
 extern struct sEventRecord newevent;
-#define NEWEVENT(MAIN, SUB, INFO, VALUE)                  \
-    do                                                    \
-    {                                                     \
-        __disable_irq();                                  \
-        newevent.unixTime_s_ms = currentTime;             \
-        __enable_irq();                                   \
-        newevent.type = (MAIN) | (((uint32_t)SUB) << 16); \
-        newevent.info = INFO;                             \
-        newevent.value = VALUE;                           \
-        EventsAdd(&newevent);                             \
-    } while (0)
+
+void NEWEVENT(event_type_t MAIN, uint32_t SUB, uint32_t INFO, float VALUE);
 
 extern struct sEventRecord events[EVENTS_RECORDS_NUM + 1];
 extern uint16_t eventsIN, eventsOUT, eventsNUM;

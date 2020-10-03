@@ -10,6 +10,38 @@
 
 #include "stm32f7xx_hal.h"
 
+static uint32_t current_time=0;
+
+/*
+ * Initializes the Global MSP.
+ */
+void HAL_MspInit(void)
+{
+  __HAL_RCC_PWR_CLK_ENABLE();
+  __HAL_RCC_SYSCFG_CLK_ENABLE();
+
+}
+void system_increment_time(void)
+{
+	uint32_t current_time_next = current_time;
+	current_time_next++;
+	
+	DINT;
+	current_time = current_time_next;
+	EINT;
+}
+
+uint32_t system_get_time(void)
+{
+	return current_time;
+}
+
+status_t system_delay_ticks(uint32_t delay_ticks)
+{
+	HAL_Delay(delay_ticks);
+	return PFC_SUCCESS;
+}
+
 /**
   * @brief System Clock Configuration
   * @retval None
@@ -72,4 +104,14 @@ status_t system_init(void)
     HAL_Init();
     SystemClock_Config();
     return PFC_SUCCESS;
+}
+
+/**
+  * @brief This function handles System tick timer.
+  */
+void SysTick_Handler(void)
+{
+	system_increment_time();
+
+  HAL_IncTick();
 }

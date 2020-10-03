@@ -1,11 +1,10 @@
 #include "protocol.h"
-
+#include "device.h"
 #include <string.h>
 
 #include "BSP/bsp.h"
 #include "BSP/uart.h"
 #include "crc.h"
-#include "main.h"
 #include "stm32f7xx_hal.h"
 
 extern UART_HandleTypeDef huart1;
@@ -16,7 +15,7 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
     HAL_UART_DMAStop(huart);
     HAL_UART_DeInit(huart);
     HAL_UART_MspDeInit(huart);
-    MX_USART1_UART_Init();
+    uart_init();
     memset(port.rx_buffer, 0xFF, sizeof(port.rx_buffer));
     HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
     HAL_UART_Receive_DMA(huart, (uint8_t *)port.rx_buffer, RX_BUFFER_SIZE);
@@ -39,11 +38,12 @@ void send_packet(uint8_t *data, uint32_t len)
 
 status_t protocol_hw_init(void)
 {
-    prothandlers_init(&port);
-    memset(port.rx_buffer, 0xFF, sizeof(port.rx_buffer));
-    HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
-    HAL_UART_Receive_DMA(&huart1, (uint8_t *)port.rx_buffer, RX_BUFFER_SIZE);
-    port.rx_readed = 0;
+	prothandlers_init(&port);
+	memset(port.rx_buffer, 0xFF, sizeof(port.rx_buffer));
+	HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
+	HAL_UART_Receive_DMA(&huart1, (uint8_t *)port.rx_buffer, RX_BUFFER_SIZE);
+	port.rx_readed = 0;
+	return PFC_SUCCESS;
 }
 
 void protocol_init(PROTOCOL_CONTEXT *pc,
@@ -96,9 +96,9 @@ void protocol_reset(PROTOCOL_CONTEXT *pc)
     pc->pdata = pc->receivedPackage.data;
 }
 
-static char get_byte(SciPort *port, unsigned char *b)
+static int get_byte(SciPort *port, unsigned char *b)
 {
-    if (!b) return -2;
+    if (b==0) return -2;
     /*
     if (port->rx_overflow) {
         // Если переполнение - говорим об этом
@@ -268,7 +268,6 @@ int protocol_work(PROTOCOL_CONTEXT *pc)
                 }
                 pc->state = P_START;
                 return 1;
-                break;
             default:
                 pc->state = P_START;
                 break;

@@ -11,9 +11,45 @@
 #include "BSP/bsp.h"
 #include "BSP/timer.h"
 #include "stm32f7xx_hal.h"
+#include "defines.h"
 
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
+
+static ADC_TRANSFER_CALLBACK adc_cplt_callback = 0;
+static ADC_TRANSFER_CALLBACK adc_half_cplt_callback = 0;
+
+status_t adc_register_callbacks(ADC_TRANSFER_CALLBACK cptl_callback, ADC_TRANSFER_CALLBACK half_cplt_callback)
+{
+	adc_cplt_callback = cptl_callback;
+	adc_half_cplt_callback = half_cplt_callback;
+	return PFC_SUCCESS;
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	if(adc_cplt_callback)adc_cplt_callback();
+}
+	
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	if(adc_half_cplt_callback)adc_half_cplt_callback();
+}
+
+status_t adc_start(uint32_t* buffer, uint32_t buffer_size)
+{
+	HAL_ADC_Start(&hadc1);
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)buffer, buffer_size);
+	return PFC_SUCCESS;
+}
+
+status_t adc_stop(void)
+{
+	HAL_ADC_Stop_DMA(&hadc1);
+	
+	return PFC_SUCCESS;
+}
+
 /**
 * @brief ADC MSP Initialization
 * This function configures the hardware resources used in this example
@@ -55,7 +91,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-        GPIO_InitStruct.Pin = I_ADC_KKM_A_Pin | I_ADC_KKM_B_Pin | I_ADC_KKM_C_Pin | I_ADC_ET_Pin | TEMP_1_Pin | TEMP_2_Pin;
+        GPIO_InitStruct.Pin = I_ADC_PFC_A_Pin | I_ADC_PFC_B_Pin | I_ADC_PFC_C_Pin | I_ADC_ET_Pin | TEMP_1_Pin | TEMP_2_Pin;
         GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -125,7 +161,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
     */
         HAL_GPIO_DeInit(GPIOC, U_DC_ADC_Pin | A_HALF_ADC_Pin | B_HALF_ADC_Pin | C_HALF_ADC_Pin | A_EMS_ADC_Pin | B_EMS_ADC_Pin);
 
-        HAL_GPIO_DeInit(GPIOA, I_ADC_KKM_A_Pin | I_ADC_KKM_B_Pin | I_ADC_KKM_C_Pin | I_ADC_ET_Pin | TEMP_1_Pin | TEMP_2_Pin);
+        HAL_GPIO_DeInit(GPIOA, I_ADC_PFC_A_Pin | I_ADC_PFC_B_Pin | I_ADC_PFC_C_Pin | I_ADC_ET_Pin | TEMP_1_Pin | TEMP_2_Pin);
 
         HAL_GPIO_DeInit(GPIOB, C_EMS_ADC_Pin | I_EMS_OUT_Pin);
 
@@ -141,7 +177,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
   * @param None
   * @retval None
   */
-void MX_ADC1_Init(void)
+void adc_init(void)
 {
     /* USER CODE BEGIN ADC1_Init 0 */
 
@@ -283,7 +319,13 @@ void MX_ADC1_Init(void)
     {
         Error_Handler();
     }
-    /* USER CODE BEGIN ADC1_Init 2 */
+}
 
-    /* USER CODE END ADC1_Init 2 */
+
+/**
+  * @brief This function handles DMA2 stream0 global interrupt.
+  */
+void DMA2_Stream0_IRQHandler(void)
+{
+  HAL_DMA_IRQHandler(&hdma_adc1);
 }

@@ -13,6 +13,6 @@
 
 /*------------------  PUBLIC FUNCTIONS  --------------------------------------*/
 
-void MX_IWDG_Init(void);
+void iwdg_init(void);
 
 #endif /* _IWDG_H */

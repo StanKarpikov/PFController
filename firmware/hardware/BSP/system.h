@@ -9,10 +9,14 @@
 
 /*---------------------  INCLUDES  -------------------------------------------*/
 
+#include "stdint.h"
 #include "BSP/debug.h"
 
 /*------------------  PUBLIC FUNCTIONS  --------------------------------------*/
 
 status_t system_init(void);
+status_t system_delay_ticks(uint32_t delay_ticks);
+uint32_t system_get_time(void);
+void system_increment_time(void);
 
 #endif /* _SYSTEM_H */

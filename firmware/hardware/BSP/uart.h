@@ -15,6 +15,6 @@
 /*------------------  PUBLIC FUNCTIONS  --------------------------------------*/
 
 status_t uart_debug_transmit(uint8_t* data, uint32_t length);
-void MX_USART1_UART_Init(void);
+void uart_init(void);
 
 #endif /* _UART_H */

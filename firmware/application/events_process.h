@@ -4,7 +4,6 @@
 #include "defines.h"
 #include "device.h"
 #include "events.h"
-#include "main.h"
 #include "protocol.h"
 
 #define EVENT_OK 0

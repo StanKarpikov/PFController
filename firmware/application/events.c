@@ -2,7 +2,8 @@
 
 #include "clogic.h"
 #include "device.h"
-#include "main.h"
+#include "BSP/system.h"
+#include "string.h"
 
 #define EVENTS_REPEAT_TIME 2000
 struct sEventRecord events[EVENTS_RECORDS_NUM + 1];
@@ -10,6 +11,19 @@ struct sEventRecord newevent;
 
 uint16_t eventsIN = 0, eventsOUT = 0, eventsNUM = 0;
 uint32_t lastEventTime[SUB_EVENT_TYPE_PROTECTION_IGBT + 1][ADC_CHANNEL_NUMBER];
+
+void NEWEVENT(event_type_t MAIN, uint32_t SUB, uint32_t INFO, float VALUE)
+{                                          
+		__disable_irq();                                  
+		newevent.unixTime_s_ms = system_get_time();             
+		__enable_irq();                                   
+		newevent.type = (MAIN) | (((uint32_t)SUB) << 16); 
+		newevent.info = INFO;                             
+		newevent.value = VALUE;                           
+		EventsAdd(&newevent);                             
+}
+
+
 void EventsClear()
 {
     DINT;
@@ -47,15 +61,15 @@ inline void CheckEvents(uint16_t subtype, uint32_t info)
         case PROTECTION_IGNORE:
             break;
         case PROTECTION_WARNING_STOP:
-            if (KKM.status >= KKM_STATE_SYNC)
+            if (PFC.status >= PFC_STATE_SYNC)
             {
-                clogic_set_state(KKM_STATE_FAULTBLOCK);
+                clogic_set_state(PFC_STATE_FAULTBLOCK);
             }
             break;
         case PROTECTION_ERROR_STOP:
-            if (KKM.status >= KKM_STATE_SYNC)
+            if (PFC.status >= PFC_STATE_SYNC)
             {
-                clogic_set_state(KKM_STATE_FAULTBLOCK);
+                clogic_set_state(PFC_STATE_FAULTBLOCK);
             }
             break;
     }
@@ -67,13 +81,13 @@ void EventsAdd(struct sEventRecord* event)
         uint16_t subtype = (event->type >> 16) & 0xFFFF;
         CheckEvents(subtype, event->info);
         DINT;
-        if ((HAL_GetTick() - lastEventTime[subtype][event->info]) < EVENTS_REPEAT_TIME)
+        if ((system_get_time() - lastEventTime[subtype][event->info]) < EVENTS_REPEAT_TIME)
         {
             EINT;
             return;
         }
         EINT;
-        lastEventTime[subtype][event->info] = HAL_GetTick();
+        lastEventTime[subtype][event->info] = system_get_time();
     }
 
     DINT;
