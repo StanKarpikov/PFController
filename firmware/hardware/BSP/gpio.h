@@ -14,5 +14,7 @@
 /*------------------  PUBLIC FUNCTIONS  --------------------------------------*/
 
 void MX_GPIO_Init(void);
+status_t gpio_error_led_on(void);
+status_t gpio_status_led_on(void);
 
 #endif /* _GPIO_H */

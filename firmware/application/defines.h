@@ -1,6 +1,17 @@
+/**
+ * @file defines.h
+ * @author Stanislav Karpikov
+ * @brief Global settings and defines
+ */
+
 #ifndef __DEFINES_H__
 #define __DEFINES_H__
+
+/*---------------------  INCLUDES  -------------------------------------------*/
+
 #include "stdint.h"
+
+/*------------------  PUBLIC DEFINES  ----------------------------------------*/
 
 #define PWM_PERIOD  (2000)
 

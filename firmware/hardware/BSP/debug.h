@@ -13,9 +13,23 @@
 
 /*-------------------  PUBLIC DEFINES  ---------------------------------------*/
 
+/*--------------------  PUBLIC MACRO  ----------------------------------------*/
+
+
 #define ARGUMENT_ASSERT(ARGUMENT) \
 	do{ if(ARGUMENT == 0)return PFC_ERROR_DATA;}while(0)
 
+#define BREAKPOINT() \
+	do{ \
+		if( is_debug_session() )\
+		{\
+			__asm  {BKPT 0}\
+		} \
+	}while(0)
+							
+#define DINT __disable_irq()
+#define EINT __enable_irq()
+	
 /*------------------  PUBLIC FUNCTIONS  --------------------------------------*/
 
 void Error_Handler(void);

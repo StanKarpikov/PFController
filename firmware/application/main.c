@@ -63,7 +63,7 @@ int main(void)
 
 	protocol_hw_init();
 	
-	HAL_GPIO_WritePin(GPIOD, LED_2_Pin,GPIO_PIN_SET);
+	gpio_status_led_on();
 	
 	for(int i=0;i<2000;i++){
 		sinusoid[i]=sin((float)i/2000.0f*2.0f*3.1416f)*2000.0f;

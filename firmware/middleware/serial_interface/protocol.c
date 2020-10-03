@@ -4,6 +4,7 @@
 #include "stm32f7xx_hal.h"
 #include "main.h"
 #include "BSP/uart.h"
+#include "BSP/bsp.h"
 
 extern UART_HandleTypeDef huart1;
 SciPort port;

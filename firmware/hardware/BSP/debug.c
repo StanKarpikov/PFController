@@ -8,7 +8,7 @@
 
 #include "BSP/debug.h"
 #include "BSP/uart.h"
-
+#include "stm32f7xx_hal.h"
 
 int fputc(int c, FILE*f)
 {
@@ -37,6 +37,8 @@ void Error_Handler(void)
   while (1);
   /* USER CODE END Error_Handler_Debug */
 }
+
+										
 bool is_debug_session(void){
     return (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk) == 0U ? false : true;
 }

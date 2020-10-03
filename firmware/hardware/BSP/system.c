@@ -72,5 +72,5 @@ status_t system_init(void)
 {
 	HAL_Init();
 	SystemClock_Config();
-	return SUCCESS;
+	return PFC_SUCCESS;
 }

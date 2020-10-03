@@ -6,9 +6,22 @@
 
 /*---------------------  INCLUDES  -------------------------------------------*/
 
+#include "BSP/bsp.h"
 #include "BSP/gpio.h"
 #include "BSP/debug.h"
 #include "stm32f7xx_hal.h"
+
+status_t gpio_error_led_on(void)
+{
+	HAL_GPIO_WritePin(GPIOD, LED_1_Pin,GPIO_PIN_SET);
+	return PFC_SUCCESS;
+}		
+
+status_t gpio_status_led_on(void)
+{
+	HAL_GPIO_WritePin(GPIOD, LED_2_Pin,GPIO_PIN_SET);
+	return PFC_SUCCESS;
+}	
 
 /**
   * @brief GPIO Initialization Function

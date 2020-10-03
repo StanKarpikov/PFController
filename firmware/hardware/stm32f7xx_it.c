@@ -36,37 +36,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f7xx_it.h"
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
-/* USER CODE END Includes */
 
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN TD */
+#include "BSP/gpio.h"
+#include "BSP/debug.h"
 
-/* USER CODE END TD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
- 
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
-/* USER CODE BEGIN PFP */
-
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
 void _get_registers_from_stack(uint32_t* stack_address)
 {
 
@@ -74,7 +47,7 @@ void _get_registers_from_stack(uint32_t* stack_address)
     volatile unsigned int pc = stack_address[ 6 ];
     volatile unsigned int psr = stack_address[ 7 ];
 
-		HAL_GPIO_WritePin(GPIOD, LED_1_Pin,GPIO_PIN_SET);
+		gpio_error_led_on();
     /* See: 4.3.10. Configurable Fault Status Register for deyeils */
     /* http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0553a/Cihcfefj.html */
 
