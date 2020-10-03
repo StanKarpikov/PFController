@@ -1,5 +1,5 @@
 #include "protocol.h"
-#include "device.h"
+#include "command_processor.h"
 #include <string.h>
 
 #include "BSP/bsp.h"

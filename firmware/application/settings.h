@@ -23,7 +23,7 @@ typedef struct _settings
     } PWM;
     struct
     {
-        //=== защиты ======
+        /* Protection */
         float Ud_min;       //!< Граничные значения для Ud
         float Ud_max;       //!< Граничные значения для Ud
         float temperature;  //!< Граничные значения для Температуры
@@ -36,8 +36,8 @@ typedef struct _settings
     } PROTECTION;
     struct
     {
-        //==== накачка =====
-        float ctrlUd_Kp;  //!< Управление накачкой
+        /* Charge */
+        float ctrlUd_Kp;
         float ctrlUd_Ki;
         float ctrlUd_Kd;
         float Ud_nominal;

@@ -1,8 +1,8 @@
 #include "algorithm.h"
 #include "BSP/system.h"
 #include "BSP/timer.h"
-#include "clogic.h"
-#include "device.h"
+#include "pfc_logic.h"
+#include "command_processor.h"
 #include "events_process.h"
 #include "settings.h"
 #include "string.h"
@@ -132,7 +132,7 @@ void algorithm_work(void)
 			#define R (0.07f)
 			#define w (2.0f*MATH_PI*50.0f)
 			float Th=(float)j/128.0f*(2.0f*MATH_PI);
-			float Ud=UD;
+			float Ud=adc_get_cap_voltage();
 			float Ua=//sin(Th)*sqrt(2.0f)*PFC.adc.active[ADC_EMS_A];
 				PFC.adc.ch[last_buffer][ADC_MATH_A][j];
 			float Ub=//sin(Th+2.0f*MATH_PI/3.0f)*sqrt(2.0f)*PFC.adc.active[ADC_EMS_B];
@@ -237,7 +237,7 @@ void algorithm_work(void)
 				uint32_t arr = (200000000.0f / 2.0f / 128.0f * (PFC.period_fact / 1000000.0f));
 				timer_correct_period(arr);
         //---------------------
-        clogic_do();
+        pfc_do();
         //---------------------
         //---------------------
         static uint32_t lastprint = 0;

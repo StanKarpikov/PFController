@@ -573,14 +573,14 @@
               <FilePath>..\application\algorithm.h</FilePath>
             </File>
             <File>
-              <FileName>clogic.c</FileName>
+              <FileName>pfc_logic.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\application\clogic.c</FilePath>
+              <FilePath>..\application\pfc_logic.c</FilePath>
             </File>
             <File>
-              <FileName>clogic.h</FileName>
+              <FileName>pfc_logic.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\application\clogic.h</FilePath>
+              <FilePath>..\application\pfc_logic.h</FilePath>
             </File>
             <File>
               <FileName>defines.h</FileName>
@@ -588,14 +588,14 @@
               <FilePath>..\application\defines.h</FilePath>
             </File>
             <File>
-              <FileName>device.c</FileName>
+              <FileName>command_processor.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\application\device.c</FilePath>
+              <FilePath>..\application\command_processor.c</FilePath>
             </File>
             <File>
-              <FileName>device.h</FileName>
+              <FileName>command_processor.h</FileName>
               <FileType>5</FileType>
-              <FilePath>..\application\device.h</FilePath>
+              <FilePath>..\application\command_processor.h</FilePath>
             </File>
             <File>
               <FileName>events.c</FileName>

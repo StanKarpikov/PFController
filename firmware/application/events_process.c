@@ -62,7 +62,7 @@ char events_was_CT_overload(float *adc_values)
 uint16_t overUDTicks;
 int events_check_Ud(float Ud)
 {
-    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return 0;
+    if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return 0;
     if (Ud > PFC.settings.PROTECTION.Ud_max)
     {
         overUDTicks++;
@@ -79,7 +79,7 @@ int events_check_Ud(float Ud)
     {
         overUDTicks = 0;
     }
-    if (PFC.status >= PFC_STATE_CHARGE && Ud < PFC.settings.PROTECTION.Ud_min)
+    if (pfc_get_state() >= PFC_STATE_CHARGE && Ud < PFC.settings.PROTECTION.Ud_min)
     {
         NEWEVENT(
             EVENT_TYPE_PROTECTION,
@@ -93,7 +93,7 @@ int events_check_Ud(float Ud)
 
 void events_check_temperature(void)
 {
-    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return;
+    if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return;
     if (PFC.temperature > PFC.settings.PROTECTION.temperature /* TEMPERATURE_HW_MAX */)
     {
         NEWEVENT(
@@ -108,7 +108,7 @@ void events_check_voltage_RMS(void)
 {
     int i;
 
-    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return;
+    if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return;
 
     for (i = 0; i < PFC_NCHAN; i++)
     {
@@ -134,7 +134,7 @@ void events_check_overvoltage_transient(float *U)
 {
     int channel;
 
-    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return;
+    if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return;
     for (channel = 0; channel < PFC_NCHAN; channel++)
     {
 #ifdef ONLY_A_CHANNEL
@@ -163,7 +163,7 @@ int events_check_overcurrent_rms(void)
 {
     char i;
 
-    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return EVENT_OK;
+    if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return EVENT_OK;
     for (i = 0; i < PFC_NCHAN; i++)
     {
 #ifdef ONLY_A_CHANNEL
@@ -185,7 +185,7 @@ int events_check_overcurrent_peak(float *IPFC)
 {
     int channel;
 
-    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return EVENT_OK;
+    if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return EVENT_OK;
     for (channel = 0; channel < PFC_NCHAN; channel++)
     {
 #ifdef ONLY_A_CHANNEL
@@ -209,7 +209,7 @@ void events_check_period(unsigned int period_length)
     if (period_length == 0) return;
     float freq = 1.0f / ((float)period_length / 1000000.0f);
 
-    if (PFC.status >= PFC_STATE_STOPPING || PFC.status <= PFC_STATE_STOP) return;
+    if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return;
     if (freq > PFC.settings.PROTECTION.Fnet_max)
     {
         NEWEVENT(
@@ -226,7 +226,7 @@ void events_check_period(unsigned int period_length)
             0,
             freq);
     } /*TODO:
-	if(PFC.status>=PFC_STATE_PRECHARGE_PREPARE && fabs(PFC.U_50Hz[0].phase-MATH_PI/2)>0.1){
+	if(pfc_get_state()>=PFC_STATE_PRECHARGE_PREPARE && fabs(PFC.U_50Hz[0].phase-MATH_PI/2)>0.1){
 		NEWEVENT(
 					EVENT_TYPE_PROTECTION,
 					SUB_EVENT_TYPE_PROTECTION_BAD_SYNC,

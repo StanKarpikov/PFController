@@ -4,7 +4,9 @@
  * @brief Board support package: Timer
  */
 
-/*---------------------  INCLUDES  -------------------------------------------*/
+/*--------------------------------------------------------------
+                       INCLUDES
+--------------------------------------------------------------*/
 
 #include "BSP/timer.h"
 
@@ -13,7 +15,9 @@
 #include "defines.h"
 #include "stm32f7xx_hal.h"
 
-/*-------------------  PRIVATE DATA  -----------------------------------------*/
+/*--------------------------------------------------------------
+                       PRIVATE DATA
+--------------------------------------------------------------*/
 
 static TIM_HandleTypeDef htim1 = {0};
 static TIM_HandleTypeDef htim2 = {0};
@@ -25,7 +29,9 @@ static DMA_HandleTypeDef hdma_tim1_ch3 = {0};
 static DMA_HandleTypeDef hdma_tim8_ch2 = {0};
 static DMA_HandleTypeDef hdma_tim8_ch3 = {0};
 
-/*----------------  PRIVATE FUNCTIONS  ---------------------------------------*/
+/*--------------------------------------------------------------
+                       PRIVATE FUNCTIONS
+--------------------------------------------------------------*/
 
 static void tim_msp_post_init(TIM_HandleTypeDef* htim)
 {
@@ -292,7 +298,9 @@ static void tim9_Init(void)
     tim_msp_post_init(&htim9);
 }
 
-/*-----------------  PUBLIC FUNCTIONS  ---------------------------------------*/
+/*--------------------------------------------------------------
+                       PUBLIC FUNCTIONS
+--------------------------------------------------------------*/
 
 /**
 * @brief TIM_Base MSP Initialization

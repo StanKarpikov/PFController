@@ -2,7 +2,7 @@
 #define __EVENTS_PROCESS_H__
 
 #include "defines.h"
-#include "device.h"
+#include "command_processor.h"
 #include "events.h"
 #include "protocol.h"
 

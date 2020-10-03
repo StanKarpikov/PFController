@@ -3,16 +3,23 @@
  * @author Stanislav Karpikov
  * @brief ADC support and control module
  */
+/*--------------------------------------------------------------
+                       INCLUDES
+--------------------------------------------------------------*/
 
 #include "adc_logic.h"
 
 #include "BSP/timer.h"
 #include "BSP/adc.h"
 #include "BSP/gpio.h"
-#include "clogic.h"
-#include "device.h"
+#include "pfc_logic.h"
+#include "command_processor.h"
 #include "events_process.h"
 #include "string.h"
+
+/*--------------------------------------------------------------
+                       PRIVATE DATA
+--------------------------------------------------------------*/
 
 uint16_t ADC_DMA_buf[ADC_CHANNEL_NUMBER];
 float adc_values[ADC_CHANNEL_NUMBER + ADC_MATH_NUMBER];
@@ -22,37 +29,25 @@ uint8_t last_buffer = 0;
 uint16_t symbol = 0;
 uint8_t newPeriod = 0;
 uint8_t needSquare[] = {
-    0,  //CH10
-    1,  //CH11
-    1,  //CH12
-    1,  //CH13
-    0,  //CH0
-    0,  //CH1
-    0,  //CH2
-    0,  //CH3
-    0,  //CH5
-    0,  //CH6
-    1,  //CH14
-    1,  //CH15
-    1,  //CH8
-    1,  //CH9
+    0,  //CH10 - ADC_UD
+    1,  //CH11 - ADC_U_A
+    1,  //CH12 - ADC_U_B
+    1,  //CH13 - ADC_U_C
+    0,  //CH0 - ADC_I_A
+    0,  //CH1 - ADC_I_B
+    0,  //CH2 - ADC_I_C
+    0,  //CH3 - ADC_I_ET
+    0,  //CH5 - ADC_I_TEMP1
+    0,  //CH6 - ADC_I_TEMP2
+    1,  //CH14 - ADC_EMS_A
+    1,  //CH15 - ADC_EMS_B
+    1,  //CH8 - ADC_EMS_C
+    1,  //CH9 - ADC_EMS_I
     1,
     1,
-    1};
-//ADC_UD,			//CH10
-//ADC_U_A,		//CH11
-//ADC_U_B,		//CH12
-//ADC_U_C,		//CH13
-//ADC_I_A,		//CH0
-//ADC_I_B,		//CH1
-//ADC_I_C,		//CH2
-//ADC_I_ET,		//CH3
-//ADC_I_TEMP1,//CH5
-//ADC_I_TEMP2,//CH6
-//ADC_EMS_A,	//CH14
-//ADC_EMS_B,	//CH15
-//ADC_EMS_C,	//CH8
-//ADC_EMS_I,	//CH9
+    1
+};
+
 //ADC_MATH_A,
 //ADC_MATH_B,
 //ADC_MATH_C,
@@ -60,6 +55,54 @@ uint8_t needSquare[] = {
 //ADC_MATH_C_B,
 //ADC_MATH_C_C
 		
+float VLet_1 = 0;  //прошлое значение ошибок
+float VLIt_1 = 0;  //прошлое значение интегральной составляющей
+float Ia_e_1 = 0;        //прошлое значение ошибок
+float Ia_It_1 = 0;       //прошлое значение интегральной составляющей
+float Ib_e_1 = 0;        //прошлое значение ошибок
+float Ib_It_1 = 0;       //прошлое значение интегральной составляющей
+float Ic_e_1 = 0;        //прошлое значение ошибок
+float Ic_It_1 = 0;       //прошлое значение интегральной составляющей
+float Kp = 0, Ki = 0.2;  //Ki=0.0003;
+float ia = 0;
+
+
+typedef struct
+{
+    float ch[BUF_NUM][ADC_CHANNEL_FULL_COUNT][ADC_VAL_NUM];
+
+    float active[ADC_CHANNEL_FULL_COUNT];  //RMS or mean value with correction
+    uint16_t active_raw[ADC_CHANNEL_NUMBER];             //RMS or mean value without correction
+
+    //Temp sum for calculate adc active value
+    float sum_raw_sqr[BUF_NUM][ADC_CHANNEL_FULL_COUNT];
+    float sum_raw[BUF_NUM][ADC_CHANNEL_FULL_COUNT];
+}adc_t;
+
+typedef struct
+{
+    PROTOCOL_CONTEXT protocol;
+    SETTINGS settings;
+    adc_t adc;
+
+    ComplexAmpPhase U_50Hz[PFC_NCHAN];
+    float period_delta;
+
+    float period_fact;
+    float U_0Hz[PFC_NCHAN];
+    float I_0Hz[PFC_NCHAN];
+    float U_phase[PFC_NCHAN];
+    float thdu[PFC_NCHAN];
+
+    float temperature;
+}pfc_t;
+
+static pfc_t PFC;
+
+/*--------------------------------------------------------------
+                       PRIVATE FUNCTIONS
+--------------------------------------------------------------*/
+
 void adc_cplt_callback(void)
 {
     memcpy(adc_values_raw, ADC_DMA_buf, sizeof(ADC_DMA_buf) / 2);
@@ -77,23 +120,7 @@ float PID(float et, float* et_1, float Kp, float Ki, float Kd, float* It_1)
     return Ut;
 };
 
-float VLet_1 = 0;  //прошлое значение ошибок
-float VLIt_1 = 0;  //прошлое значение интегральной составляющей
-//float Idet_1=0;//прошлое значение ошибок
-//float IdIt_1=0;//прошлое значение интегральной составляющей
-//float Iqet_1=0;//прошлое значение ошибок
-//float IqIt_1=0;//прошлое значение интегральной составляющей
-float Ia_e_1 = 0;        //прошлое значение ошибок
-float Ia_It_1 = 0;       //прошлое значение интегральной составляющей
-float Ib_e_1 = 0;        //прошлое значение ошибок
-float Ib_It_1 = 0;       //прошлое значение интегральной составляющей
-float Ic_e_1 = 0;        //прошлое значение ошибок
-float Ic_It_1 = 0;       //прошлое значение интегральной составляющей
-float Kp = 0, Ki = 0.2;  //Ki=0.0003;
-float ia = 0;
-
-
-void adc_half_cplt_callback(void)
+static void adc_half_cplt_callback(void)
 {
 		gpio_pwm_test_on();
     int i_isr;
@@ -108,21 +135,19 @@ void adc_half_cplt_callback(void)
         adc_values[i_isr] = adc_values_raw[i_isr];
     }
     //events_was_CT_overload(adc_values);//TODO:
-    //=======================================================
-    //=======================================================
+		
     /* Применяем смещения каналов */
     for (i_isr = 0; i_isr < ADC_CHANNEL_NUMBER; i_isr++)
     {
         /* Каналы переменного тока/напряжения смещаем на UREF */
         adc_values[i_isr] -= PFC.settings.CALIBRATIONS.offset[i_isr];
         adc_values[i_isr] *= PFC.settings.CALIBRATIONS.calibration[i_isr];
-        //=======================================================
+
         PFC.adc.ch[current_buffer][i_isr][symbol] = adc_values[i_isr];
     }
-    //=======================================================
     //events_check_overcurrent_peak(&adc_values[ADC_I_A]);
     //events_check_overvoltage_transient(&adc_values[ADC_U_A]);
-    if (PFC.status >= PFC_STATE_CHARGE && PFC.status < PFC_STATE_FAULTBLOCK)
+    if (pfc_get_state() >= PFC_STATE_CHARGE && pfc_get_state() < PFC_STATE_FAULTBLOCK)
     {
         events_check_Ud(adc_values[ADC_UD]);
     }
@@ -141,7 +166,7 @@ void adc_half_cplt_callback(void)
     else
     {
         float VL = PID(
-            PFC.settings.CAPACITORS.Ud_nominal - UD,
+            PFC.settings.CAPACITORS.Ud_nominal - adc_get_cap_voltage(),
             &VLet_1,
             PFC.settings.CAPACITORS.ctrlUd_Kp,
             PFC.settings.CAPACITORS.ctrlUd_Ki,
@@ -195,7 +220,6 @@ void adc_half_cplt_callback(void)
         if (Ib_It_1 < (-1.0f)) Ib_It_1 = -1.0f;
         if (Ic_It_1 < (-1.0f)) Ic_It_1 = -1.0f;
 
-#define EPS 0
         if (va > (1.0f - EPS)) va = 1.0f - EPS;
         if (vb > (1.0f - EPS)) vb = 1.0f - EPS;
         if (vc > (1.0f - EPS)) vc = 1.0f - EPS;
@@ -212,32 +236,25 @@ void adc_half_cplt_callback(void)
         PFC.adc.ch[current_buffer][ADC_MATH_C_B][symbol] = vb;
         PFC.adc.ch[current_buffer][ADC_MATH_C_C][symbol] = vc;
     }
-    //=======================================================
     symbol++;
-    static int pulse = 0;
     if (symbol >= ADC_VAL_NUM)
     {
         symbol = 0;
         current_buffer ^= 1;
         last_buffer = !current_buffer;
         newPeriod = 1;
-
-        if (PFC.status == PFC_STATE_CHARGE)
-        {
-            pulse++;
-            if (pulse >= 4)
-            {
-                pulse = 0;
-                PFC.status = PFC_STATE_WORK;
-            }
-        }
     }
-    //=======================================================
-    //=======================================================
-    //=======================================================
     gpio_pwm_test_off();
 }
 
+/*--------------------------------------------------------------
+                       PUBLIC FUNCTIONS
+--------------------------------------------------------------*/
+
+float adc_get_cap_voltage(void)
+{
+	return PFC.adc.active[ADC_UD];
+}
 
 status_t adc_logic_start(void)
 {
@@ -248,4 +265,18 @@ status_t adc_logic_start(void)
 	timer_start_adc_timer();
 
 	return PFC_SUCCESS;
+}
+
+void adc_get_active(float* U_0Hz, float* I_0Hz, float* U_phase, float* thdu)
+{
+		memcpy(U_0Hz, PFC.U_0Hz, sizeof(PFC.U_0Hz));
+		memcpy(I_0Hz, PFC.I_0Hz, sizeof(PFC.I_0Hz));
+		memcpy(U_phase, PFC.U_phase, sizeof(PFC.U_phase));
+		memcpy(thdu, PFC.thdu, sizeof(PFC.thdu));
+}
+
+
+void adc_get_active(float* active)
+{
+	if(active)memcpy(active, PFC.adc.active, sizeof(PFC.adc.active));
 }

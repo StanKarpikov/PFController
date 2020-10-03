@@ -4,13 +4,29 @@
  * @brief Board support package: system tools
  */
 
-/*---------------------  INCLUDES  -------------------------------------------*/
+/*--------------------------------------------------------------
+                       INCLUDES
+--------------------------------------------------------------*/
 
 #include "BSP/system.h"
 
 #include "stm32f7xx_hal.h"
 
+/*--------------------------------------------------------------
+                       PRIVATE DEFINES
+--------------------------------------------------------------*/
+
+#define TIME_MAX_VALUE (4133894400000ULL)
+
+/*--------------------------------------------------------------
+                       PRIVATE DATA
+--------------------------------------------------------------*/
+
 static uint32_t current_time=0;
+
+/*--------------------------------------------------------------
+                       PUBLIC FUNCTIONS
+--------------------------------------------------------------*/
 
 /*
  * Initializes the Global MSP.
@@ -23,7 +39,7 @@ void HAL_MspInit(void)
 }
 void system_increment_time(void)
 {
-	uint32_t current_time_next = current_time;
+	uint64_t current_time_next = current_time;
 	current_time_next++;
 	
 	DINT;
@@ -31,7 +47,18 @@ void system_increment_time(void)
 	EINT;
 }
 
-uint32_t system_get_time(void)
+void system_set_time(uint64_t time)
+{
+	if (time > TIME_MAX_VALUE)
+	{
+			time = 0;
+	}
+	DINT;
+	current_time = time;
+	EINT;
+}
+
+uint64_t system_get_time(void)
 {
 	return current_time;
 }

@@ -7,16 +7,21 @@
 #ifndef _SYSTEM_H
 #define _SYSTEM_H
 
-/*---------------------  INCLUDES  -------------------------------------------*/
+/*--------------------------------------------------------------
+                       INCLUDES
+--------------------------------------------------------------*/
 
 #include "stdint.h"
 #include "BSP/debug.h"
 
-/*------------------  PUBLIC FUNCTIONS  --------------------------------------*/
+/*--------------------------------------------------------------
+                       PUBLIC FUNCTIONS
+--------------------------------------------------------------*/
 
 status_t system_init(void);
 status_t system_delay_ticks(uint32_t delay_ticks);
-uint32_t system_get_time(void);
+uint64_t system_get_time(void);
 void system_increment_time(void);
+void system_set_time(uint64_t time);
 
 #endif /* _SYSTEM_H */

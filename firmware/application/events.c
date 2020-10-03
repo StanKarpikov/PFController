@@ -1,7 +1,7 @@
 #include "events.h"
 
-#include "clogic.h"
-#include "device.h"
+#include "pfc_logic.h"
+#include "command_processor.h"
 #include "BSP/system.h"
 #include "string.h"
 
@@ -61,15 +61,15 @@ inline void CheckEvents(uint16_t subtype, uint32_t info)
         case PROTECTION_IGNORE:
             break;
         case PROTECTION_WARNING_STOP:
-            if (PFC.status >= PFC_STATE_SYNC)
+            if (pfc_get_state() >= PFC_STATE_SYNC)
             {
-                clogic_set_state(PFC_STATE_FAULTBLOCK);
+                pfc_set_state(PFC_STATE_FAULTBLOCK);
             }
             break;
         case PROTECTION_ERROR_STOP:
-            if (PFC.status >= PFC_STATE_SYNC)
+            if (pfc_get_state() >= PFC_STATE_SYNC)
             {
-                clogic_set_state(PFC_STATE_FAULTBLOCK);
+                pfc_set_state(PFC_STATE_FAULTBLOCK);
             }
             break;
     }

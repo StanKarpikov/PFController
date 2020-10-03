@@ -4,15 +4,16 @@
  * @brief Main file with initialisation and entry point
  */
 
-/*---------------------  INCLUDES  -------------------------------------------*/
+/*--------------------------------------------------------------
+                       INCLUDES
+--------------------------------------------------------------*/
 
 #include "EEPROM_emulation.h"
 #include "algorithm.h"
-#include "clogic.h"
-#include "device.h"
+#include "pfc_logic.h"
+#include "command_processor.h"
 #include "events_process.h"
 #include "settings.h"
-
 /* BSP */
 #include "BSP/adc.h"
 #include "BSP/debug.h"
@@ -22,16 +23,15 @@
 #include "BSP/system.h"
 #include "BSP/timer.h"
 #include "BSP/uart.h"
-
 /* app */
 #include "adc_logic.h"
-
 /* settings */
 #include "defines.h"
-
 #include "string.h"
 
-/*-----------------  PUBLIC FUNCTIONS  ---------------------------------------*/
+/*--------------------------------------------------------------
+                       PUBLIC FUNCTIONS
+--------------------------------------------------------------*/
 
 /**
   * @brief  The application entry point.
@@ -44,9 +44,8 @@ int main(void)
     EEPROMClass();
     memset(&PFC, 0, sizeof(PFC));
     ReadSettings(&PFC.settings);
-    PFC.status = PFC_STATE_INIT;  //!< Текущее состояние работы
 
-    /* Initialize all configured peripherals */
+    /* Initialize all peripherals */
     gpio_init();
     dma_init();
     adc_init();

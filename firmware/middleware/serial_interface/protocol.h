@@ -99,14 +99,14 @@ typedef struct _protocol_context
     PROTOCOL_STATUS status;
 
     SciPort *port;
-} PROTOCOL_CONTEXT;
+} protocol_context_t;
 //==================  COMMANDS  ============================
 
-struct __attribute__((__packed__)) sCOMMAND_GET_ADC_ACTIVE
+struct __attribute__((__packed__)) s_command_get_adc_active
 {
     uint8_t null;
 };
-struct __attribute__((__packed__)) sANSWER_GET_ADC_ACTIVE
+struct __attribute__((__packed__)) s_answer_get_adc_active
 {
     float ADC_UD;       //CH10
     float ADC_U_A;      //CH11
@@ -127,11 +127,13 @@ struct __attribute__((__packed__)) sANSWER_GET_ADC_ACTIVE
     float ADC_MATH_B;
     float ADC_MATH_C;
 };
-struct __attribute__((__packed__)) sCOMMAND_GET_ADC_ACTIVE_RAW
+
+struct __attribute__((__packed__)) s_command_get_adc_active_raw
 {
     uint8_t null;
 };
-struct __attribute__((__packed__)) sANSWER_GET_ADC_ACTIVE_RAW
+
+struct __attribute__((__packed__)) s_answer_get_adc_active_raw
 {
     uint16_t ADC_UD;       //CH10
     uint16_t ADC_U_A;      //CH11
@@ -148,30 +150,30 @@ struct __attribute__((__packed__)) sANSWER_GET_ADC_ACTIVE_RAW
     uint16_t ADC_EMS_C;    //CH8
     uint16_t ADC_EMS_I;    //CH9
 };
-struct __attribute__((__packed__)) sCOMMAND_SWITCH_ON_OFF
+struct __attribute__((__packed__)) s_command_switch_on_off
 {
     uint8_t command;
     uint32_t data;
 };
-struct __attribute__((__packed__)) sANSWER_SWITCH_ON_OFF
+struct __attribute__((__packed__)) s_answer_switch_on_off
 {
     uint8_t result;
 };
-struct __attribute__((__packed__)) sCOMMAND_GET_WORK_STATE
+struct __attribute__((__packed__)) s_command_get_work_state
 {
     uint64_t currentTime;
 };
-struct __attribute__((__packed__)) sANSWER_GET_WORK_STATE
+struct __attribute__((__packed__)) s_answer_get_work_state
 {
     uint8_t state;
     uint32_t activeChannels[3];
 };
 
-struct __attribute__((__packed__)) sCOMMAND_GET_VERSION_INFO
+struct __attribute__((__packed__)) s_command_get_version_info
 {
     uint8_t null;
 };
-struct __attribute__((__packed__)) sANSWER_GET_VERSION_INFO
+struct __attribute__((__packed__)) s_answer_get_version_info
 {
     uint16_t major;
     uint16_t minor;
@@ -185,12 +187,12 @@ struct __attribute__((__packed__)) sANSWER_GET_VERSION_INFO
     uint8_t minute;
     uint8_t second;
 };
-struct __attribute__((__packed__)) sCOMMAND_GET_OSCILOG
+struct __attribute__((__packed__)) s_command_get_oscillog
 {
     uint8_t num;
 };
 #define OSCILLOG_TRANSFER_SIZE 128
-struct __attribute__((__packed__)) sANSWER_GET_OSCILOG
+struct __attribute__((__packed__)) s_answer_get_oscillog
 {
     uint8_t ch;
     float max;
@@ -198,20 +200,20 @@ struct __attribute__((__packed__)) sANSWER_GET_OSCILOG
     uint16_t len;
     uint8_t data[OSCILLOG_TRANSFER_SIZE];
 };
-struct __attribute__((__packed__)) sCOMMAND_GET_SETTINGS_CALIBRATIONS
+struct __attribute__((__packed__)) s_command_get_settings_calibrations
 {
     uint8_t null;
 };
-struct __attribute__((__packed__)) sANSWER_GET_SETTINGS_CALIBRATIONS
+struct __attribute__((__packed__)) s_answer_get_settings_calibrations
 {
     float calibration[ADC_CHANNEL_NUMBER];
     float offset[ADC_CHANNEL_NUMBER];
 };
-struct __attribute__((__packed__)) sCOMMAND_GET_SETTINGS_PROTECTION
+struct __attribute__((__packed__)) s_command_get_settings_protection
 {
     uint8_t null;
 };
-struct __attribute__((__packed__)) sANSWER_GET_SETTINGS_PROTECTION
+struct __attribute__((__packed__)) s_answer_get_settings_protection
 {
     float Ud_min;
     float Ud_max;
@@ -223,11 +225,11 @@ struct __attribute__((__packed__)) sANSWER_GET_SETTINGS_PROTECTION
     float I_max_rms;
     float I_max_peak;
 };
-struct __attribute__((__packed__)) sCOMMAND_GET_SETTINGS_CAPACITORS
+struct __attribute__((__packed__)) s_command_get_settings_capacitors
 {
     uint8_t null;
 };
-struct __attribute__((__packed__)) sANSWER_GET_SETTINGS_CAPACITORS
+struct __attribute__((__packed__)) s_answer_get_settings_capacitors
 {
     float ctrlUd_Kp;
     float ctrlUd_Ki;
@@ -235,21 +237,21 @@ struct __attribute__((__packed__)) sANSWER_GET_SETTINGS_CAPACITORS
     float Ud_nominal;
     float Ud_precharge;
 };
-struct __attribute__((__packed__)) sCOMMAND_GET_SETTINGS_FILTERS
+struct __attribute__((__packed__)) s_command_get_settings_filters
 {
     uint8_t null;
 };
-struct __attribute__((__packed__)) sANSWER_GET_SETTINGS_FILTERS
+struct __attribute__((__packed__)) s_answer_get_settings_filters
 {
     float K_I;
     float K_U;
     float K_UD;
 };
-struct __attribute__((__packed__)) sCOMMAND_GET_NET_PARAMS
+struct __attribute__((__packed__)) s_command_get_net_params
 {
     uint8_t null;
 };
-struct __attribute__((__packed__)) sANSWER_GET_NET_PARAMS
+struct __attribute__((__packed__)) s_answer_get_net_params
 {
     float period_fact;
     float U0Hz_A;
@@ -267,11 +269,11 @@ struct __attribute__((__packed__)) sANSWER_GET_NET_PARAMS
 };
 #include "events.h"
 #define MAX_NUM_TRANSFERED_EVENTS (120 / (sizeof(struct sEventRecord)))  //not more than 120 bytes
-struct __attribute__((__packed__)) sCOMMAND_GET_EVENTS
+struct __attribute__((__packed__)) s_command_get_events
 {
     uint64_t afterIndex;
 };
-struct __attribute__((__packed__)) sANSWER_GET_EVENTS
+struct __attribute__((__packed__)) s_answer_get_events
 {
     uint16_t num;
     struct sEventRecord events[MAX_NUM_TRANSFERED_EVENTS];
@@ -304,24 +306,24 @@ enum
     PROTECTION_WARNING_STOP,
     PROTECTION_ERROR_STOP
 };
-#define sCOMMAND_SET_SETTINGS_CALIBRATIONS sANSWER_GET_SETTINGS_CALIBRATIONS
-#define sANSWER_SET_SETTINGS_CALIBRATIONS  sCOMMAND_GET_SETTINGS_CALIBRATIONS
-#define sCOMMAND_SET_SETTINGS_PROTECTION   sANSWER_GET_SETTINGS_PROTECTION
-#define sANSWER_SET_SETTINGS_PROTECTION    sCOMMAND_GET_SETTINGS_PROTECTION
-#define sCOMMAND_SET_SETTINGS_CAPACITORS   sANSWER_GET_SETTINGS_CAPACITORS
-#define sANSWER_SET_SETTINGS_CAPACITORS    sCOMMAND_GET_SETTINGS_CAPACITORS
-#define sCOMMAND_SET_SETTINGS_FILTERS      sANSWER_GET_SETTINGS_FILTERS
-#define sANSWER_SET_SETTINGS_FILTERS       sCOMMAND_GET_SETTINGS_FILTERS
+#define s_command_set_settings_calibrations s_answer_get_settings_calibrations
+#define s_answer_set_settings_calibrations  s_command_get_settings_calibrations
+#define s_command_set_settings_protection   s_answer_get_settings_protection
+#define s_answer_set_settings_protection    s_command_get_settings_protection
+#define s_command_set_settings_capacitors   s_answer_get_settings_capacitors
+#define s_answer_set_settings_capacitors    s_command_get_settings_capacitors
+#define s_command_set_settings_filters      s_answer_get_settings_filters
+#define s_answer_set_settings_filters       s_command_get_settings_filters
 //=============  END COMMANDS  ============================
-int protocol_work(PROTOCOL_CONTEXT *pc);
-void protocol_unknown_command_handle(PROTOCOL_CONTEXT *pc);
-void protocol_init(PROTOCOL_CONTEXT *pc,
+int protocol_work(protocol_context_t *pc);
+void protocol_unknown_command_handle(protocol_context_t *pc);
+void protocol_init(protocol_context_t *pc,
                    enum protocol_mode mode,
                    prot_handler *handlers,
                    unsigned char handlersLen,
                    SciPort *_port);
-void protocol_send_package(PROTOCOL_CONTEXT *pc);
-void protocol_error_handle(PROTOCOL_CONTEXT *pc, unsigned char command);
+void protocol_send_package(protocol_context_t *pc);
+void protocol_error_handle(protocol_context_t *pc, unsigned char command);
 status_t protocol_hw_init(void);
 
 #define package_get_crc(pac)           ((pac)->data[(pac)->fields.len] | ((pac)->data[(pac)->fields.len + 1] << 8))
