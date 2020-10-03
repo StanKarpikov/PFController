@@ -3,13 +3,43 @@
 #include "crc.h"
 #include "stm32f7xx_hal.h"
 #include "main.h"
+#include "BSP/uart.h"
+
 extern UART_HandleTypeDef huart1;
+SciPort port;
+
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart){
+	HAL_UART_DMAStop(huart);
+	HAL_UART_DeInit(huart);
+	HAL_UART_MspDeInit(huart);
+	MX_USART1_UART_Init();
+	memset(port.rx_buffer,0xFF,sizeof(port.rx_buffer));
+	HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
+	HAL_UART_Receive_DMA(huart,(uint8_t*)port.rx_buffer,RX_BUFFER_SIZE);
+	port.rx_readed=0;
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart){
+	HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
+}
+
 void send_packet(uint8_t* data, uint32_t len){
 		HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_SET);
 		if(HAL_UART_Transmit_DMA(&huart1, data ,len) != HAL_OK) {
 			HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
 		};
 }
+
+status_t protocol_hw_init(void)
+{
+	prothandlers_init(&port);
+	memset(port.rx_buffer,0xFF,sizeof(port.rx_buffer));
+	HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
+	HAL_UART_Receive_DMA(&huart1,(uint8_t*)port.rx_buffer,RX_BUFFER_SIZE);
+	port.rx_readed=0;
+}
+
 void protocol_init(PROTOCOL_CONTEXT *pc,
                    enum protocol_mode mode,
                    prot_handler *handlers,

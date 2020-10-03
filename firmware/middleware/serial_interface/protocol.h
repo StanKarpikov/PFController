@@ -2,6 +2,7 @@
 #define __PROTOCOL_H__
 
 #include "defines.h"
+#include "BSP/debug.h"
 
 #define PROTOCOL_MAX_LENGTH  	(216)  // Max data - 210 + 6 service bytes
 #define MIN_PACKET_LEN 				(4)
@@ -60,6 +61,7 @@ typedef union  {
 } PROTOCOL_STATUS;
 #define RX_BUFFER_SIZE (0x3FF)
 #define TX_BUFFER_SIZE (0x3FF)
+
 typedef struct _SciPort {
     unsigned char tx_buffer[TX_BUFFER_SIZE];
     unsigned char tx_index;
@@ -70,6 +72,7 @@ typedef struct _SciPort {
     int rx_readed;    // Позиция для следующего чтения
     unsigned char rx_overflow; // 0 - normal, 1 - rx buffer overflow
 } SciPort;
+
 typedef struct _protocol_context {
     enum protocol_mode mode;
 
@@ -287,7 +290,8 @@ void protocol_init(PROTOCOL_CONTEXT *pc,
 									 SciPort *_port);
 void protocol_send_package(PROTOCOL_CONTEXT *pc);
 void protocol_error_handle(PROTOCOL_CONTEXT *pc, unsigned char command);
-
+status_t protocol_hw_init(void);
+									 
 #define package_get_crc(pac) 	            ((pac)->data[(pac)->fields.len] | ((pac)->data[(pac)->fields.len+1]<<8))
 #define package_calculate_crc(pac)        crc16((pac)->data+1, (pac)->fields.len-1)
 #define package_clear_status(pac) 	      (pac)->fields.status.raw = 0

@@ -1,11 +1,29 @@
+/**
+ * @file adc_logic.c
+ * @author Stanislav Karpikov
+ * @brief ADC support and control module
+ */
+ 
 #include "main.h"
 #include "device.h"
 #include "clogic.h"
 #include "events_process.h"
+#include "adc_logic.h"
+#include "BSP/timer.h"
 
 extern ADC_HandleTypeDef hadc1;
 extern DMA_HandleTypeDef hdma_adc1;
 extern TIM_HandleTypeDef htim1;
+
+status_t adc_start(void)
+{
+	HAL_ADC_Start(&hadc1);
+	HAL_ADC_Start_DMA(&hadc1,(uint32_t*)ADC_DMA_buf,ADC_CHANNEL_NUMBER);
+	
+	timer_start_adc_timer();
+	
+	return PFC_SUCCESS;
+}
 
 uint16_t ADC_DMA_buf[ADC_CHANNEL_NUMBER];
 float adc_values[ADC_CHANNEL_NUMBER+ADC_MATH_NUMBER];
