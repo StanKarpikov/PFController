@@ -10,5 +10,5 @@ void clogic_do(void);
 void clogic_disable_pwm(void);
 void clogic_restore_pwm(void);
 extern uint8_t PWMon;
-	
+
 #endif

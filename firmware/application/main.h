@@ -53,12 +53,9 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "math.h"
-#include "string.h"
 #include "stdbool.h"
+#include "string.h"
 
-
-
-										
 extern uint64_t currentTime;
 /* USER CODE END Includes */
 
@@ -80,7 +77,6 @@ extern uint64_t currentTime;
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
 
 /* Exported functions prototypes ---------------------------------------------*/
-
 
 /* USER CODE BEGIN EFP */
 

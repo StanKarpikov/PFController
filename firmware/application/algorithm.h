@@ -5,4 +5,4 @@
 
 void algorithm_work(void);
 
-#endif //__ALGORITHM_H
+#endif  //__ALGORITHM_H

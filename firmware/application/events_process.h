@@ -1,11 +1,11 @@
 #ifndef __EVENTS_PROCESS_H__
 #define __EVENTS_PROCESS_H__
 
-#include "events.h"
 #include "defines.h"
-#include "protocol.h"
 #include "device.h"
+#include "events.h"
 #include "main.h"
+#include "protocol.h"
 
 #define EVENT_OK 0
 
@@ -40,4 +40,4 @@ void events_check_ct_connection(void);
 void events_autoconfig_error(unsigned char channel, float reactive);
 void events_underdosing_error(unsigned char channel, float compensation_ratio);
 
-#endif	/*__EVENTS_PROCESS_H__ */
+#endif /*__EVENTS_PROCESS_H__ */
