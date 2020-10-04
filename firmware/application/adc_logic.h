@@ -81,5 +81,7 @@ extern float Ic_It_1;
 status_t adc_logic_start(void);
 float adc_get_cap_voltage(void);
 void adc_get_active(float* active);
+void adc_get_active_raw(float* active_raw);
+void adc_get_params(float* U_0Hz, float* I_0Hz, float* U_phase, float* thdu, float* period_fact);
 
 #endif /* _ADC_LOGIC_H */

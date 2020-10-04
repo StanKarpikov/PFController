@@ -82,7 +82,6 @@ typedef struct
 typedef struct
 {
     PROTOCOL_CONTEXT protocol;
-    SETTINGS settings;
     adc_t adc;
 
     ComplexAmpPhase U_50Hz[PFC_NCHAN];
@@ -267,16 +266,22 @@ status_t adc_logic_start(void)
 	return PFC_SUCCESS;
 }
 
-void adc_get_active(float* U_0Hz, float* I_0Hz, float* U_phase, float* thdu)
+void adc_get_params(float* U_0Hz, float* I_0Hz, float* U_phase, float* thdu, float* period_fact)
 {
-		memcpy(U_0Hz, PFC.U_0Hz, sizeof(PFC.U_0Hz));
-		memcpy(I_0Hz, PFC.I_0Hz, sizeof(PFC.I_0Hz));
-		memcpy(U_phase, PFC.U_phase, sizeof(PFC.U_phase));
-		memcpy(thdu, PFC.thdu, sizeof(PFC.thdu));
+		if(U_0Hz)memcpy(U_0Hz, PFC.U_0Hz, sizeof(PFC.U_0Hz));
+		if(I_0Hz)memcpy(I_0Hz, PFC.I_0Hz, sizeof(PFC.I_0Hz));
+		if(U_phase)memcpy(U_phase, PFC.U_phase, sizeof(PFC.U_phase));
+		if(thdu)memcpy(thdu, PFC.thdu, sizeof(PFC.thdu));
+		if(period_fact)*period_fact = PFC.period_fact;
 }
 
 
 void adc_get_active(float* active)
 {
 	if(active)memcpy(active, PFC.adc.active, sizeof(PFC.adc.active));
+}
+
+void adc_get_active_raw(float* active_raw)
+{
+	if(active_raw)memcpy(active_raw, PFC.adc.active_raw, sizeof(PFC.adc.active_raw));
 }

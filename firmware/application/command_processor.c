@@ -27,7 +27,7 @@ static void	protocol_command_get_ac_active(protocol_context_t *pc);
 static void	protocol_command_get_adc_active_raw(protocol_context_t *pc);
 static void	protocol_command_get_oscillog(protocol_context_t *pc);
 static void	protocol_command_get_net_params(protocol_context_t *pc);
-static void	protocol_command_set_settings_calbrations(protocol_context_t *pc);
+static void	protocol_command_set_settings_calibrations(protocol_context_t *pc);
 static void	protocol_command_set_settings_protection(protocol_context_t *pc);
 static void	protocol_command_set_settings_capacitors(protocol_context_t *pc);
 static void	protocol_command_set_settings_filters(protocol_context_t *pc);
@@ -54,7 +54,7 @@ static PFC_COMMAND_CALLBACK handlers_array[]=
 	protocol_command_get_oscillog,
 	protocol_command_get_net_params,
 
-	protocol_command_set_settings_calbrations,
+	protocol_command_set_settings_calibrations,
 	protocol_command_set_settings_protection,
 	protocol_command_set_settings_capacitors,
 	protocol_command_set_settings_filters,
@@ -157,8 +157,6 @@ static void	protocol_command_get_adc_active(protocol_context_t *pc)
 	protocol_send_package(pc); 	
 }
 
-//================================================================================
-
 static void	protocol_command_get_net_params(protocol_context_t *pc)
 {
 	struct s_command_get_net_params *req=0;
@@ -166,26 +164,28 @@ static void	protocol_command_get_net_params(protocol_context_t *pc)
 
 	preprocess_answer((void**)&req, (void**)&pack, pc, sizeof(struct s_answer_get_net_params), PFC_COMMAND_GET_NET_PARAMS);
 	
-	U_0Hz[PFC_NCHAN];
-  I_0Hz[PFC_NCHAN];
-  U_phase[PFC_NCHAN];
-  thdu[PFC_NCHAN];
+	float U_0Hz[PFC_NCHAN]={0};
+  float I_0Hz[PFC_NCHAN]={0};
+  float U_phase[PFC_NCHAN]={0};
+  float thdu[PFC_NCHAN]={0};
+	float period_fact=0;
+	adc_get_params(U_0Hz, I_0Hz, U_phase, thdu, &period_fact);
 	
-	pack->period_fact = PFC.period_fact;
-	pack->U0Hz_A = PFC.U_0Hz[0];  //Постоянная составляющая
-	pack->U0Hz_B = PFC.U_0Hz[1];
-	pack->U0Hz_C = PFC.U_0Hz[2];
-	pack->I0Hz_A = PFC.I_0Hz[0];  //Постоянная составляющая
-	pack->I0Hz_B = PFC.I_0Hz[1];
-	pack->I0Hz_C = PFC.I_0Hz[2];
+	pack->period_fact = period_fact;
+	pack->U0Hz_A = U_0Hz[0];
+	pack->U0Hz_B = U_0Hz[1];
+	pack->U0Hz_C = U_0Hz[2];
+	pack->I0Hz_A = I_0Hz[0];
+	pack->I0Hz_B = I_0Hz[1];
+	pack->I0Hz_C = I_0Hz[2];
 
-	pack->thdu_A = PFC.thdu[0];
-	pack->thdu_B = PFC.thdu[1];
-	pack->thdu_C = PFC.thdu[2];
+	pack->thdu_A = thdu[0];
+	pack->thdu_B = thdu[1];
+	pack->thdu_C = thdu[2];
 
-	pack->U_phase_A = PFC.U_phase[0];
-	pack->U_phase_B = PFC.U_phase[1];
-	pack->U_phase_C = PFC.U_phase[2];
+	pack->U_phase_A = U_phase[0];
+	pack->U_phase_B = U_phase[1];
+	pack->U_phase_C = U_phase[2];
 
 	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_net_params));
 	protocol_send_package(pc); 
@@ -200,26 +200,27 @@ static void	protocol_command_get_adc_active_raw(protocol_context_t *pc)
 
 	preprocess_answer((void**)&req, (void**)&pack, pc, sizeof(struct s_answer_get_adc_active_raw), PFC_COMMAND_GET_ADC_ACTIVE_RAW);
 		
-	pack->ADC_UD = PFC.adc.active_raw[ADC_UD];
-	pack->ADC_U_A = PFC.adc.active_raw[ADC_U_A];
-	pack->ADC_U_B = PFC.adc.active_raw[ADC_U_B];
-	pack->ADC_U_C = PFC.adc.active_raw[ADC_U_C];
-	pack->ADC_I_A = PFC.adc.active_raw[ADC_I_A];
-	pack->ADC_I_B = PFC.adc.active_raw[ADC_I_B];
-	pack->ADC_I_C = PFC.adc.active_raw[ADC_I_C];
-	pack->ADC_I_ET = PFC.adc.active_raw[ADC_I_ET];
-	pack->ADC_I_TEMP1 = PFC.adc.active_raw[ADC_I_TEMP1];
-	pack->ADC_I_TEMP2 = PFC.adc.active_raw[ADC_I_TEMP2];
-	pack->ADC_EMS_A = PFC.adc.active_raw[ADC_EMS_A];
-	pack->ADC_EMS_B = PFC.adc.active_raw[ADC_EMS_B];
-	pack->ADC_EMS_C = PFC.adc.active_raw[ADC_EMS_C];
-	pack->ADC_EMS_I = PFC.adc.active_raw[ADC_EMS_I];
+	float active_raw[ADC_CHANNEL_NUMBER]={0}; 
+	adc_get_active_raw(active_raw);
+		
+	pack->ADC_UD = active_raw[ADC_UD];
+	pack->ADC_U_A = active_raw[ADC_U_A];
+	pack->ADC_U_B = active_raw[ADC_U_B];
+	pack->ADC_U_C = active_raw[ADC_U_C];
+	pack->ADC_I_A = active_raw[ADC_I_A];
+	pack->ADC_I_B = active_raw[ADC_I_B];
+	pack->ADC_I_C = active_raw[ADC_I_C];
+	pack->ADC_I_ET = active_raw[ADC_I_ET];
+	pack->ADC_I_TEMP1 = active_raw[ADC_I_TEMP1];
+	pack->ADC_I_TEMP2 = active_raw[ADC_I_TEMP2];
+	pack->ADC_EMS_A = active_raw[ADC_EMS_A];
+	pack->ADC_EMS_B = active_raw[ADC_EMS_B];
+	pack->ADC_EMS_C = active_raw[ADC_EMS_C];
+	pack->ADC_EMS_I = active_raw[ADC_EMS_I];
 
 	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_adc_active_raw));
 	protocol_send_package(pc); 
 }
-
-//================================================================================
 
 static void	protocol_command_get_work_state(protocol_context_t *pc)
 {
@@ -231,16 +232,40 @@ static void	protocol_command_get_work_state(protocol_context_t *pc)
 	system_set_time(req->currentTime);
 
 	pack->state = pfc_get_state();
-	pack->activeChannels[0] = PFC.settings.PWM.activeChannels[0];
-	pack->activeChannels[1] = PFC.settings.PWM.activeChannels[1];
-	pack->activeChannels[2] = PFC.settings.PWM.activeChannels[2];
+	
+	settings_pwm_t pwm_settings = settings_get_pwm();
+	pack->activeChannels[0] = pwm_settings.activeChannels[0];
+	pack->activeChannels[1] = pwm_settings.activeChannels[1];
+	pack->activeChannels[2] = pwm_settings.activeChannels[2];
 
 	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_work_state));
 	protocol_send_package(pc); 
 }
 
-//================================================================================
-
+static status_t get_date_from_compiler_string(
+		char* date, char* time,
+		uint16_t* DD, uint16_t* MM, uint16_t* YYYY, 
+		uint16_t* HH, uint16_t* MN, uint16_t* SS	
+	)
+{
+	ARGUMENT_ASSERT(date);
+	ARGUMENT_ASSERT(time);
+	ARGUMENT_ASSERT(DD);
+	ARGUMENT_ASSERT(MM);
+	ARGUMENT_ASSERT(YYYY);
+	ARGUMENT_ASSERT(HH);
+	ARGUMENT_ASSERT(MN);
+	ARGUMENT_ASSERT(SS);
+	
+	*DD = 0;
+	if (date[4] >= '0') *DD = (date[4] - '0');
+	*DD = *DD * 10 + (date[5] - '0');
+	*MM = BUILD_MONTH_CH1;
+	*YYYY = (date[7] - '0') * 1000 + (date[8] - '0') * 100 + (date[9] - '0') * 10 + (date[10] - '0');
+	*HH = (time[0] - '0') * 10 + (time[1] - '0');
+	*MN = (time[3] - '0') * 10 + (time[4] - '0');
+	*SS = (time[6] - '0') * 10 + (time[7] - '0');
+}
 
 static void	protocol_command_get_version_info(protocol_context_t *pc)
 {
@@ -254,14 +279,8 @@ static void	protocol_command_get_version_info(protocol_context_t *pc)
 	pack->micro = FW_VERSION_MICRO;
 	pack->build = FW_VERSION_BUILD;
 
-	uint16_t DD = 0;
-	if (__DATE__[4] >= '0') DD = (__DATE__[4] - '0');
-	DD = DD * 10 + (__DATE__[5] - '0');
-	uint16_t MM = BUILD_MONTH_CH1;
-	uint16_t YYYY = (__DATE__[7] - '0') * 1000 + (__DATE__[8] - '0') * 100 + (__DATE__[9] - '0') * 10 + (__DATE__[10] - '0');
-	uint16_t HH = (__TIME__[0] - '0') * 10 + (__TIME__[1] - '0');
-	uint16_t MN = (__TIME__[3] - '0') * 10 + (__TIME__[4] - '0');
-	uint16_t SS = (__TIME__[6] - '0') * 10 + (__TIME__[7] - '0');
+	uint16_t DD=0, MM=0, YYYY=0, HH=0, MN=0, SS=0;
+	get_date_from_compiler_string(__DATE__, __TIME__, &DD, &MM, &YYYY, &HH, &MN, &SS);
 
 	pack->day = DD;
 	pack->month = MM;
@@ -328,11 +347,13 @@ static void	protocol_command_get_settings_calibrations(protocol_context_t *pc)
 
 	preprocess_answer((void**)&req, (void**)&pack, pc, sizeof(struct s_answer_get_settings_calibrations), PFC_COMMAND_GET_SETTINGS_CALIBRATIONS);
 	
+	settings_calibrations_t calibrations = settings_get_calibrations();
+	
 	int i;
 	for (i = 0; i < ADC_CHANNEL_NUMBER; i++)
 	{
-			pack->calibration[i] = PFC.settings.CALIBRATIONS.calibration[i];  //!< Калибровки для каналов
-			pack->offset[i] = PFC.settings.CALIBRATIONS.offset[i];            //!< Смещения для каналов
+			pack->calibration[i] = calibrations.calibration[i];  //!< Калибровки для каналов
+			pack->offset[i] = calibrations.offset[i];            //!< Смещения для каналов
 	}
 
 	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_settings_calibrations));
@@ -341,21 +362,25 @@ static void	protocol_command_get_settings_calibrations(protocol_context_t *pc)
 
 //================================================================================
 
-static void	protocol_command_set_settings_calbrations(protocol_context_t *pc)
+static void	protocol_command_set_settings_calibrations(protocol_context_t *pc)
 {
-	struct s_command_set_settings_calbrations *req=0;
-	struct s_answer_set_settings_calbrations *pack=0;
+	struct s_command_set_settings_calibrations *req=0;
+	struct s_answer_set_settings_calibrations *pack=0;
 
-	preprocess_answer((void**)&req, (void**)&pack, pc, sizeof(struct s_answer_set_settings_calbrations), PFC_COMMAND_SET_SETTINGS_CALIBRATIONS);
+	preprocess_answer((void**)&req, (void**)&pack, pc, sizeof(struct s_answer_set_settings_calibrations), PFC_COMMAND_SET_SETTINGS_CALIBRATIONS);
+	
+	settings_calibrations_t calibrations = settings_get_calibrations();
 	
 	int i;
 	for (i = 0; i < ADC_CHANNEL_NUMBER; i++)
 	{
-			PFC.settings.CALIBRATIONS.calibration[i] = req->calibration[i];  //!< Калибровки для каналов
-			PFC.settings.CALIBRATIONS.offset[i] = req->offset[i];            //!< Смещения для каналов
+			calibrations.calibration[i] = req->calibration[i];  //!< Калибровки для каналов
+			calibrations.offset[i] = req->offset[i];            //!< Смещения для каналов
 	}
+	
+	settings_set_calibrations(calibrations);
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_set_settings_calbrations));
+	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_set_settings_calibrations));
 	protocol_send_package(pc); 
 }
 
@@ -367,15 +392,17 @@ static void	protocol_command_get_settings_protection(protocol_context_t *pc)
 
 	preprocess_answer((void**)&req, (void**)&pack, pc, sizeof(struct s_answer_get_settings_protection), PFC_COMMAND_GET_SETTINGS_PROTECTION);
 	
-	pack->Ud_min = PFC.settings.PROTECTION.Ud_min;            //!< Граничные значения для Ud
-	pack->Ud_max = PFC.settings.PROTECTION.Ud_max;            //!< Граничные значения для Ud
-	pack->temperature = PFC.settings.PROTECTION.temperature;  //!< Граничные значения для Температуры
-	pack->U_min = PFC.settings.PROTECTION.U_min;              //!< Граничные значения для напряжения
-	pack->U_max = PFC.settings.PROTECTION.U_max;
-	pack->Fnet_min = PFC.settings.PROTECTION.Fnet_min;      //!< минимальная частота сети
-	pack->Fnet_max = PFC.settings.PROTECTION.Fnet_max;      //!< максимальная частота сети
-	pack->I_max_rms = PFC.settings.PROTECTION.I_max_rms;    //!< Максимальное граничное значение тока фильтра по RMS
-	pack->I_max_peak = PFC.settings.PROTECTION.I_max_peak;  //!< Максимальное граничное мгновенное значение тока фильтра
+	settings_protection_t protection = settings_get_protection();
+	
+	pack->Ud_min = protection.Ud_min;            //!< Граничные значения для Ud
+	pack->Ud_max = protection.Ud_max;            //!< Граничные значения для Ud
+	pack->temperature = protection.temperature;  //!< Граничные значения для Температуры
+	pack->U_min = protection.U_min;              //!< Граничные значения для напряжения
+	pack->U_max = protection.U_max;
+	pack->Fnet_min = protection.Fnet_min;      //!< минимальная частота сети
+	pack->Fnet_max = protection.Fnet_max;      //!< максимальная частота сети
+	pack->I_max_rms = protection.I_max_rms;    //!< Максимальное граничное значение тока фильтра по RMS
+	pack->I_max_peak = protection.I_max_peak;  //!< Максимальное граничное мгновенное значение тока фильтра
 
 	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_settings_protection));
 	protocol_send_package(pc); 
@@ -390,15 +417,19 @@ static void	protocol_command_set_settings_protection(protocol_context_t *pc)
 
 	preprocess_answer((void**)&req, (void**)&pack, pc, sizeof(struct s_answer_set_settings_protection), PFC_COMMAND_SET_SETTINGS_PROTECTION);
 	
-	PFC.settings.PROTECTION.Ud_min = req->Ud_min;            //!< Граничные значения для Ud
-	PFC.settings.PROTECTION.Ud_max = req->Ud_max;            //!< Граничные значения для Ud
-	PFC.settings.PROTECTION.temperature = req->temperature;  //!< Граничные значения для Температуры
-	PFC.settings.PROTECTION.U_min = req->U_min;              //!< Граничные значения для напряжения
-	PFC.settings.PROTECTION.U_max = req->U_max;
-	PFC.settings.PROTECTION.Fnet_min = req->Fnet_min;      //!< минимальная частота сети
-	PFC.settings.PROTECTION.Fnet_max = req->Fnet_max;      //!< максимальная частота сети
-	PFC.settings.PROTECTION.I_max_rms = req->I_max_rms;    //!< Максимальное граничное значение тока фильтра по RMS
-	PFC.settings.PROTECTION.I_max_peak = req->I_max_peak;  //!< Максимальное граничное мгновенное значение тока фильтра
+	settings_protection_t protection = settings_get_protection();
+	
+	protection.Ud_min = req->Ud_min;            //!< Граничные значения для Ud
+	protection.Ud_max = req->Ud_max;            //!< Граничные значения для Ud
+	protection.temperature = req->temperature;  //!< Граничные значения для Температуры
+	protection.U_min = req->U_min;              //!< Граничные значения для напряжения
+	protection.U_max = req->U_max;
+	protection.Fnet_min = req->Fnet_min;      //!< минимальная частота сети
+	protection.Fnet_max = req->Fnet_max;      //!< максимальная частота сети
+	protection.I_max_rms = req->I_max_rms;    //!< Максимальное граничное значение тока фильтра по RMS
+	protection.I_max_peak = req->I_max_peak;  //!< Максимальное граничное мгновенное значение тока фильтра
+	
+	settings_set_protection(protection);
 
 	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_set_settings_protection));
 	protocol_send_package(pc); 
@@ -412,11 +443,13 @@ static void	protocol_command_get_settings_capacitors(protocol_context_t *pc)
 
 	preprocess_answer((void**)&req, (void**)&pack, pc, sizeof(struct s_answer_get_settings_capacitors), PFC_COMMAND_GET_SETTINGS_CAPACITORS);
 	
-	pack->ctrlUd_Kp = PFC.settings.CAPACITORS.ctrlUd_Kp;
-	pack->ctrlUd_Ki = PFC.settings.CAPACITORS.ctrlUd_Ki;
-	pack->ctrlUd_Kd = PFC.settings.CAPACITORS.ctrlUd_Kd;
-	pack->Ud_nominal = PFC.settings.CAPACITORS.Ud_nominal;
-	pack->Ud_precharge = PFC.settings.CAPACITORS.Ud_precharge;
+	settings_capacitors_t capacitors = settings_get_capacitors();
+	
+	pack->ctrlUd_Kp = capacitors.ctrlUd_Kp;
+	pack->ctrlUd_Ki = capacitors.ctrlUd_Ki;
+	pack->ctrlUd_Kd = capacitors.ctrlUd_Kd;
+	pack->Ud_nominal = capacitors.Ud_nominal;
+	pack->Ud_precharge = capacitors.Ud_precharge;
 
 	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_settings_capacitors));
 	protocol_send_package(pc); 
@@ -430,11 +463,15 @@ static void	protocol_command_set_settings_capacitors(protocol_context_t *pc)
 
 	preprocess_answer((void**)&req, (void**)&pack, pc, sizeof(struct s_answer_set_settings_capacitors), PFC_COMMAND_SET_SETTINGS_CAPACITORS);
 	
-	PFC.settings.CAPACITORS.ctrlUd_Kp = req->ctrlUd_Kp;
-	PFC.settings.CAPACITORS.ctrlUd_Ki = req->ctrlUd_Ki;
-	PFC.settings.CAPACITORS.ctrlUd_Kd = req->ctrlUd_Kd;
-	PFC.settings.CAPACITORS.Ud_nominal = req->Ud_nominal;
-	PFC.settings.CAPACITORS.Ud_precharge = req->Ud_precharge;
+	settings_capacitors_t capacitors = settings_get_capacitors();
+	
+	capacitors.ctrlUd_Kp = req->ctrlUd_Kp;
+	capacitors.ctrlUd_Ki = req->ctrlUd_Ki;
+	capacitors.ctrlUd_Kd = req->ctrlUd_Kd;
+	capacitors.Ud_nominal = req->Ud_nominal;
+	capacitors.Ud_precharge = req->Ud_precharge;
+	
+	settings_set_capacitors(capacitors);
 
 	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_set_settings_capacitors));
 	protocol_send_package(pc); 
@@ -448,9 +485,12 @@ static void	protocol_command_get_settings_filters(protocol_context_t *pc)
 
 	preprocess_answer((void**)&req, (void**)&pack, pc, sizeof(struct s_answer_get_settings_filters), PFC_COMMAND_GET_SETTINGS_FILTERS);
 	
-	pack->K_I = PFC.settings.FILTERS.K_I;
-	pack->K_U = PFC.settings.FILTERS.K_U;
-	pack->K_UD = PFC.settings.FILTERS.K_UD;
+	settings_filters_t filters = settings_get_filters();
+	
+	pack->K_I = filters.K_I;
+	pack->K_U = filters.K_U;
+	pack->K_UD = filters.K_UD;
+	
 
 	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_settings_filters));
 	protocol_send_package(pc); 
@@ -464,9 +504,13 @@ static void	protocol_command_set_settings_filters(protocol_context_t *pc)
 
 	preprocess_answer((void**)&req, (void**)&pack, pc, sizeof(struct s_answer_set_settings_filters), PFC_COMMAND_SET_SETTINGS_FILTERS);
 	
-	PFC.settings.FILTERS.K_I = req->K_I;
-	PFC.settings.FILTERS.K_U = req->K_U;
-	PFC.settings.FILTERS.K_UD = req->K_UD;
+	settings_filters_t filters = settings_get_filters();
+	
+	filters.K_I = req->K_I;
+	filters.K_U = req->K_U;
+	filters.K_UD = req->K_UD;
+	
+	settings_set_filters(filters);
 
 	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_set_settings_filters));
 	protocol_send_package(pc); 

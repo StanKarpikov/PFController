@@ -3,6 +3,7 @@
 
 #include "BSP/debug.h"
 #include "defines.h"
+#include "adc_logic.h"
 
 #define PROTOCOL_MAX_LENGTH (216)  // Max data - 210 + 6 service bytes
 #define MIN_PACKET_LEN      (4)
@@ -306,6 +307,7 @@ enum
     PROTECTION_WARNING_STOP,
     PROTECTION_ERROR_STOP
 };
+
 #define s_command_set_settings_calibrations s_answer_get_settings_calibrations
 #define s_answer_set_settings_calibrations  s_command_get_settings_calibrations
 #define s_command_set_settings_protection   s_answer_get_settings_protection
