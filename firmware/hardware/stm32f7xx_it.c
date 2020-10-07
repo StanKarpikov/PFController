@@ -10,7 +10,6 @@
 
 #include "stdint.h"
 #include "stm32f7xx.h"
-#include "stm32f7xx_it.h"
 #include "string.h"
 
 #include "BSP/gpio.h"
@@ -21,6 +20,11 @@
                        PRIVATE FUNCTIONS
 --------------------------------------------------------------*/
 
+/**
+ * @brief  Extract registers from the stack and print the contents
+ * 
+ * @stack_address  Address of the stack
+ */
 void get_registers_from_stack(uint32_t* stack_address)
 {
 
@@ -166,15 +170,19 @@ void get_registers_from_stack(uint32_t* stack_address)
 
     BREAKPOINT();
 
+		/*
 		for(volatile int i=0;i<0xFFFFFFF;i++);
-		// USER CODE END HardFault_IRQn 0 
 		NVIC_SystemReset();
+		*/
 }
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
+/**
+ * @brief Hard fault interrupt handler 
+ */
 __asm void HardFault_Handler(void)
 {
     tst lr, #4

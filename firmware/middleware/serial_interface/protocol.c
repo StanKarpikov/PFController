@@ -33,13 +33,18 @@
 --------------------------------------------------------------*/
 
 static protocol_context_t protocol;
-extern UART_HandleTypeDef huart1;
 static SciPort port;
 
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS
 --------------------------------------------------------------*/
 
+/**
+ * @brief Send a packet to the interface
+ * 
+ * @data Pointer to the data block
+ * @len  Data block size
+ */
 static void send_packet(uint8_t *data, uint32_t len)
 {
 	uart_interface_transmit(data, len);

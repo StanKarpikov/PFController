@@ -23,7 +23,9 @@
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
+#if defined(ENABLE_WATCHDOG)
 static IWDG_HandleTypeDef hiwdg;
+#endif
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS

@@ -402,11 +402,6 @@
               <FileType>1</FileType>
               <FilePath>..\hardware\stm32f7xx_it.c</FilePath>
             </File>
-            <File>
-              <FileName>stm32f7xx_it.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\hardware\stm32f7xx_it.h</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
