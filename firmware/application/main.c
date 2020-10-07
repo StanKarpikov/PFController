@@ -40,8 +40,6 @@ int main(void)
 {
     system_init();
 
-    EEPROMClass();
-
     ReadSettings();
 
     /* Initialize all peripherals */

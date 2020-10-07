@@ -37,4 +37,12 @@
 
 #define MATH_PI (3.141592653589793)
 
+/*--------------------------------------------------------------
+											PUBLIC DEFINES::EEPROM
+--------------------------------------------------------------*/
+
+#define EEPROM_START_ADDRESS  ((uint32_t)(0x08180000))
+#define EEPROM_PAGE0_SECTOR (FLASH_SECTOR_12)
+#define EEPROM_PAGE1_SECTOR (FLASH_SECTOR_13)
+
 #endif

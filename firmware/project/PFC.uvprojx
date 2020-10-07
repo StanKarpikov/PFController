@@ -563,6 +563,11 @@
               <FilePath>..\application\adc_logic.c</FilePath>
             </File>
             <File>
+              <FileName>adc_logic.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\application\adc_logic.h</FilePath>
+            </File>
+            <File>
               <FileName>pfc_logic.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\pfc_logic.c</FilePath>
@@ -621,11 +626,6 @@
               <FileName>settings.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\application\settings.h</FilePath>
-            </File>
-            <File>
-              <FileName>adc_logic.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\application\adc_logic.h</FilePath>
             </File>
           </Files>
         </Group>

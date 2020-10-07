@@ -1,9 +1,38 @@
+/**
+ * @file events_process.c
+ * @author Stanislav Karpikov
+ * @brief Process events (status, warnings, errors, faults)
+ */
+
+/*--------------------------------------------------------------
+                       INCLUDE
+--------------------------------------------------------------*/
+
 #include "events_process.h"
 #include "pfc_logic.h"
 #include "math.h"
 
+/*--------------------------------------------------------------
+                       DEFINES
+--------------------------------------------------------------*/
+
+#define EVENT_OK (0)
 #define ADC_MARGIN                  (100)
 #define IS_ADC_VALUE_NEAR_BOUNDS(x) ((x) > (4095 - ADC_MARGIN) || (x) < ADC_MARGIN)
+
+#undef ONLY_A_CHANNEL /**< Define to test work only on one channel */
+
+#define SQRT_OF_2             (1 / 1.4142135623730950488016887242097)
+#define RMS_TO_INSTANT_SIN(r) ((r)*SQRT_OF_2)
+
+/*--------------------------------------------------------------
+                       PRIVATE DATA
+--------------------------------------------------------------*/
+
+static uint16_t CT_overloadTicks[ADC_EMS_I + 1]={0};
+static uint16_t overUDTicks;
+
+uint16_t overVoltageTicks[PFC_NCHAN] = {0, 0, 0};
 
 #ifdef ONLY_A_CHANNEL
 uint16_t passingADCChannels[] = {
@@ -21,14 +50,23 @@ uint16_t passingADCChannels[] = {
     1,  // ADC_UD_1;
     1   // ADC_UD_2;
 };
+#endif
 
-inline uint16_t isPassADCChannel(uint16_t channel)
+/*--------------------------------------------------------------
+                       PRIVATE FUNCTIONS
+--------------------------------------------------------------*/
+
+#ifdef ONLY_A_CHANNEL
+static inline uint16_t isPassADCChannel(uint16_t channel)
 {
     return !(passingADCChannels[channel]);
 }
 #endif
 
-uint16_t CT_overloadTicks[ADC_EMS_I + 1];
+/*--------------------------------------------------------------
+                       PUBLIC FUNCTIONS
+--------------------------------------------------------------*/
+
 char events_was_CT_overload(float *adc_values)
 {
     char i;
@@ -60,7 +98,6 @@ char events_was_CT_overload(float *adc_values)
     return was_ovrld;
 }
 
-uint16_t overUDTicks;
 int events_check_Ud(float Ud)
 {
     if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return 0;
@@ -132,10 +169,6 @@ void events_check_voltage_RMS(void)
     }
 }
 
-#define SQRT_OF_2             (1 / 1.4142135623730950488016887242097)
-#define RMS_TO_INSTANT_SIN(r) ((r)*SQRT_OF_2)
-
-uint16_t overVoltageTicks[PFC_NCHAN] = {0, 0, 0};
 void events_check_overvoltage_transient(float *U)
 {
     int channel;
@@ -249,4 +282,47 @@ void events_check_period(unsigned int period_length)
 					PFC.U_50Hz[0].phase
 				);
 	}*/
+}
+
+void events_check_voltage_rms(void)
+{
+	/* TODO: Implement the check */
+}
+
+void events_check_supply(void)
+{
+	/* TODO: Implement the check */
+}
+
+
+void events_check_voltage_phase_rotation(void)
+{
+	/* TODO: Implement the check */
+}
+
+
+void events_check_loading_current(void)
+{
+	/* TODO: Implement the check */
+}
+
+void events_preload_start(void)
+{
+	/* TODO: Implement the check */
+}
+
+
+void events_preload_stop(void)
+{
+	/* TODO: Implement the check */
+}
+
+void events_preload_is_started(void)
+{
+	/* TODO: Implement the check */
+}
+
+void events_check_preload(void)
+{
+	/* TODO: Implement the check */
 }

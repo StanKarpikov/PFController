@@ -32,7 +32,7 @@ static int EEPROM_ReadSettings(SETTINGS *settings)
 
     for (int ADDR = 0; ADDR < sizeof(SETTINGS) / 2; ADDR++)
     {
-        if (EEPROM_OK != EEreadB(ADDR, &mem[ADDR])) return -1;
+        if (EEPROM_OK != eeprom_read_variable(ADDR, &mem[ADDR])) return -1;
     }
     memcpy(settings, mem, sizeof(SETTINGS));
     if (settings->magic != MAGIC_2BYTE) return -1;
@@ -76,7 +76,7 @@ static int EEPROM_WriteSettings(SETTINGS *settings)
     for (int ADDR = 0; ADDR < sizeof(SETTINGS) / 2; ADDR++)
     {
         DATA = mem[ADDR];
-        if (EEPROM_OK != EEwrite(ADDR, DATA)) return -1;
+        if (EEPROM_OK != eeprom_update_variable(ADDR, DATA)) return -1;
     }
     return 1;
 }

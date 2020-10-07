@@ -1,7 +1,7 @@
 /**
  * @file events.c
  * @author Stanislav Karpikov
- * @brief Process events (status, warnings, errors, faults)
+ * @brief Events management (status, warnings, errors, faults)
  */
 
 /*--------------------------------------------------------------
