@@ -1,11 +1,29 @@
+/**
+ * @file events.h
+ * @author Stanislav Karpikov
+ * @brief Process events (status, warnings, errors, faults)
+ */
+ 
 #ifndef EVENTS_H_
 #define EVENTS_H_
 
+/*--------------------------------------------------------------
+                       INCLUDE
+--------------------------------------------------------------*/
+
 #include "stdint.h"
+
+/*--------------------------------------------------------------
+                       DEFINES
+--------------------------------------------------------------*/
 
 #define EVENTS_RECORDS_NUM 0x3F
 
-struct __attribute__((__packed__)) sEventRecord
+/*--------------------------------------------------------------
+                       PUBLIC TYPES
+--------------------------------------------------------------*/
+
+struct __attribute__((__packed__)) event_record_s
 {
     uint64_t unixTime_s_ms;
 
@@ -13,6 +31,7 @@ struct __attribute__((__packed__)) sEventRecord
     uint32_t info;
     float value;
 };
+
 typedef enum
 {
     EVENT_TYPE_POWER,
@@ -21,15 +40,12 @@ typedef enum
     EVENT_TYPE_EVENT
 }event_type_t;
 
-extern struct sEventRecord newevent;
+/*--------------------------------------------------------------
+                       PUBLIC FUNCTIONS
+--------------------------------------------------------------*/
 
-void NEWEVENT(event_type_t MAIN, uint32_t SUB, uint32_t INFO, float VALUE);
-
-extern struct sEventRecord events[EVENTS_RECORDS_NUM + 1];
-extern uint16_t eventsIN, eventsOUT, eventsNUM;
-
-void EventsClear(void);
-void EventsAdd(struct sEventRecord* event);
-uint16_t EventsGet(uint64_t afterIndex, uint16_t num, struct sEventRecord* buf);
+void events_new_event(event_type_t main, uint32_t sub, uint32_t info, float value);
+void events_clear(void);
+uint16_t events_get(uint64_t after_index, uint16_t num, struct event_record_s* buf);
 
 #endif /* EVENTS_H_ */

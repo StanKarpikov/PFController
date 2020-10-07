@@ -1,3 +1,13 @@
+/**
+ * @file events.c
+ * @author Stanislav Karpikov
+ * @brief Process events (status, warnings, errors, faults)
+ */
+
+/*--------------------------------------------------------------
+                       INCLUDE
+--------------------------------------------------------------*/
+
 #include "events.h"
 
 #include "pfc_logic.h"
@@ -5,39 +15,23 @@
 #include "BSP/system.h"
 #include "string.h"
 
-#define EVENTS_REPEAT_TIME 2000
-struct sEventRecord events[EVENTS_RECORDS_NUM + 1];
-struct sEventRecord newevent;
+/*--------------------------------------------------------------
+                       DEFINES
+--------------------------------------------------------------*/
 
-uint16_t eventsIN = 0, eventsOUT = 0, eventsNUM = 0;
-uint32_t lastEventTime[SUB_EVENT_TYPE_PROTECTION_IGBT + 1][ADC_CHANNEL_NUMBER];
+#define EVENTS_REPEAT_TIME (2000)
 
-void NEWEVENT(event_type_t MAIN, uint32_t SUB, uint32_t INFO, float VALUE)
-{                              
-		newevent.unixTime_s_ms = system_get_time();                               
-		newevent.type = (MAIN) | (((uint32_t)SUB) << 16); 
-		newevent.info = INFO;                             
-		newevent.value = VALUE;                           
-		EventsAdd(&newevent);                             
-}
+/*--------------------------------------------------------------
+                       PRIVATE DATA
+--------------------------------------------------------------*/
 
+static struct event_record_s events[EVENTS_RECORDS_NUM + 1]={0};
 
-void EventsClear()
-{
-    DINT;
-    int i = 0;
-    for (i = 0; i < EVENTS_RECORDS_NUM; i++)
-    {
-        events[i].unixTime_s_ms = 0;
-    }
-    eventsIN = 0;
-    eventsOUT = 0;
-    eventsNUM = 0;
-    memset(lastEventTime, 0, sizeof(lastEventTime));
-    EINT;
-}
+static uint16_t events_in = 0;
+static uint16_t events_out = 0;
+static uint32_t lastEventTime[SUB_EVENT_TYPE_PROTECTION_IGBT + 1][ADC_CHANNEL_NUMBER]={0};
 
-uint16_t ProtectionLevels[] = {
+static const uint16_t ProtectionLevels[] = {
     PROTECTION_WARNING_STOP,  //SUB_EVENT_TYPE_PROTECTION_UD_MIN
     PROTECTION_ERROR_STOP,    //SUB_EVENT_TYPE_PROTECTION_UD_MAX
     PROTECTION_ERROR_STOP,    //SUB_EVENT_TYPE_PROTECTION_TEMPERATURE
@@ -52,7 +46,26 @@ uint16_t ProtectionLevels[] = {
     PROTECTION_WARNING_STOP,  //SUB_EVENT_TYPE_PROTECTION_BAD_SYNC
     PROTECTION_ERROR_STOP     //SUB_EVENT_TYPE_PROTECTION_IGBT
 };
-inline void CheckEvents(uint16_t subtype, uint32_t info)
+
+/*--------------------------------------------------------------
+                       PRIVATE FUNCTIONS
+--------------------------------------------------------------*/
+
+static void events_lock(void)
+{
+	DINT;
+}
+
+static void events_unlock(void)
+{
+	EINT;
+}
+
+/*--------------------------------------------------------------
+                       PRIVATE FUNCTIONS
+--------------------------------------------------------------*/
+
+static void events_check(uint16_t subtype, uint32_t info)
 {
     switch (ProtectionLevels[subtype])
     {
@@ -72,58 +85,87 @@ inline void CheckEvents(uint16_t subtype, uint32_t info)
             break;
     }
 }
-void EventsAdd(struct sEventRecord* event)
+
+static void events_add(struct event_record_s* event)
 {
     if ((event->type & 0xFFFF) == EVENT_TYPE_PROTECTION)
     {
         uint16_t subtype = (event->type >> 16) & 0xFFFF;
-        CheckEvents(subtype, event->info);
-        DINT;
+        events_check(subtype, event->info);
+        events_lock();
         if ((system_get_time() - lastEventTime[subtype][event->info]) < EVENTS_REPEAT_TIME)
         {
-            EINT;
+            events_unlock();
             return;
         }
-        EINT;
+        events_unlock();
         lastEventTime[subtype][event->info] = system_get_time();
     }
 
-    DINT;
-    events[eventsIN] = *event;
+    events_lock();
+    events[events_in] = *event;
 
-    eventsIN++;
-    eventsIN &= EVENTS_RECORDS_NUM;
+    events_in++;
+    events_in &= EVENTS_RECORDS_NUM;
 
-    if (eventsIN == eventsOUT)
+    if (events_in == events_out)
     {
-        eventsOUT++;
-        eventsOUT &= EVENTS_RECORDS_NUM;
+        events_out++;
+        events_out &= EVENTS_RECORDS_NUM;
     }
-    EINT;
+    events_unlock();
 }
 
-uint16_t EventsGet(uint64_t afterIndex, uint16_t num, struct sEventRecord* buf)
+/*--------------------------------------------------------------
+                       PUBLIC FUNCTIONS
+--------------------------------------------------------------*/
+
+void events_new_event(event_type_t main, uint32_t sub, uint32_t info, float value)
+{                              
+	  struct event_record_s newevent={0};
+		newevent.unixTime_s_ms = system_get_time();                               
+		newevent.type = (main) | (((uint32_t)sub) << 16); 
+		newevent.info = info;                             
+		newevent.value = value;                           
+		events_add(&newevent);                             
+}
+
+void events_clear(void)
+{
+    events_lock();
+    int i = 0;
+    for (i = 0; i < EVENTS_RECORDS_NUM; i++)
+    {
+        events[i].unixTime_s_ms = 0;
+    }
+    events_in = 0;
+    events_out = 0;
+    memset(lastEventTime, 0, sizeof(lastEventTime));
+    events_unlock();
+}
+
+uint16_t events_get(uint64_t after_index, uint16_t num, struct event_record_s* buf)
 {
     uint16_t count = 0;
-    DINT;
-    uint16_t eOUT = eventsOUT;
-    while (eOUT != eventsIN)
+    events_lock();
+    uint16_t ev_out = events_out;
+    while (ev_out != events_in)
     {
-        if (events[eOUT].unixTime_s_ms >= afterIndex)
+        if (events[ev_out].unixTime_s_ms >= after_index)
         {
-            memcpy(buf, &events[eOUT], sizeof(struct sEventRecord));
+            memcpy(buf, &events[ev_out], sizeof(struct event_record_s));
             buf++;
-            afterIndex = events[eOUT].unixTime_s_ms;
+            after_index = events[ev_out].unixTime_s_ms;
             count++;
             if (count >= num)
             {
-                EINT;
+                events_unlock();
                 return count;
             }
         }
-        eOUT++;
-        eOUT &= EVENTS_RECORDS_NUM;
+        ev_out++;
+        ev_out &= EVENTS_RECORDS_NUM;
     }
-    EINT;
+    events_unlock();
     return count;
 }

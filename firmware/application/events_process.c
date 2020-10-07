@@ -45,7 +45,7 @@ char events_was_CT_overload(float *adc_values)
             CT_overloadTicks[i]++;
             if (CT_overloadTicks[i] > 3)
             {
-                NEWEVENT(EVENT_TYPE_PROTECTION,
+                events_new_event(EVENT_TYPE_PROTECTION,
                          SUB_EVENT_TYPE_PROTECTION_ADC_OVERLOAD,
                          i,
                          adc_values[i]);
@@ -70,7 +70,7 @@ int events_check_Ud(float Ud)
         overUDTicks++;
         if (overUDTicks > 3)
         {
-            NEWEVENT(
+            events_new_event(
                 EVENT_TYPE_PROTECTION,
                 SUB_EVENT_TYPE_PROTECTION_UD_MAX,
                 0,
@@ -83,7 +83,7 @@ int events_check_Ud(float Ud)
     }
     if (pfc_get_state() >= PFC_STATE_CHARGE && Ud < protection.Ud_min)
     {
-        NEWEVENT(
+        events_new_event(
             EVENT_TYPE_PROTECTION,
             SUB_EVENT_TYPE_PROTECTION_UD_MIN,
             0,
@@ -100,7 +100,7 @@ void events_check_temperature(void)
 		settings_protection_t protection = settings_get_protection();
     if (temperature > protection.temperature /* TEMPERATURE_HW_MAX */)
     {
-        NEWEVENT(
+        events_new_event(
             EVENT_TYPE_PROTECTION,
             SUB_EVENT_TYPE_PROTECTION_TEMPERATURE,
             0,
@@ -123,7 +123,7 @@ void events_check_voltage_RMS(void)
 #endif
         if (active[ADC_U_A + i] < protection.U_min)
         {
-            NEWEVENT(
+            events_new_event(
                 EVENT_TYPE_PROTECTION,
                 SUB_EVENT_TYPE_PROTECTION_U_MIN,
                 i,
@@ -152,7 +152,7 @@ void events_check_overvoltage_transient(float *U)
             overVoltageTicks[channel]++;
             if (overVoltageTicks[channel] > 3)
             {
-                NEWEVENT(
+                events_new_event(
                     EVENT_TYPE_PROTECTION,
                     SUB_EVENT_TYPE_PROTECTION_U_MAX,
                     channel,
@@ -181,7 +181,7 @@ int events_check_overcurrent_rms(void)
 #endif
         if (active[ADC_I_A + i] > protection.I_max_rms)
         {
-            NEWEVENT(
+            events_new_event(
                 EVENT_TYPE_PROTECTION,
                 SUB_EVENT_TYPE_PROTECTION_IAFG_MAX_RMS,
                 i,
@@ -205,7 +205,7 @@ int events_check_overcurrent_peak(float *IPFC)
 #endif
         if (fabs(IPFC[channel]) > protection.I_max_peak)
         {
-            NEWEVENT(
+            events_new_event(
                 EVENT_TYPE_PROTECTION,
                 SUB_EVENT_TYPE_PROTECTION_IAFG_MAX_PEAK,
                 channel,
@@ -226,7 +226,7 @@ void events_check_period(unsigned int period_length)
 	
     if (freq > protection.Fnet_max)
     {
-        NEWEVENT(
+        events_new_event(
             EVENT_TYPE_PROTECTION,
             SUB_EVENT_TYPE_PROTECTION_F_MAX,
             0,
@@ -234,7 +234,7 @@ void events_check_period(unsigned int period_length)
     }
     if (freq < protection.Fnet_min)
     {
-        NEWEVENT(
+        events_new_event(
             EVENT_TYPE_PROTECTION,
             SUB_EVENT_TYPE_PROTECTION_F_MIN,
             0,
@@ -242,7 +242,7 @@ void events_check_period(unsigned int period_length)
     } 
 		/*TODO: Check the nesessity of the U_50Hz verification
 	if(pfc_get_state()>=PFC_STATE_PRECHARGE_PREPARE && fabs(PFC.U_50Hz[0].phase-MATH_PI/2)>0.1){
-		NEWEVENT(
+		events_new_event(
 					EVENT_TYPE_PROTECTION,
 					SUB_EVENT_TYPE_PROTECTION_BAD_SYNC,
 					0,

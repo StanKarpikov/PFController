@@ -273,7 +273,7 @@ static void pfc_charge_process(void)
 	/*
 	TODO: Check the charge
 	if (adc_get_cap_voltage() < (PFC.settings.CAPACITORS.Ud_precharge*0.8)){//TODO:
-		NEWEVENT(
+		events_new_event(
 				EVENT_TYPE_PROTECTION,
 				SUB_EVENT_TYPE_PROTECTION_UD_MIN,
 				0,
@@ -379,7 +379,7 @@ void pfc_process(void)
        
     if (pfc_get_state() != last_status)
     {
-        NEWEVENT(EVENT_TYPE_CHANGESTATE, pfc_get_state(), 0, 0);
+        events_new_event(EVENT_TYPE_CHANGESTATE, pfc_get_state(), 0, 0);
     }
     last_status = pfc_get_state();
     period_counter++;

@@ -524,7 +524,7 @@ static void	protocol_command_get_events(void *pc)
 
 	preprocess_answer((void**)&req, (void**)&pack, pc, sizeof(struct s_answer_get_events), PFC_COMMAND_GET_EVENTS);
 	
-	pack->num = EventsGet(req->afterIndex, MAX_NUM_TRANSFERED_EVENTS, pack->events);
+	pack->num = events_get(req->after_index, MAX_NUM_TRANSFERED_EVENTS, pack->events);
 
 	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_get_events));
 	protocol_send_package(pc); 
