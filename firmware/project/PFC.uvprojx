@@ -563,16 +563,6 @@
               <FilePath>..\application\adc_logic.c</FilePath>
             </File>
             <File>
-              <FileName>algorithm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\algorithm.c</FilePath>
-            </File>
-            <File>
-              <FileName>algorithm.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\application\algorithm.h</FilePath>
-            </File>
-            <File>
               <FileName>pfc_logic.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\pfc_logic.c</FilePath>

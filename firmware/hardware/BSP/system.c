@@ -60,7 +60,10 @@ void system_set_time(uint64_t time)
 
 uint64_t system_get_time(void)
 {
-	return current_time;
+	DINT;
+	uint64_t time = current_time;
+	EINT;
+	return time;
 }
 
 status_t system_delay_ticks(uint32_t delay_ticks)

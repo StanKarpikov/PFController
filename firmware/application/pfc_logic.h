@@ -56,5 +56,7 @@ typedef enum
 status_t pfc_apply_command(pfc_commands_t command, uint32_t data);
 void pfc_process(void);
 pfc_state_t pfc_get_state(void);
+void pfc_faultblock(void);
+uint8_t pfc_is_pwm_on(void);
 
 #endif /* _PFC_LOGIC_H */

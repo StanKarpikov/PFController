@@ -16,40 +16,39 @@
 #include "adc_logic.h"
 #include "events.h"
 #include "fw_ver.h"
+#include "string.h"
 
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS PROTOTYPES
 --------------------------------------------------------------*/
 
-static void	protocol_command_test(protocol_context_t *pc);
-static void	protocol_command_switch_on_off(protocol_context_t *pc);
-static void	protocol_command_get_ac_active(protocol_context_t *pc);
-static void	protocol_command_get_adc_active_raw(protocol_context_t *pc);
-static void	protocol_command_get_oscillog(protocol_context_t *pc);
-static void	protocol_command_get_net_params(protocol_context_t *pc);
-static void	protocol_command_set_settings_calibrations(protocol_context_t *pc);
-static void	protocol_command_set_settings_protection(protocol_context_t *pc);
-static void	protocol_command_set_settings_capacitors(protocol_context_t *pc);
-static void	protocol_command_set_settings_filters(protocol_context_t *pc);
-static void	protocol_command_get_settings_calibrations(protocol_context_t *pc);
-static void	protocol_command_get_settings_protection(protocol_context_t *pc);
-static void	protocol_command_get_settings_capacitors(protocol_context_t *pc);
-static void	protocol_command_get_settings_filters(protocol_context_t *pc);
-static void	protocol_command_get_work_state(protocol_context_t *pc);
-static void	protocol_command_get_version_info(protocol_context_t *pc);
-static void	protocol_command_get_events(protocol_context_t *pc);
+static void	protocol_command_test(void *pc);
+static void	protocol_command_switch_on_off(void *pc);
+static void	protocol_command_get_adc_active(void *pc);
+static void	protocol_command_get_adc_active_raw(void *pc);
+static void	protocol_command_get_oscillog(void *pc);
+static void	protocol_command_get_net_params(void *pc);
+static void	protocol_command_set_settings_calibrations(void *pc);
+static void	protocol_command_set_settings_protection(void *pc);
+static void	protocol_command_set_settings_capacitors(void *pc);
+static void	protocol_command_set_settings_filters(void *pc);
+static void	protocol_command_get_settings_calibrations(void *pc);
+static void	protocol_command_get_settings_protection(void *pc);
+static void	protocol_command_get_settings_capacitors(void *pc);
+static void	protocol_command_get_settings_filters(void *pc);
+static void	protocol_command_get_work_state(void *pc);
+static void	protocol_command_get_version_info(void *pc);
+static void	protocol_command_get_events(void *pc);
 
 /*--------------------------------------------------------------
                        PRIVATE TYPES
 --------------------------------------------------------------*/
 
-typedef void (*PFC_COMMAND_CALLBACK)(protocol_context_t *pc); /**<  */
-
 static PFC_COMMAND_CALLBACK handlers_array[]=
 {
 	protocol_command_test,
 	protocol_command_switch_on_off,
-	protocol_command_get_ac_active,
+	protocol_command_get_adc_active,
 	protocol_command_get_adc_active_raw,
 	protocol_command_get_oscillog,
 	protocol_command_get_net_params,
@@ -89,7 +88,7 @@ enum
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-float OSC_DATA[OSC_CHANNEL_NUMBER][OSCILLOG_TRANSFER_SIZE];
+static float OSC_DATA[OSC_CHANNEL_NUMBER][OSCILLOG_TRANSFER_SIZE]={0};
 
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS
@@ -108,7 +107,7 @@ static void preprocess_answer(
 	pc->packageToSend.fields.command = command;
 }
 
-static void	protocol_command_switch_on_off(protocol_context_t *pc)
+static void	protocol_command_switch_on_off(void *pc)
 {
 	struct s_command_switch_on_off *req=0;
 	struct s_answer_switch_on_off *pack=0;
@@ -116,16 +115,16 @@ static void	protocol_command_switch_on_off(protocol_context_t *pc)
 	preprocess_answer((void**)&req, (void**)&pack, pc, sizeof(struct s_answer_switch_on_off), PFC_COMMAND_SWITCH_ON_OFF);
 	
 	pack->result = 1;
-	if(pfc_apply_command(req->command, req->data) != PFC_SUCCESS)
+	if(pfc_apply_command((pfc_commands_t)req->command, req->data) != PFC_SUCCESS)
 	{
 		pack->result=0;
 	}
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_switch_on_off));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_switch_on_off));
 	protocol_send_package(pc); 
 }
 
-static void	protocol_command_get_adc_active(protocol_context_t *pc)
+static void	protocol_command_get_adc_active(void *pc)
 {
 	struct s_command_get_adc_active *req=0;
 	struct s_answer_get_adc_active *pack=0;
@@ -153,11 +152,11 @@ static void	protocol_command_get_adc_active(protocol_context_t *pc)
 	pack->ADC_MATH_B = active[ADC_EMS_B];
 	pack->ADC_MATH_C = active[ADC_EMS_C];
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_adc_active));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_get_adc_active));
 	protocol_send_package(pc); 	
 }
 
-static void	protocol_command_get_net_params(protocol_context_t *pc)
+static void	protocol_command_get_net_params(void *pc)
 {
 	struct s_command_get_net_params *req=0;
 	struct s_answer_get_net_params *pack=0;
@@ -187,13 +186,13 @@ static void	protocol_command_get_net_params(protocol_context_t *pc)
 	pack->U_phase_B = U_phase[1];
 	pack->U_phase_C = U_phase[2];
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_net_params));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_get_net_params));
 	protocol_send_package(pc); 
 }
 
 //================================================================================
 
-static void	protocol_command_get_adc_active_raw(protocol_context_t *pc)
+static void	protocol_command_get_adc_active_raw(void *pc)
 {
 	struct s_command_get_adc_active_raw *req=0;
 	struct s_answer_get_adc_active_raw *pack=0;
@@ -218,11 +217,11 @@ static void	protocol_command_get_adc_active_raw(protocol_context_t *pc)
 	pack->ADC_EMS_C = active_raw[ADC_EMS_C];
 	pack->ADC_EMS_I = active_raw[ADC_EMS_I];
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_adc_active_raw));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_get_adc_active_raw));
 	protocol_send_package(pc); 
 }
 
-static void	protocol_command_get_work_state(protocol_context_t *pc)
+static void	protocol_command_get_work_state(void *pc)
 {
 	struct s_command_get_work_state *req=0;
 	struct s_answer_get_work_state *pack=0;
@@ -238,7 +237,7 @@ static void	protocol_command_get_work_state(protocol_context_t *pc)
 	pack->activeChannels[1] = pwm_settings.activeChannels[1];
 	pack->activeChannels[2] = pwm_settings.activeChannels[2];
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_work_state));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_get_work_state));
 	protocol_send_package(pc); 
 }
 
@@ -265,9 +264,10 @@ static status_t get_date_from_compiler_string(
 	*HH = (time[0] - '0') * 10 + (time[1] - '0');
 	*MN = (time[3] - '0') * 10 + (time[4] - '0');
 	*SS = (time[6] - '0') * 10 + (time[7] - '0');
+	return PFC_SUCCESS;
 }
 
-static void	protocol_command_get_version_info(protocol_context_t *pc)
+static void	protocol_command_get_version_info(void *pc)
 {
 	struct s_command_get_version_info *req=0;
 	struct s_answer_get_version_info *pack=0;
@@ -289,13 +289,13 @@ static void	protocol_command_get_version_info(protocol_context_t *pc)
 	pack->minute = MN;
 	pack->second = SS;
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_version_info));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_get_version_info));
 	protocol_send_package(pc); 
 }
 
 //================================================================================
 
-static void	protocol_command_get_oscillog(protocol_context_t *pc)
+static void	protocol_command_get_oscillog(void *pc)
 {
 	struct s_command_get_oscillog *req=0;
 	struct s_answer_get_oscillog *pack=0;
@@ -304,7 +304,7 @@ static void	protocol_command_get_oscillog(protocol_context_t *pc)
 	
 	if (req->num > OSC_CHANNEL_NUMBER)
 	{
-			protocol_error_handle(pc, package_get_command(&pc->receivedPackage));
+			protocol_error_handle(pc, package_get_command(&(((protocol_context_t*)pc)->receivedPackage)));
 			return;
 	}
 	pack->ch = req->num;
@@ -334,13 +334,13 @@ static void	protocol_command_get_oscillog(protocol_context_t *pc)
 	pack->min = oscillog_min;
 
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_oscillog));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_get_oscillog));
 	protocol_send_package(pc); 
 }
 
 //================================================================================
 
-static void	protocol_command_get_settings_calibrations(protocol_context_t *pc)
+static void	protocol_command_get_settings_calibrations(void *pc)
 {
 	struct s_command_get_settings_calibrations *req=0;
 	struct s_answer_get_settings_calibrations *pack=0;
@@ -352,17 +352,17 @@ static void	protocol_command_get_settings_calibrations(protocol_context_t *pc)
 	int i;
 	for (i = 0; i < ADC_CHANNEL_NUMBER; i++)
 	{
-			pack->calibration[i] = calibrations.calibration[i];  //!< Калибровки для каналов
-			pack->offset[i] = calibrations.offset[i];            //!< Смещения для каналов
+			pack->calibration[i] = calibrations.calibration[i];
+			pack->offset[i] = calibrations.offset[i];
 	}
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_settings_calibrations));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_get_settings_calibrations));
 	protocol_send_package(pc); 
 }
 
 //================================================================================
 
-static void	protocol_command_set_settings_calibrations(protocol_context_t *pc)
+static void	protocol_command_set_settings_calibrations(void *pc)
 {
 	struct s_command_set_settings_calibrations *req=0;
 	struct s_answer_set_settings_calibrations *pack=0;
@@ -374,18 +374,18 @@ static void	protocol_command_set_settings_calibrations(protocol_context_t *pc)
 	int i;
 	for (i = 0; i < ADC_CHANNEL_NUMBER; i++)
 	{
-			calibrations.calibration[i] = req->calibration[i];  //!< Калибровки для каналов
-			calibrations.offset[i] = req->offset[i];            //!< Смещения для каналов
+			calibrations.calibration[i] = req->calibration[i];
+			calibrations.offset[i] = req->offset[i];
 	}
 	
 	settings_set_calibrations(calibrations);
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_set_settings_calibrations));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_set_settings_calibrations));
 	protocol_send_package(pc); 
 }
 
 //================================================================================
-static void	protocol_command_get_settings_protection(protocol_context_t *pc)
+static void	protocol_command_get_settings_protection(void *pc)
 {
 	struct s_command_get_settings_protection *req=0;
 	struct s_answer_get_settings_protection *pack=0;
@@ -394,23 +394,23 @@ static void	protocol_command_get_settings_protection(protocol_context_t *pc)
 	
 	settings_protection_t protection = settings_get_protection();
 	
-	pack->Ud_min = protection.Ud_min;            //!< Граничные значения для Ud
-	pack->Ud_max = protection.Ud_max;            //!< Граничные значения для Ud
-	pack->temperature = protection.temperature;  //!< Граничные значения для Температуры
-	pack->U_min = protection.U_min;              //!< Граничные значения для напряжения
+	pack->Ud_min = protection.Ud_min;
+	pack->Ud_max = protection.Ud_max;
+	pack->temperature = protection.temperature;
+	pack->U_min = protection.U_min;
 	pack->U_max = protection.U_max;
-	pack->Fnet_min = protection.Fnet_min;      //!< минимальная частота сети
-	pack->Fnet_max = protection.Fnet_max;      //!< максимальная частота сети
-	pack->I_max_rms = protection.I_max_rms;    //!< Максимальное граничное значение тока фильтра по RMS
-	pack->I_max_peak = protection.I_max_peak;  //!< Максимальное граничное мгновенное значение тока фильтра
+	pack->Fnet_min = protection.Fnet_min;
+	pack->Fnet_max = protection.Fnet_max;
+	pack->I_max_rms = protection.I_max_rms;
+	pack->I_max_peak = protection.I_max_peak;
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_settings_protection));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_get_settings_protection));
 	protocol_send_package(pc); 
 }
 
 //================================================================================
 
-static void	protocol_command_set_settings_protection(protocol_context_t *pc)
+static void	protocol_command_set_settings_protection(void *pc)
 {
 	struct s_command_set_settings_protection *req=0;
 	struct s_answer_set_settings_protection *pack=0;
@@ -419,24 +419,24 @@ static void	protocol_command_set_settings_protection(protocol_context_t *pc)
 	
 	settings_protection_t protection = settings_get_protection();
 	
-	protection.Ud_min = req->Ud_min;            //!< Граничные значения для Ud
-	protection.Ud_max = req->Ud_max;            //!< Граничные значения для Ud
-	protection.temperature = req->temperature;  //!< Граничные значения для Температуры
-	protection.U_min = req->U_min;              //!< Граничные значения для напряжения
+	protection.Ud_min = req->Ud_min;
+	protection.Ud_max = req->Ud_max;
+	protection.temperature = req->temperature;
+	protection.U_min = req->U_min;
 	protection.U_max = req->U_max;
-	protection.Fnet_min = req->Fnet_min;      //!< минимальная частота сети
-	protection.Fnet_max = req->Fnet_max;      //!< максимальная частота сети
-	protection.I_max_rms = req->I_max_rms;    //!< Максимальное граничное значение тока фильтра по RMS
-	protection.I_max_peak = req->I_max_peak;  //!< Максимальное граничное мгновенное значение тока фильтра
+	protection.Fnet_min = req->Fnet_min;
+	protection.Fnet_max = req->Fnet_max;
+	protection.I_max_rms = req->I_max_rms;
+	protection.I_max_peak = req->I_max_peak;
 	
 	settings_set_protection(protection);
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_set_settings_protection));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_set_settings_protection));
 	protocol_send_package(pc); 
 }
 
 //================================================================================
-static void	protocol_command_get_settings_capacitors(protocol_context_t *pc)
+static void	protocol_command_get_settings_capacitors(void *pc)
 {
 	struct s_command_get_settings_capacitors *req=0;
 	struct s_answer_get_settings_capacitors *pack=0;
@@ -451,12 +451,12 @@ static void	protocol_command_get_settings_capacitors(protocol_context_t *pc)
 	pack->Ud_nominal = capacitors.Ud_nominal;
 	pack->Ud_precharge = capacitors.Ud_precharge;
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_settings_capacitors));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_get_settings_capacitors));
 	protocol_send_package(pc); 
 }
 
 //================================================================================
-static void	protocol_command_set_settings_capacitors(protocol_context_t *pc)
+static void	protocol_command_set_settings_capacitors(void *pc)
 {
 	struct s_command_set_settings_capacitors *req=0;
 	struct s_answer_set_settings_capacitors *pack=0;
@@ -473,12 +473,12 @@ static void	protocol_command_set_settings_capacitors(protocol_context_t *pc)
 	
 	settings_set_capacitors(capacitors);
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_set_settings_capacitors));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_set_settings_capacitors));
 	protocol_send_package(pc); 
 }
 
 //================================================================================
-static void	protocol_command_get_settings_filters(protocol_context_t *pc)
+static void	protocol_command_get_settings_filters(void *pc)
 {
 	struct s_command_get_settings_filters *req=0;
 	struct s_answer_get_settings_filters *pack=0;
@@ -492,12 +492,12 @@ static void	protocol_command_get_settings_filters(protocol_context_t *pc)
 	pack->K_UD = filters.K_UD;
 	
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_settings_filters));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_get_settings_filters));
 	protocol_send_package(pc); 
 }
 
 //================================================================================
-static void	protocol_command_set_settings_filters(protocol_context_t *pc)
+static void	protocol_command_set_settings_filters(void *pc)
 {
 	struct s_command_set_settings_filters *req=0;
 	struct s_answer_set_settings_filters *pack=0;
@@ -512,12 +512,12 @@ static void	protocol_command_set_settings_filters(protocol_context_t *pc)
 	
 	settings_set_filters(filters);
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_set_settings_filters));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_set_settings_filters));
 	protocol_send_package(pc); 
 }
 
 //================================================================================
-static void	protocol_command_get_events(protocol_context_t *pc)
+static void	protocol_command_get_events(void *pc)
 {
 	struct s_command_get_events *req=0;
 	struct s_answer_get_events *pack=0;
@@ -526,12 +526,12 @@ static void	protocol_command_get_events(protocol_context_t *pc)
 	
 	pack->num = EventsGet(req->afterIndex, MAX_NUM_TRANSFERED_EVENTS, pack->events);
 
-	package_set_data_len(&pc->packageToSend, sizeof(struct s_answer_get_events));
+	package_set_data_len(&(((protocol_context_t*)pc)->packageToSend), sizeof(struct s_answer_get_events));
 	protocol_send_package(pc); 
 }
 
 
-static void	protocol_command_test(protocol_context_t *pc)
+static void	protocol_command_test(void *pc)
 {
 	/* TEST */
 }
@@ -539,8 +539,20 @@ static void	protocol_command_test(protocol_context_t *pc)
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
+	
+void protocol_write_osc_data(float** osc_adc_ch)
+{
+	/* TODO: Add lock protection */
+	for (int i = 0; i < PFC_NCHAN; i++)
+	{
+			memcpy(OSC_DATA[OSC_U_A + i], osc_adc_ch[ADC_MATH_A + i], sizeof(OSC_DATA[OSC_U_A + i]));
+			memcpy(OSC_DATA[OSC_I_A + i], osc_adc_ch[ADC_I_A + i], sizeof(OSC_DATA[OSC_I_A + i]));
+			memcpy(OSC_DATA[OSC_COMP_A + i], osc_adc_ch[ADC_MATH_C_A + i], sizeof(OSC_DATA[OSC_COMP_A + i]));
+	}
+	memcpy(OSC_DATA[OSC_UD], osc_adc_ch[ADC_UD], sizeof(OSC_DATA[OSC_UD]));
+}
 
 void prothandlers_init(SciPort *_port)
 {
-    protocol_init(&PFC.protocol, p_mode_client, handlers_array, PFC_COMMAND_COUNT, _port);
+    protocol_init(p_mode_client, handlers_array, PFC_COMMAND_COUNT, _port);
 }

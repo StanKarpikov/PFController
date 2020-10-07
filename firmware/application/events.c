@@ -13,10 +13,8 @@ uint16_t eventsIN = 0, eventsOUT = 0, eventsNUM = 0;
 uint32_t lastEventTime[SUB_EVENT_TYPE_PROTECTION_IGBT + 1][ADC_CHANNEL_NUMBER];
 
 void NEWEVENT(event_type_t MAIN, uint32_t SUB, uint32_t INFO, float VALUE)
-{                                          
-		__disable_irq();                                  
-		newevent.unixTime_s_ms = system_get_time();             
-		__enable_irq();                                   
+{                              
+		newevent.unixTime_s_ms = system_get_time();                               
 		newevent.type = (MAIN) | (((uint32_t)SUB) << 16); 
 		newevent.info = INFO;                             
 		newevent.value = VALUE;                           
@@ -63,13 +61,13 @@ inline void CheckEvents(uint16_t subtype, uint32_t info)
         case PROTECTION_WARNING_STOP:
             if (pfc_get_state() >= PFC_STATE_SYNC)
             {
-                pfc_set_state(PFC_STATE_FAULTBLOCK);
+                pfc_faultblock();
             }
             break;
         case PROTECTION_ERROR_STOP:
             if (pfc_get_state() >= PFC_STATE_SYNC)
             {
-                pfc_set_state(PFC_STATE_FAULTBLOCK);
+                pfc_faultblock();
             }
             break;
     }

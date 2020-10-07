@@ -94,26 +94,25 @@ static void settings_unlock(void)
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
-int SaveSettings(SETTINGS *settings)
+status_t SaveSettings(void)
 {
-    //return 0;//TODO:
-    if (EEPROM_WriteSettings(settings) < 0)
+    if (EEPROM_WriteSettings(&settings) < 0)
     {
         //ERROR(ERROR_LOG("EEPROM Write Settings FAILED!\n"));
-        return -1;
+        return PFC_ERROR_GENERIC;
     }
-    return 1;
+    return PFC_SUCCESS;
 }
 
-int ReadSettings(SETTINGS *settings)
+status_t ReadSettings(void)
 {
-    if (EEPROM_ReadSettings(settings) < 0)
+    if (EEPROM_ReadSettings(&settings) < 0)
     {
         //WARNING(DEF_LOG("EEPROM Read Settings FAILED! May be corrupted or first time running\n"));
-        MakeDefaults(settings);
-        SaveSettings(settings);
+        MakeDefaults(&settings);
+        SaveSettings();
     }
-    return 1;
+    return PFC_SUCCESS;
 }
 
 

@@ -7,6 +7,7 @@
 #include "crc.h"
 #include "stm32f7xx_hal.h"
 
+static protocol_context_t protocol;
 extern UART_HandleTypeDef huart1;
 SciPort port;
 
@@ -46,20 +47,19 @@ status_t protocol_hw_init(void)
 	return PFC_SUCCESS;
 }
 
-void protocol_init(PROTOCOL_CONTEXT *pc,
-                   enum protocol_mode mode,
-                   prot_handler *handlers,
+void protocol_init(enum protocol_mode mode,
+                   PFC_COMMAND_CALLBACK *handlers,
                    unsigned char handlersLen,
                    SciPort *_port)
 {
-    pc->mode = mode;
+    protocol.mode = mode;
 
-    pc->handlers = handlers;
-    pc->handlersLen = handlersLen;
+    protocol.handlers = handlers;
+    protocol.handlersLen = handlersLen;
 
-    pc->port = _port;
+    protocol.port = _port;
 }
-void protocol_send_package(PROTOCOL_CONTEXT *pc)
+void protocol_send_package(protocol_context_t *pc)
 {
     pc->state = P_START;
     pc->packageToSend.fields.start = PROTOCOL_START_BYTE;
@@ -72,7 +72,7 @@ void protocol_send_package(PROTOCOL_CONTEXT *pc)
     pc->packageToSend.data[pc->packageToSend.fields.len + 3] = PROTOCOL_STOP_BYTE;
     send_packet(pc->packageToSend.data, pc->packageToSend.fields.len + MIN_PACKET_LEN);
 }
-void protocol_error_handle(PROTOCOL_CONTEXT *pc, unsigned char command)
+void protocol_error_handle(protocol_context_t *pc, unsigned char command)
 {
     PACKAGE *out;
     out = &pc->packageToSend;
@@ -82,11 +82,11 @@ void protocol_error_handle(PROTOCOL_CONTEXT *pc, unsigned char command)
     package_set_data_len(out, 0);
     protocol_send_package(pc);
 }
-void protocol_unknown_command_handle(PROTOCOL_CONTEXT *pc)
+void protocol_unknown_command_handle(protocol_context_t *pc)
 {
     protocol_error_handle(pc, package_get_command(&pc->receivedPackage));
 }
-void protocol_reset(PROTOCOL_CONTEXT *pc)
+void protocol_reset(protocol_context_t *pc)
 {
     memset(&pc->receivedPackage, 0, sizeof(PACKAGE));
     memset(&pc->packageToSend, 0, sizeof(PACKAGE));
@@ -128,8 +128,9 @@ static int get_byte(SciPort *port, unsigned char *b)
     }
     return 0;
 }
-int protocol_work(PROTOCOL_CONTEXT *pc)
+int protocol_work()
 {
+		protocol_context_t *pc = &protocol;
     unsigned char b;
     int prot_r = 0;
     while ((prot_r = get_byte(pc->port, &b)) > 0)

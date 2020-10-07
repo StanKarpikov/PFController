@@ -151,7 +151,8 @@ static void pfc_restore_pwm(void)
 
 static bool is_voltage_ready(void)
 {
-    if (adc_get_cap_voltage() > PFC.settings.CAPACITORS.Ud_precharge)
+		settings_capacitors_t capacitors = settings_get_capacitors();
+    if (adc_get_cap_voltage() > capacitors.Ud_precharge)
     {
         return true;
     }
@@ -197,8 +198,12 @@ static void pfc_stop_process(void)
 static void pfc_sync_process(void)
 {	
 	pfc_disable_pwm();
+	ComplexAmpPhase U_50Hz[PFC_NCHAN]={0};
+	float period_delta = 0;
+  adc_get_complex_phase(U_50Hz, &period_delta);
 	/* Wait for a phase stabilisation */
-	if (PFC.period_delta == 0 && fabs(PFC.U_50Hz[0].phase) < SYNC_MINIMUM_PHASE)
+	/* TODO: Check for float comparison */
+	if (period_delta == 0 && fabs(U_50Hz[0].phase) < SYNC_MINIMUM_PHASE)
 	{
 			pfc_set_state(PFC_STATE_PRECHARGE_PREPARE);
 	}
@@ -209,6 +214,7 @@ static void pfc_precharge_prepare_process(void)
 	preload_started = 0;
 	pfc_set_state(PFC_STATE_PRECHARGE);
 }
+
 static void pfc_precharge_process(void)
 {
 	pfc_disable_pwm();
@@ -305,8 +311,14 @@ static void pfc_set_state(pfc_state_t state)
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
-status_t pfc_appky_command(pfc_commands_t command, uint32_t data)
+void pfc_faultblock(void)
 {
+	pfc_set_state(PFC_STATE_FAULTBLOCK);
+}
+
+status_t pfc_apply_command(pfc_commands_t command, uint32_t data)
+{
+	settings_pwm_t pwm_settings = settings_get_pwm();
 	switch (command)
 	{
 			case COMMAND_WORK_ON:
@@ -333,21 +345,23 @@ status_t pfc_appky_command(pfc_commands_t command, uint32_t data)
 			case COMMAND_SETTINGS_SAVE:
 					if (pfc_get_state() == PFC_STATE_STOP)
 					{
-							SaveSettings(&PFC.settings);
+							SaveSettings();
 					}
 					break;
 			case COMMAND_CHANNEL0_DATA:
-					PFC.settings.PWM.activeChannels[0] = data;
+					pwm_settings.activeChannels[0] = data;
+					settings_set_pwm(pwm_settings);
 					break;
 			case COMMAND_CHANNEL1_DATA:
-					PFC.settings.PWM.activeChannels[1] = data;
+					pwm_settings.activeChannels[1] = data;
+					settings_set_pwm(pwm_settings);
 					break;
 			case COMMAND_CHANNEL2_DATA:
-					PFC.settings.PWM.activeChannels[2] = data;
+					pwm_settings.activeChannels[2] = data;
+					settings_set_pwm(pwm_settings);
 					break;
 			default:
 				  return PFC_ERROR_DATA;
-					break;
 	}
 	return PFC_SUCCESS;
 }
@@ -369,6 +383,11 @@ void pfc_process(void)
     }
     last_status = pfc_get_state();
     period_counter++;
+}
+
+uint8_t pfc_is_pwm_on(void)
+{
+	return PWMon;
 }
 
 pfc_state_t pfc_get_state(void)

@@ -9,7 +9,6 @@
 --------------------------------------------------------------*/
 
 #include "EEPROM_emulation.h"
-#include "algorithm.h"
 #include "pfc_logic.h"
 #include "command_processor.h"
 #include "events_process.h"
@@ -42,8 +41,8 @@ int main(void)
     system_init();
 
     EEPROMClass();
-    memset(&PFC, 0, sizeof(PFC));
-    ReadSettings(&PFC.settings);
+
+    ReadSettings();
 
     /* Initialize all peripherals */
     gpio_init();
@@ -63,11 +62,11 @@ int main(void)
 
     while (1)
     {
-        protocol_work(&PFC.protocol);
+        protocol_work();
 
         algorithm_work();
         
-        PFC.temperature = 28;  //TODO:
+        adc_set_temperature(28);  //TODO: Add temperature sensor measurement
         events_check_temperature();
     }
 }

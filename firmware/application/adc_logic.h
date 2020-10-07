@@ -82,6 +82,10 @@ status_t adc_logic_start(void);
 float adc_get_cap_voltage(void);
 void adc_get_active(float* active);
 void adc_get_active_raw(float* active_raw);
+void adc_get_complex_phase(ComplexAmpPhase* U_50Hz, float* period_delta);
 void adc_get_params(float* U_0Hz, float* I_0Hz, float* U_phase, float* thdu, float* period_fact);
+float adc_get_temperature(void);
+void adc_set_temperature(float temperature);
+void algorithm_work(void);
 
 #endif /* _ADC_LOGIC_H */

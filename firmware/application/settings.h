@@ -88,7 +88,7 @@ status_t settings_set_calibrations(settings_calibrations_t calibrations);
 status_t settings_set_protection(settings_protection_t protection);
 status_t settings_set_capacitors(settings_capacitors_t capacitors);
 
-int SaveSettings(SETTINGS *settings);
-int ReadSettings(SETTINGS *settings);
+status_t SaveSettings(void);
+status_t ReadSettings(void);
 
 #endif

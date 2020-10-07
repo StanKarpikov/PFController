@@ -54,7 +54,8 @@ typedef union __attribute__((__packed__))
     } fields;
     unsigned char data[PROTOCOL_MAX_LENGTH];
 } PACKAGE;
-typedef void (*prot_handler)(void *);
+typedef void (*PFC_COMMAND_CALLBACK)(void *pc); /**<  */
+
 typedef union
 {
     struct _protocol_status
@@ -91,7 +92,7 @@ typedef struct _protocol_context
     PACKAGE receivedPackage;
     PACKAGE packageToSend;
 
-    prot_handler *handlers;
+    PFC_COMMAND_CALLBACK *handlers;
     unsigned char handlersLen;
 
     unsigned char size;
@@ -317,11 +318,10 @@ enum
 #define s_command_set_settings_filters      s_answer_get_settings_filters
 #define s_answer_set_settings_filters       s_command_get_settings_filters
 //=============  END COMMANDS  ============================
-int protocol_work(protocol_context_t *pc);
+int protocol_work(void);
 void protocol_unknown_command_handle(protocol_context_t *pc);
-void protocol_init(protocol_context_t *pc,
-                   enum protocol_mode mode,
-                   prot_handler *handlers,
+void protocol_init(enum protocol_mode mode,
+                   PFC_COMMAND_CALLBACK *handlers,
                    unsigned char handlersLen,
                    SciPort *_port);
 void protocol_send_package(protocol_context_t *pc);
