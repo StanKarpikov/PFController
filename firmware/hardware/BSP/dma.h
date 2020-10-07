@@ -17,6 +17,6 @@
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
-void dma_init(void);
+status_t dma_init(void);
 
 #endif /* _DMA_H */

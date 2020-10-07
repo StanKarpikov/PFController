@@ -21,7 +21,5 @@
 	#error "Please define the board"
 #endif
 
-/*------------------  PUBLIC FUNCTIONS  --------------------------------------*/
-
 
 #endif /* _BSP_H */

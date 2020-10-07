@@ -9,18 +9,18 @@
 --------------------------------------------------------------*/
 
 #include "BSP/debug.h"
-
 #include "BSP/uart.h"
 #include "stm32f7xx_hal.h"
 
+/*--------------------------------------------------------------
+                       PUBLIIC FUNCTIONS
+--------------------------------------------------------------*/
+
 int fputc(int c, FILE *f)
 {
-    /* Place your implementation of fputc here */
-    /* e.g. write a character to the USART */
     if (c == '\n') fputc('\r', f);
     //HAL_GPIO_WritePin(UART6_DE_GPIO_Port, UART6_DE_Pin, GPIO_PIN_SET);
     uart_debug_transmit((uint8_t *)&c, 1);
-
     //HAL_GPIO_WritePin(UART6_DE_GPIO_Port, UART6_DE_Pin, GPIO_PIN_RESET);
 
     return 1;
@@ -30,23 +30,21 @@ int fputc(int c, FILE *f)
   * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
-void Error_Handler(void)
+void error_handler(void)
 {
-    /* USER CODE BEGIN Error_Handler_Debug */
-    /* User can add his own implementation to report the HAL error return state */
     BREAKPOINT();
-    for (volatile int i = 0; i < 0xFFFFFFF; i++)
-        ;
+	/*
+    for (volatile int i = 0; i < 0xFFFFFFF; i++);
     NVIC_SystemReset();
-    while (1)
-        ;
-    /* USER CODE END Error_Handler_Debug */
+    while (1);
+	*/
 }
 
 bool is_debug_session(void)
 {
     return (CoreDebug->DHCSR & CoreDebug_DHCSR_C_DEBUGEN_Msk) == 0U ? false : true;
 }
+
 #ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number

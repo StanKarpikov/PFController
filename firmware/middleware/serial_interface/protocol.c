@@ -42,11 +42,7 @@ static SciPort port;
 
 static void send_packet(uint8_t *data, uint32_t len)
 {
-    HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_SET);
-    if (HAL_UART_Transmit_DMA(&huart1, data, len) != HAL_OK)
-    {
-        HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
-    };
+	uart_interface_transmit(data, len);
 }
 
 static int get_byte(SciPort *port, unsigned char *b)

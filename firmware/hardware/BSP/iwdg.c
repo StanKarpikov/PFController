@@ -20,17 +20,21 @@
 #undef ENABLE_WATCHDOG
 
 /*--------------------------------------------------------------
-                       PUBLIC FUNCTIONS
+                       PRIVATE DATA
 --------------------------------------------------------------*/
 
-IWDG_HandleTypeDef hiwdg;
+static IWDG_HandleTypeDef hiwdg;
+
+/*--------------------------------------------------------------
+                       PUBLIC FUNCTIONS
+--------------------------------------------------------------*/
 
 /**
   * @brief IWDG Initialization Function
   * @param None
   * @retval None
   */
-void iwdg_init(void)
+status_t iwdg_init(void)
 {
 #if defined(ENABLE_WATCHDOG)
 		/* Approx. 10 sec */ 
@@ -40,7 +44,8 @@ void iwdg_init(void)
     hiwdg.Init.Reload = 4095;
     if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
 #endif
+	return PFC_SUCCESS;
 }

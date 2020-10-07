@@ -9,11 +9,19 @@
 --------------------------------------------------------------*/
 
 #include "BSP/timer.h"
-
 #include "BSP/bsp.h"
 #include "BSP/debug.h"
 #include "defines.h"
 #include "stm32f7xx_hal.h"
+
+/*--------------------------------------------------------------
+                       DEFINES
+--------------------------------------------------------------*/
+
+#define TIMER2_PERIOD (15625)
+#define TIMER9_PRESCALER (20000)
+
+#define PWM_DEAD_TIME (100)
 
 /*--------------------------------------------------------------
                        PRIVATE DATA
@@ -39,14 +47,7 @@ static void tim_msp_post_init(TIM_HandleTypeDef* htim)
     if (htim->Instance == TIM1)
     {
         __HAL_RCC_GPIOE_CLK_ENABLE();
-        /**TIM1 GPIO Configuration    
-				PE8     ------> TIM1_CH1N
-				PE9     ------> TIM1_CH1
-				PE10     ------> TIM1_CH2N
-				PE11     ------> TIM1_CH2
-				PE12     ------> TIM1_CH3N
-				PE13     ------> TIM1_CH3 
-				*/
+
         GPIO_InitStruct.Pin = CH1_PFC_LOW_TIM1CH1N_Pin | CH1_PFC_HIGH_TIM1CH1_Pin | CH2_PFC_LOW_TIM1CH2N_Pin | CH2_PFC_HIGH_TIM1CH2_Pin | CH3_PFC_LOW_TIM1CH3N_Pin | CH3_PFC_HIGH_TIM1CH3_Pin;
         GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -58,12 +59,7 @@ static void tim_msp_post_init(TIM_HandleTypeDef* htim)
     {
         __HAL_RCC_GPIOB_CLK_ENABLE();
         __HAL_RCC_GPIOC_CLK_ENABLE();
-        /**TIM8 GPIO Configuration    
-				PB14     ------> TIM8_CH2N
-				PB15     ------> TIM8_CH3N
-				PC7     ------> TIM8_CH2
-				PC8     ------> TIM8_CH3 
-				*/
+
         GPIO_InitStruct.Pin = CH1_ET_LOW_TIM8_CH2N_Pin | CH2_ET_LOW_TIM8_CH3N_Pin;
         GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -80,11 +76,8 @@ static void tim_msp_post_init(TIM_HandleTypeDef* htim)
     }
     else if (htim->Instance == TIM9)
     {
-
         __HAL_RCC_GPIOE_CLK_ENABLE();
-        /**TIM9 GPIO Configuration    
-				PE5     ------> TIM9_CH1 
-				*/
+
         GPIO_InitStruct.Pin = PWM_KYLER_Pin;
         GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -97,7 +90,7 @@ static void tim_msp_post_init(TIM_HandleTypeDef* htim)
 /**
   * @brief TIM1 Initialization Function
   */
-static void tim1_Init(void)
+static status_t tim1_Init(void)
 {
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
@@ -113,23 +106,23 @@ static void tim1_Init(void)
     htim1.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim1) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
     if (HAL_TIM_ConfigClockSource(&htim1, &sClockSourceConfig) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     if (HAL_TIM_PWM_Init(&htim1) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
     sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
     sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
     if (HAL_TIMEx_MasterConfigSynchronization(&htim1, &sMasterConfig) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     sConfigOC.OCMode = TIM_OCMODE_PWM1;
     sConfigOC.Pulse = 0;
@@ -140,15 +133,15 @@ static void tim1_Init(void)
     sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
     if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     if (HAL_TIM_PWM_ConfigChannel(&htim1, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_ENABLE;
     sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_ENABLE;
@@ -163,16 +156,17 @@ static void tim1_Init(void)
     sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
     if (HAL_TIMEx_ConfigBreakDeadTime(&htim1, &sBreakDeadTimeConfig) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     //~400ns
     tim_msp_post_init(&htim1);
+		return PFC_SUCCESS;
 }
 
 /**
   * @brief TIM2 Initialization Function
   */
-static void tim2_Init(void)
+static status_t tim2_Init(void)
 {
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
@@ -180,30 +174,31 @@ static void tim2_Init(void)
     htim2.Instance = TIM2;
     htim2.Init.Prescaler = 0;
     htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim2.Init.Period = 15625;
+    htim2.Init.Period = TIMER2_PERIOD;
     htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV2;
     htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
     if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     sMasterConfig.MasterOutputTrigger = TIM_TRGO_UPDATE;
     sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_ENABLE;
     if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
+		return PFC_SUCCESS;
 }
 
 /**
   * @brief TIM8 Initialization Function
   */
-static void tim8_Init(void)
+static status_t tim8_Init(void)
 {
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
@@ -219,23 +214,23 @@ static void tim8_Init(void)
     htim8.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_Base_Init(&htim8) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
     if (HAL_TIM_ConfigClockSource(&htim8, &sClockSourceConfig) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     if (HAL_TIM_PWM_Init(&htim8) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
     sMasterConfig.MasterOutputTrigger2 = TIM_TRGO2_RESET;
     sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
     if (HAL_TIMEx_MasterConfigSynchronization(&htim8, &sMasterConfig) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     sConfigOC.OCMode = TIM_OCMODE_PWM1;
     sConfigOC.Pulse = 0;
@@ -246,16 +241,16 @@ static void tim8_Init(void)
     sConfigOC.OCNIdleState = TIM_OCNIDLESTATE_RESET;
     if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_2) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     if (HAL_TIM_PWM_ConfigChannel(&htim8, &sConfigOC, TIM_CHANNEL_3) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     sBreakDeadTimeConfig.OffStateRunMode = TIM_OSSR_ENABLE;
     sBreakDeadTimeConfig.OffStateIDLEMode = TIM_OSSI_ENABLE;
     sBreakDeadTimeConfig.LockLevel = TIM_LOCKLEVEL_OFF;
-    sBreakDeadTimeConfig.DeadTime = 100;
+    sBreakDeadTimeConfig.DeadTime = PWM_DEAD_TIME;
     sBreakDeadTimeConfig.BreakState = TIM_BREAK_DISABLE;
     sBreakDeadTimeConfig.BreakPolarity = TIM_BREAKPOLARITY_HIGH;
     sBreakDeadTimeConfig.BreakFilter = 0;
@@ -265,27 +260,28 @@ static void tim8_Init(void)
     sBreakDeadTimeConfig.AutomaticOutput = TIM_AUTOMATICOUTPUT_DISABLE;
     if (HAL_TIMEx_ConfigBreakDeadTime(&htim8, &sBreakDeadTimeConfig) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     tim_msp_post_init(&htim8);
+		return PFC_SUCCESS;
 }
 
 /**
   * @brief TIM9 Initialization Function
   */
-static void tim9_Init(void)
+static status_t tim9_Init(void)
 {
     TIM_OC_InitTypeDef sConfigOC = {0};
 
     htim9.Instance = TIM9;
-    htim9.Init.Prescaler = 20000;
+    htim9.Init.Prescaler = TIMER9_PRESCALER;
     htim9.Init.CounterMode = TIM_COUNTERMODE_UP;
     htim9.Init.Period = 0;
     htim9.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
     htim9.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
     if (HAL_TIM_PWM_Init(&htim9) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     sConfigOC.OCMode = TIM_OCMODE_PWM1;
     sConfigOC.Pulse = 0;
@@ -293,9 +289,10 @@ static void tim9_Init(void)
     sConfigOC.OCFastMode = TIM_OCFAST_DISABLE;
     if (HAL_TIM_PWM_ConfigChannel(&htim9, &sConfigOC, TIM_CHANNEL_1) != HAL_OK)
     {
-        Error_Handler();
+        error_handler();
     }
     tim_msp_post_init(&htim9);
+		return PFC_SUCCESS;
 }
 
 /*--------------------------------------------------------------
@@ -316,9 +313,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
         __HAL_RCC_TIM1_CLK_ENABLE();
 
         __HAL_RCC_GPIOE_CLK_ENABLE();
-        /**TIM1 GPIO Configuration    
-				PE15     ------> TIM1_BKIN 
-				*/
+
         GPIO_InitStruct.Pin = GPIO_PIN_15;
         GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -328,8 +323,8 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
 
         /* TIM1 DMA Init */
         /* TIM1_CH1 Init */
-        hdma_tim1_ch1.Instance = DMA2_Stream1;
-        hdma_tim1_ch1.Init.Channel = DMA_CHANNEL_6;
+        hdma_tim1_ch1.Instance = TIMER1_CH1_DMA_STREAM;
+        hdma_tim1_ch1.Init.Channel = TIMER1_CH1_DMA_CHANNEL;
         hdma_tim1_ch1.Init.Direction = DMA_MEMORY_TO_PERIPH;
         hdma_tim1_ch1.Init.PeriphInc = DMA_PINC_DISABLE;
         hdma_tim1_ch1.Init.MemInc = DMA_MINC_ENABLE;
@@ -340,14 +335,14 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
         hdma_tim1_ch1.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
         if (HAL_DMA_Init(&hdma_tim1_ch1) != HAL_OK)
         {
-            Error_Handler();
+            error_handler();
         }
 
         __HAL_LINKDMA(htim_base, hdma[TIM_DMA_ID_CC1], hdma_tim1_ch1);
 
         /* TIM1_CH2 Init */
-        hdma_tim1_ch2.Instance = DMA2_Stream2;
-        hdma_tim1_ch2.Init.Channel = DMA_CHANNEL_6;
+        hdma_tim1_ch2.Instance = TIMER1_CH2_DMA_STREAM;
+        hdma_tim1_ch2.Init.Channel = TIMER1_CH2_DMA_CHANNEL;
         hdma_tim1_ch2.Init.Direction = DMA_MEMORY_TO_PERIPH;
         hdma_tim1_ch2.Init.PeriphInc = DMA_PINC_DISABLE;
         hdma_tim1_ch2.Init.MemInc = DMA_MINC_ENABLE;
@@ -358,14 +353,14 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
         hdma_tim1_ch2.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
         if (HAL_DMA_Init(&hdma_tim1_ch2) != HAL_OK)
         {
-            Error_Handler();
+            error_handler();
         }
 
         __HAL_LINKDMA(htim_base, hdma[TIM_DMA_ID_CC2], hdma_tim1_ch2);
 
         /* TIM1_CH3 Init */
-        hdma_tim1_ch3.Instance = DMA2_Stream6;
-        hdma_tim1_ch3.Init.Channel = DMA_CHANNEL_6;
+        hdma_tim1_ch3.Instance = TIMER1_CH3_DMA_STREAM;
+        hdma_tim1_ch3.Init.Channel = TIMER1_CH3_DMA_CHANNEL;
         hdma_tim1_ch3.Init.Direction = DMA_MEMORY_TO_PERIPH;
         hdma_tim1_ch3.Init.PeriphInc = DMA_PINC_DISABLE;
         hdma_tim1_ch3.Init.MemInc = DMA_MINC_ENABLE;
@@ -376,25 +371,21 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
         hdma_tim1_ch3.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
         if (HAL_DMA_Init(&hdma_tim1_ch3) != HAL_OK)
         {
-            Error_Handler();
+            error_handler();
         }
 
         __HAL_LINKDMA(htim_base, hdma[TIM_DMA_ID_CC3], hdma_tim1_ch3);
     }
     else if (htim_base->Instance == TIM2)
     {
-        /* Peripheral clock enable */
         __HAL_RCC_TIM2_CLK_ENABLE();
     }
     else if (htim_base->Instance == TIM8)
     {
-        /* Peripheral clock enable */
         __HAL_RCC_TIM8_CLK_ENABLE();
 
         __HAL_RCC_GPIOA_CLK_ENABLE();
-        /**TIM8 GPIO Configuration    
-				PA8     ------> TIM8_BKIN2 
-				*/
+
         GPIO_InitStruct.Pin = GPIO_PIN_8;
         GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
@@ -402,10 +393,8 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
         GPIO_InitStruct.Alternate = GPIO_AF3_TIM8;
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-        /* TIM8 DMA Init */
-        /* TIM8_CH2 Init */
-        hdma_tim8_ch2.Instance = DMA2_Stream3;
-        hdma_tim8_ch2.Init.Channel = DMA_CHANNEL_7;
+        hdma_tim8_ch2.Instance = TIMER8_CH2_DMA_STREAM;
+        hdma_tim8_ch2.Init.Channel = TIMER8_CH2_DMA_CHANNEL;
         hdma_tim8_ch2.Init.Direction = DMA_MEMORY_TO_PERIPH;
         hdma_tim8_ch2.Init.PeriphInc = DMA_PINC_DISABLE;
         hdma_tim8_ch2.Init.MemInc = DMA_MINC_ENABLE;
@@ -416,14 +405,14 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
         hdma_tim8_ch2.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
         if (HAL_DMA_Init(&hdma_tim8_ch2) != HAL_OK)
         {
-            Error_Handler();
+            error_handler();
         }
 
         __HAL_LINKDMA(htim_base, hdma[TIM_DMA_ID_CC2], hdma_tim8_ch2);
 
         /* TIM8_CH3 Init */
-        hdma_tim8_ch3.Instance = DMA2_Stream4;
-        hdma_tim8_ch3.Init.Channel = DMA_CHANNEL_7;
+        hdma_tim8_ch3.Instance = TIMER8_CH3_DMA_STREAM;
+        hdma_tim8_ch3.Init.Channel = TIMER8_CH3_DMA_CHANNEL;
         hdma_tim8_ch3.Init.Direction = DMA_MEMORY_TO_PERIPH;
         hdma_tim8_ch3.Init.PeriphInc = DMA_PINC_DISABLE;
         hdma_tim8_ch3.Init.MemInc = DMA_MINC_ENABLE;
@@ -434,7 +423,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
         hdma_tim8_ch3.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
         if (HAL_DMA_Init(&hdma_tim8_ch3) != HAL_OK)
         {
-            Error_Handler();
+            error_handler();
         }
 
         __HAL_LINKDMA(htim_base, hdma[TIM_DMA_ID_CC3], hdma_tim8_ch3);
@@ -450,7 +439,6 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim_pwm)
 {
     if (htim_pwm->Instance == TIM9)
     {
-        /* Peripheral clock enable */
         __HAL_RCC_TIM9_CLK_ENABLE();
     }
 }
@@ -469,46 +457,24 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
         /* Peripheral clock disable */
         __HAL_RCC_TIM1_CLK_DISABLE();
 
-        /**TIM1 GPIO Configuration    
-				PE8     ------> TIM1_CH1N
-				PE9     ------> TIM1_CH1
-				PE10     ------> TIM1_CH2N
-				PE11     ------> TIM1_CH2
-				PE12     ------> TIM1_CH3N
-				PE13     ------> TIM1_CH3
-				PE15     ------> TIM1_BKIN 
-				*/
         HAL_GPIO_DeInit(GPIOE, CH1_PFC_LOW_TIM1CH1N_Pin | CH1_PFC_HIGH_TIM1CH1_Pin | CH2_PFC_LOW_TIM1CH2N_Pin | CH2_PFC_HIGH_TIM1CH2_Pin | CH3_PFC_LOW_TIM1CH3N_Pin | CH3_PFC_HIGH_TIM1CH3_Pin | GPIO_PIN_15);
 
-        /* TIM1 DMA DeInit */
         HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC1]);
         HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC2]);
         HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC3]);
     }
     else if (htim_base->Instance == TIM2)
     {
-        /* Peripheral clock disable */
         __HAL_RCC_TIM2_CLK_DISABLE();
     }
     else if (htim_base->Instance == TIM8)
     {
-        /* Peripheral clock disable */
         __HAL_RCC_TIM8_CLK_DISABLE();
 
-        /**TIM8 GPIO Configuration    
-				PB14     ------> TIM8_CH2N
-				PB15     ------> TIM8_CH3N
-				PC7     ------> TIM8_CH2
-				PC8     ------> TIM8_CH3
-				PA8     ------> TIM8_BKIN2 
-				*/
         HAL_GPIO_DeInit(GPIOB, CH1_ET_LOW_TIM8_CH2N_Pin | CH2_ET_LOW_TIM8_CH3N_Pin);
-
         HAL_GPIO_DeInit(GPIOC, CH1_ET_HIGH_TIM8_CH2_Pin | CH2_ET_HIGH_TIM8_CH3_Pin);
-
         HAL_GPIO_DeInit(GPIOA, GPIO_PIN_8);
 
-        /* TIM8 DMA DeInit */
         HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC2]);
         HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC3]);
     }
@@ -524,7 +490,6 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim_pwm)
 {
     if (htim_pwm->Instance == TIM9)
     {
-        /* Peripheral clock disable */
         __HAL_RCC_TIM9_CLK_DISABLE();
     }
 }
@@ -593,7 +558,7 @@ status_t timer_init(void)
 /**
   * @brief This function handles DMA2 stream1 global interrupt.
   */
-void DMA2_Stream1_IRQHandler(void)
+void TIMER1_CH1_DMA_IRQ(void)
 {
   HAL_DMA_IRQHandler(&hdma_tim1_ch1);
 }
@@ -601,15 +566,23 @@ void DMA2_Stream1_IRQHandler(void)
 /**
   * @brief This function handles DMA2 stream2 global interrupt.
   */
-void DMA2_Stream2_IRQHandler(void)
+void TIMER1_CH2_DMA_IRQ(void)
 {
   HAL_DMA_IRQHandler(&hdma_tim1_ch2);
 }
 
 /**
+  * @brief This function handles DMA2 stream6 global interrupt.
+  */
+void TIMER1_CH3_DMA_IRQ(void)
+{
+  HAL_DMA_IRQHandler(&hdma_tim1_ch3);
+}
+
+/**
   * @brief This function handles DMA2 stream3 global interrupt.
   */
-void DMA2_Stream3_IRQHandler(void)
+void TIMER8_CH2_DMA_IRQ(void)
 {
   HAL_DMA_IRQHandler(&hdma_tim8_ch2);
 }
@@ -617,15 +590,8 @@ void DMA2_Stream3_IRQHandler(void)
 /**
   * @brief This function handles DMA2 stream4 global interrupt.
   */
-void DMA2_Stream4_IRQHandler(void)
+void TIMER8_CH3_DMA_IRQ(void)
 {
   HAL_DMA_IRQHandler(&hdma_tim8_ch3);
 }
 
-/**
-  * @brief This function handles DMA2 stream6 global interrupt.
-  */
-void DMA2_Stream6_IRQHandler(void)
-{
-  HAL_DMA_IRQHandler(&hdma_tim1_ch3);
-}

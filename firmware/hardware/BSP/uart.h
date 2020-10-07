@@ -18,6 +18,7 @@
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
+status_t uart_interface_transmit(uint8_t* data, uint32_t length);
 status_t uart_debug_transmit(uint8_t* data, uint32_t length);
 void uart_init(void);
 

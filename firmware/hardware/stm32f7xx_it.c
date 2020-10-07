@@ -1,6 +1,13 @@
+/**
+ * @file stm32f7xx_it.c
+ * @author Stanislav Karpikov
+ * @brief Interrupt management module
+ */
 
+/*--------------------------------------------------------------
+                       INCLUDES
+--------------------------------------------------------------*/
 
-/* Includes ------------------------------------------------------------------*/
 #include "stdint.h"
 #include "stm32f7xx.h"
 #include "stm32f7xx_it.h"
@@ -10,7 +17,11 @@
 #include "BSP/debug.h"
 #include "BSP/system.h"
 
-void _get_registers_from_stack(uint32_t* stack_address)
+/*--------------------------------------------------------------
+                       PRIVATE FUNCTIONS
+--------------------------------------------------------------*/
+
+void get_registers_from_stack(uint32_t* stack_address)
 {
 
     volatile unsigned int lr = stack_address[ 5 ];
@@ -159,6 +170,11 @@ void _get_registers_from_stack(uint32_t* stack_address)
 		// USER CODE END HardFault_IRQn 0 
 		NVIC_SystemReset();
 }
+
+/*--------------------------------------------------------------
+                       PUBLIC FUNCTIONS
+--------------------------------------------------------------*/
+
 __asm void HardFault_Handler(void)
 {
     tst lr, #4
@@ -166,12 +182,9 @@ __asm void HardFault_Handler(void)
     mrseq r0, msp
     mrsne r0, psp
     ldr r1, [r0, #24]
-    b __cpp(_get_registers_from_stack)
+    b __cpp(get_registers_from_stack)
 }
 
-/******************************************************************************/
-/*           Cortex-M7 Processor Interruption and Exception Handlers          */ 
-/******************************************************************************/
 /**
   * @brief This function handles Non maskable interrupt.
   */

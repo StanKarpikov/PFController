@@ -9,14 +9,17 @@
 --------------------------------------------------------------*/
 
 #include "BSP/dma.h"
-
 #include "BSP/debug.h"
 #include "stm32f7xx_hal.h"
+
+/*--------------------------------------------------------------
+                       PUBLIC FUNCTIONS
+--------------------------------------------------------------*/
 
 /** 
   * Enable DMA controller clock
   */
-void dma_init(void)
+status_t dma_init(void)
 {
     /* DMA controller clock enable */
     __HAL_RCC_DMA2_CLK_ENABLE();
@@ -46,4 +49,6 @@ void dma_init(void)
     /* DMA2_Stream7_IRQn interrupt configuration */
     HAL_NVIC_SetPriority(DMA2_Stream7_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn);
+		
+		return PFC_SUCCESS;
 }

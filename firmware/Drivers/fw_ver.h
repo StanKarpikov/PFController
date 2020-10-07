@@ -1,7 +1,21 @@
+/**
+ * @file fw_ver.h
+ * @author Stanislav Karpikov
+ * @brief Firmware version macro
+ */
+
 #ifndef __FW_VER_H__
 #define __FW_VER_H__
 
+/*--------------------------------------------------------------
+                       INCLUDES
+--------------------------------------------------------------*/
+
 #include "bver.h"
+
+/*--------------------------------------------------------------
+                       PUBLIC DEFINES
+--------------------------------------------------------------*/
 
 #define FW_VERSION_MAJOR (0)
 #define FW_VERSION_MINOR (1)

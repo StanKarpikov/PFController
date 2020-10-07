@@ -17,7 +17,7 @@
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
-void gpio_init(void);
+status_t gpio_init(void);
 status_t gpio_error_led_on(void);
 status_t gpio_status_led_on(void);
 status_t gpio_pwm_test_on(void);

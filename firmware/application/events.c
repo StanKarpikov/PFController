@@ -9,7 +9,6 @@
 --------------------------------------------------------------*/
 
 #include "events.h"
-
 #include "pfc_logic.h"
 #include "command_processor.h"
 #include "BSP/system.h"

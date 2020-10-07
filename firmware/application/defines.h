@@ -45,4 +45,11 @@
 #define EEPROM_PAGE0_SECTOR (FLASH_SECTOR_12)
 #define EEPROM_PAGE1_SECTOR (FLASH_SECTOR_13)
 
+/*--------------------------------------------------------------
+											PUBLIC DEFINES::INTERFACE
+--------------------------------------------------------------*/
+
+#define USART_INTERFACE_BAUDRATE (115200)
+#define USART_INTERFACE_IRQ_PRIORITY (3)
+
 #endif

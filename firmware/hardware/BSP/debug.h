@@ -41,7 +41,7 @@
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 	
-void Error_Handler(void);
+void error_handler(void);
 bool is_debug_session(void);
 	
 /*--------------------------------------------------------------

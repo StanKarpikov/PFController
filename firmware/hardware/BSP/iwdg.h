@@ -17,6 +17,6 @@
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
-void iwdg_init(void);
+status_t iwdg_init(void);
 
 #endif /* _IWDG_H */

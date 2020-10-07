@@ -190,7 +190,7 @@ static void	protocol_command_get_net_params(void *pc)
 	protocol_send_package(pc); 
 }
 
-//================================================================================
+
 
 static void	protocol_command_get_adc_active_raw(void *pc)
 {
@@ -293,7 +293,7 @@ static void	protocol_command_get_version_info(void *pc)
 	protocol_send_package(pc); 
 }
 
-//================================================================================
+
 
 static void	protocol_command_get_oscillog(void *pc)
 {
@@ -338,7 +338,7 @@ static void	protocol_command_get_oscillog(void *pc)
 	protocol_send_package(pc); 
 }
 
-//================================================================================
+
 
 static void	protocol_command_get_settings_calibrations(void *pc)
 {
@@ -360,7 +360,7 @@ static void	protocol_command_get_settings_calibrations(void *pc)
 	protocol_send_package(pc); 
 }
 
-//================================================================================
+
 
 static void	protocol_command_set_settings_calibrations(void *pc)
 {
@@ -384,7 +384,7 @@ static void	protocol_command_set_settings_calibrations(void *pc)
 	protocol_send_package(pc); 
 }
 
-//================================================================================
+
 static void	protocol_command_get_settings_protection(void *pc)
 {
 	struct s_command_get_settings_protection *req=0;
@@ -408,7 +408,7 @@ static void	protocol_command_get_settings_protection(void *pc)
 	protocol_send_package(pc); 
 }
 
-//================================================================================
+
 
 static void	protocol_command_set_settings_protection(void *pc)
 {
@@ -435,7 +435,7 @@ static void	protocol_command_set_settings_protection(void *pc)
 	protocol_send_package(pc); 
 }
 
-//================================================================================
+
 static void	protocol_command_get_settings_capacitors(void *pc)
 {
 	struct s_command_get_settings_capacitors *req=0;
@@ -455,7 +455,7 @@ static void	protocol_command_get_settings_capacitors(void *pc)
 	protocol_send_package(pc); 
 }
 
-//================================================================================
+
 static void	protocol_command_set_settings_capacitors(void *pc)
 {
 	struct s_command_set_settings_capacitors *req=0;
@@ -477,7 +477,7 @@ static void	protocol_command_set_settings_capacitors(void *pc)
 	protocol_send_package(pc); 
 }
 
-//================================================================================
+
 static void	protocol_command_get_settings_filters(void *pc)
 {
 	struct s_command_get_settings_filters *req=0;
@@ -496,7 +496,7 @@ static void	protocol_command_get_settings_filters(void *pc)
 	protocol_send_package(pc); 
 }
 
-//================================================================================
+
 static void	protocol_command_set_settings_filters(void *pc)
 {
 	struct s_command_set_settings_filters *req=0;
@@ -516,7 +516,7 @@ static void	protocol_command_set_settings_filters(void *pc)
 	protocol_send_package(pc); 
 }
 
-//================================================================================
+
 static void	protocol_command_get_events(void *pc)
 {
 	struct s_command_get_events *req=0;

@@ -558,6 +558,16 @@
           <GroupName>application</GroupName>
           <Files>
             <File>
+              <FileName>main.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\application\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>defines.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\application\defines.h</FilePath>
+            </File>
+            <File>
               <FileName>adc_logic.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\application\adc_logic.c</FilePath>
@@ -576,11 +586,6 @@
               <FileName>pfc_logic.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\application\pfc_logic.h</FilePath>
-            </File>
-            <File>
-              <FileName>defines.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\application\defines.h</FilePath>
             </File>
             <File>
               <FileName>command_processor.c</FileName>
@@ -611,11 +616,6 @@
               <FileName>events_process.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\application\events_process.h</FilePath>
-            </File>
-            <File>
-              <FileName>main.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\application\main.c</FilePath>
             </File>
             <File>
               <FileName>settings.c</FileName>
@@ -751,6 +751,11 @@
               <FileName>bsp.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\hardware\BSP\bsp.h</FilePath>
+            </File>
+            <File>
+              <FileName>board_stm32f7.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\hardware\board\board_stm32f7.h</FilePath>
             </File>
           </Files>
         </Group>
