@@ -67,4 +67,4 @@ status_t command_handlers_init(void);
  */
 status_t protocol_write_osc_data(float** osc_adc_ch);
 
-#endif  //_COMMAND_PROCESSOR_H
+#endif  /*_COMMAND_PROCESSOR_H */

@@ -18,18 +18,20 @@
                        DEFINES
 --------------------------------------------------------------*/
 
-#define EVENTS_REPEAT_TIME (2000)
+#define EVENTS_REPEAT_TIME (2000) /**< After this time an event will be repeated */
 
 /*--------------------------------------------------------------
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
+/** Events storage */
 static struct event_record_s events[EVENTS_RECORDS_NUM + 1]={0};
 
-static uint16_t events_in = 0;
-static uint16_t events_out = 0;
-static uint32_t lastEventTime[SUB_EVENT_TYPE_PROTECTION_IGBT + 1][ADC_CHANNEL_NUMBER]={0};
+static uint16_t events_in = 0; /**< The number of events have been written to the storage */
+static uint16_t events_out = 0;/**< The number of events have been written from the storage */
+static uint32_t lastEventTime[SUB_EVENT_TYPE_PROTECTION_IGBT + 1][ADC_CHANNEL_NUMBER]={0}; /**< The array of the last timestamps of events */
 
+/** Protection levels for different subevents */
 static const uint16_t ProtectionLevels[] = {
     PROTECTION_WARNING_STOP,  //SUB_EVENT_TYPE_PROTECTION_UD_MIN
     PROTECTION_ERROR_STOP,    //SUB_EVENT_TYPE_PROTECTION_UD_MAX

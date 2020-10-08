@@ -20,11 +20,6 @@
 #include "adc_logic.h"
 
 /*--------------------------------------------------------------
-                       PRIVATE TYPES
---------------------------------------------------------------*/
-
-
-/*--------------------------------------------------------------
                        PRIVATE FUNCTIONS PROTOTYPES
 --------------------------------------------------------------*/
 
@@ -47,22 +42,21 @@ static void pfc_faultblock_process(void);
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-static uint16_t last_status = 0;
-static uint32_t period_counter = 0;
-static uint8_t main_started = 0;
-static uint8_t preload_started = 0;
-static uint32_t main_start_period = 0;
-static uint32_t period_delta = 0;
+static pfc_state_t last_status = PFC_STATE_INIT; /**< The last state of the PFC */
+static uint32_t period_counter = 0; /**< The number of periods since start */
+static uint8_t main_started = 0; /**< The main connector is switched on */
+static uint8_t preload_started = 0; /**< The preload connector is switched on */
+static uint32_t main_start_period = 0; /**< The period count when the main connector was switched on */
 
-static uint8_t PWMon = 0;
+static uint8_t pwm_on = 0; /**< PWM is switched on */
 
-static pfc_state_t current_state = PFC_STATE_INIT;
+static pfc_state_t current_state = PFC_STATE_INIT;/**< The current state of the PFC */
 
 /*--------------------------------------------------------------
                        PRIVATE TYPES
 --------------------------------------------------------------*/
 
-typedef void (*FSM_PROCESS_CALLBACK)(void); /**<  */
+typedef void (*FSM_PROCESS_CALLBACK)(void); /**< State machine state callback */
 
 /** State table array */
 static FSM_PROCESS_CALLBACK state_table[PFC_STATE_COUNT] = {
@@ -84,6 +78,9 @@ static FSM_PROCESS_CALLBACK state_table[PFC_STATE_COUNT] = {
                        PRIVATE FUNCTIONS
 --------------------------------------------------------------*/
 		
+/**
+ * @brief Switch on the PFC
+ */
 static void pfc_switch_on(void)
 {
     if (pfc_get_state() == PFC_STATE_STOP)
@@ -96,12 +93,17 @@ static void pfc_switch_on(void)
     }
 }
 
+/**
+ * @brief Switch off the PFC
+ */
 static void pfc_switch_off(void)
 {
     pfc_set_state(PFC_STATE_STOPPING);
 }
 
-/* Сохраняет состояние каждого канала PWM и отключает его. */
+/**
+ * @brief Disable PWM channels
+ */
 static void pfc_disable_pwm(void)
 {
     int i;
@@ -112,31 +114,32 @@ static void pfc_disable_pwm(void)
 
 		timer_disable_pwm();
 		
-    PWMon = 0;
+    pwm_on = 0;
 }
 
-/* Восстанавливает состояние каналов Ш� М. */
+/**
+ * @brief Re-enable PWM channels after switching off
+ */
 static void pfc_restore_pwm(void)
 {
-    int i;
-    //et_1=0;//прошлое значение ошибок по Ud
-    //It_1=0;//прошлое значение интегральной составляющей по Ud
+    //et_1=0;//Last Ud error value
+    //It_1=0;//Last Ud integral accumulator value
 
-    for (i = 0; i < PFC_NCHAN; i++)
-    {
-        //epwm_enable(i);
-    }
-
-    if (!PWMon)
+    if (!pwm_on)
     {
 				adc_clear_accumulators();
 				timer_restore_pwm();
         
 
-        PWMon = 1;
+        pwm_on = 1;
     }
 }
 
+/**
+ * @brief Returns the readiness of the voltage on capacitors
+ *
+ * @return true if the voltage is ready, false if not ready
+ */
 static bool is_voltage_ready(void)
 {
 		settings_capacitors_t capacitors = settings_get_capacitors();
@@ -150,7 +153,9 @@ static bool is_voltage_ready(void)
     }
 }
 
-
+/**
+ * @brief Process the state callback: init
+ */
 static void pfc_init_process(void)
 {
 		Relay_Main_Off();
@@ -169,6 +174,9 @@ static void pfc_init_process(void)
 		}
 }
 
+/**
+ * @brief Process the state callback: stop
+ */
 static void pfc_stop_process(void)
 {
 		Relay_Main_Off();
@@ -183,6 +191,9 @@ static void pfc_stop_process(void)
 	/* TODO: Run PFC autotically. Currently the device wait for a command from the panel */
 }
 
+/**
+ * @brief Process the state callback: synd
+ */
 static void pfc_sync_process(void)
 {	
 	pfc_disable_pwm();
@@ -196,6 +207,10 @@ static void pfc_sync_process(void)
 			pfc_set_state(PFC_STATE_PRECHARGE_PREPARE);
 	}
 }
+
+/**
+ * @brief Process the state callback: precharge prepare
+ */
 static void pfc_precharge_prepare_process(void)
 {
 	pfc_disable_pwm();
@@ -203,6 +218,9 @@ static void pfc_precharge_prepare_process(void)
 	pfc_set_state(PFC_STATE_PRECHARGE);
 }
 
+/**
+ * @brief Process the state callback: precharge process
+ */
 static void pfc_precharge_process(void)
 {
 	pfc_disable_pwm();
@@ -218,6 +236,10 @@ static void pfc_precharge_process(void)
 			preload_started = 1;
 	}
 }
+
+/**
+ * @brief Process the state callback: main
+ */
 static void pfc_main_process(void)
 {
 	pfc_disable_pwm();
@@ -228,7 +250,7 @@ static void pfc_main_process(void)
 			main_started = 1;
 			main_start_period = period_counter;
 	}
-	period_delta = period_counter - main_start_period;
+	uint32_t period_delta = period_counter - main_start_period;
 	
 	/* Wait for transition processes to end */
 	if (period_delta > PRELOAD_STABILISATION_TIME)
@@ -236,16 +258,28 @@ static void pfc_main_process(void)
 			pfc_set_state(PFC_STATE_PRECHARGE_DISABLE);
 	}
 }
+
+/**
+ * @brief Process the state callback: precharge disable
+ */
 static void pfc_precharge_disable_process(void)
 {
 	Relay_Preload_Off();
 	preload_started = 0;
 	pfc_set_state(PFC_STATE_WORK);
 }
+
+/**
+ * @brief Process the state callback: work
+ */
 static void pfc_work_process(void)
 {
 	pfc_disable_pwm();
 }
+
+/**
+ * @brief Process the state callback: charge
+ */
 static void pfc_charge_process(void)
 {
 	static uint8_t pulse=0;
@@ -271,10 +305,18 @@ static void pfc_charge_process(void)
 	*/
 	
 }
+
+/**
+ * @brief Process the state callback: test
+ */
 static void pfc_test_process(void)
 {
 	/* NOTE: Test state can be added */
 }
+
+/**
+ * @brief Process the state callback: stopping
+ */
 static void pfc_stopping_process(void)
 {
 	Relay_Main_Off();
@@ -283,6 +325,10 @@ static void pfc_stopping_process(void)
 	//events_preload_stop();
 	pfc_set_state(PFC_STATE_STOP);
 }
+
+/**
+ * @brief Process the state callback: faultblock
+ */
 static void pfc_faultblock_process(void)
 {
 	Relay_Main_Off();
@@ -291,19 +337,36 @@ static void pfc_faultblock_process(void)
 	pfc_disable_pwm();
 }
 
+/**
+ * @brief Set state of the PFC
+ *
+ * @param state A new state of the PFC
+ */
 static void pfc_set_state(pfc_state_t state)
 {
     current_state = state;
 }
+
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
+/*
+ * @brief Block the PFC in case of a fault event
+ */
 void pfc_faultblock(void)
 {
 	pfc_set_state(PFC_STATE_FAULTBLOCK);
 }
 
+/*
+ * @brief Execute a command from the panel
+ *
+ * @param command The command to execute
+ * @param data Command data
+ * 
+ * @return Status of the operation
+ */
 status_t pfc_apply_command(pfc_commands_t command, uint32_t data)
 {
 	settings_pwm_t pwm_settings = settings_get_pwm();
@@ -354,7 +417,7 @@ status_t pfc_apply_command(pfc_commands_t command, uint32_t data)
 	return PFC_SUCCESS;
 }
 
-/**
+/*
  * @brief Process the current PFC state (called in a cycle)
  */
 void pfc_process(void)
@@ -373,12 +436,22 @@ void pfc_process(void)
     period_counter++;
 }
 
-uint8_t pfc_is_pwm_on(void)
-{
-	return PWMon;
-}
-
+/*
+ * @brief Get the current PFC state
+ *
+ * @return The PFC state
+ */
 pfc_state_t pfc_get_state(void)
 {
     return current_state;
+}
+
+/*
+ * @brief Get the current PWM state
+ *
+ * @return The PWM state
+ */
+uint8_t pfc_is_pwm_on(void)
+{
+	return pwm_on;
 }
