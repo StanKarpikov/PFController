@@ -62,7 +62,7 @@ int main(void)
     {
         protocol_work();
 
-        algorithm_work();
+        algorithm_process();
         
         adc_set_temperature(28);  //TODO: Add temperature sensor measurement
         events_check_temperature();

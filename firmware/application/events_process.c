@@ -274,12 +274,12 @@ void events_check_period(unsigned int period_length)
             freq);
     } 
 		/*TODO: Check the nesessity of the U_50Hz verification
-	if(pfc_get_state()>=PFC_STATE_PRECHARGE_PREPARE && fabs(PFC.U_50Hz[0].phase-MATH_PI/2)>0.1){
+	if(pfc_get_state()>=PFC_STATE_PRECHARGE_PREPARE && fabs(PFC.U_50Hz[PFC_ACHAN].phase-MATH_PI/2)>0.1){
 		events_new_event(
 					EVENT_TYPE_PROTECTION,
 					SUB_EVENT_TYPE_PROTECTION_BAD_SYNC,
 					0,
-					PFC.U_50Hz[0].phase
+					PFC.U_50Hz[PFC_ACHAN].phase
 				);
 	}*/
 }

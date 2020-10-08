@@ -129,19 +129,7 @@ static void pfc_restore_pwm(void)
 
     if (!PWMon)
     {
-        VLet_1 = 0;   //прошлое значение ошибок
-        VLIt_1 = 0;   //прошлое значение интегральной составляющей
-                      //	Idet_1=0;//прошлое значение ошибок
-                      //	IdIt_1=0;//прошлое значение интегральной составляющей
-                      //	Iqet_1=0;//прошлое значение ошибок
-                      //	IqIt_1=0;
-        Ia_e_1 = 0;   //прошлое значение ошибок
-        Ib_e_1 = 0;   //прошлое значение ошибок
-        Ic_e_1 = 0;   //прошлое значение ошибок
-        Ia_It_1 = 0;  //прошлое значение интегральной составляющей
-        Ib_It_1 = 0;  //прошлое значение интегральной составляющей
-        Ic_It_1 = 0;  //прошлое значение интегральной составляющей
-
+				adc_clear_accumulators();
 				timer_restore_pwm();
         
 
@@ -198,12 +186,12 @@ static void pfc_stop_process(void)
 static void pfc_sync_process(void)
 {	
 	pfc_disable_pwm();
-	ComplexAmpPhase U_50Hz[PFC_NCHAN]={0};
+	complex_amp_t U_50Hz[PFC_NCHAN]={0};
 	float period_delta = 0;
   adc_get_complex_phase(U_50Hz, &period_delta);
 	/* Wait for a phase stabilisation */
 	/* TODO: Check for float comparison */
-	if (period_delta == 0 && fabs(U_50Hz[0].phase) < SYNC_MINIMUM_PHASE)
+	if (period_delta == 0 && fabs(U_50Hz[PFC_ACHAN].phase) < SYNC_MINIMUM_PHASE)
 	{
 			pfc_set_state(PFC_STATE_PRECHARGE_PREPARE);
 	}
@@ -243,7 +231,7 @@ static void pfc_main_process(void)
 	period_delta = period_counter - main_start_period;
 	
 	/* Wait for transition processes to end */
-	if (period_delta > PRELOAD_DELAY)
+	if (period_delta > PRELOAD_STABILISATION_TIME)
 	{
 			pfc_set_state(PFC_STATE_PRECHARGE_DISABLE);
 	}
@@ -349,15 +337,15 @@ status_t pfc_apply_command(pfc_commands_t command, uint32_t data)
 					}
 					break;
 			case COMMAND_CHANNEL0_DATA:
-					pwm_settings.activeChannels[0] = data;
+					pwm_settings.activeChannels[PFC_ACHAN] = data;
 					settings_set_pwm(pwm_settings);
 					break;
 			case COMMAND_CHANNEL1_DATA:
-					pwm_settings.activeChannels[1] = data;
+					pwm_settings.activeChannels[PFC_BCHAN] = data;
 					settings_set_pwm(pwm_settings);
 					break;
 			case COMMAND_CHANNEL2_DATA:
-					pwm_settings.activeChannels[2] = data;
+					pwm_settings.activeChannels[PFC_CCHAN] = data;
 					settings_set_pwm(pwm_settings);
 					break;
 			default:
