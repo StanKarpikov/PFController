@@ -22,9 +22,6 @@
 
 #define _PACKED __attribute__((__packed__))
 
-#define RX_BUFFER_SIZE (0x3FF)
-#define TX_BUFFER_SIZE (0x3FF)
-
 #define MIN_PACKET_LEN      (4)
 #define PROTOCOL_MAX_LENGTH (216)  /**< Max data - 210 + 6 service bytes */
 #define OSCILLOG_TRANSFER_SIZE (128)
@@ -39,43 +36,25 @@ typedef void (*PFC_COMMAND_CALLBACK)(void *pc); /**<  */
 
 typedef enum 
 {
-    P_START,
-    P_STATUS,
-    P_COMMAND,
-    P_LEN,
-    P_DATA,
-    P_CRC,
-    P_STOP,
+    PROTOCOL_START,
+    PROTOCOL_STATUS,
+    PROTOCOL_COMMAND,
+    PROTOCOL_LEN,
+    PROTOCOL_DATA,
+    PROTOCOL_CRC,
+    PROTOCOL_STOP,
 }protocol_state_t;
-
-typedef enum 
-{
-    p_mode_client,
-    p_mode_adf
-}protocol_mode_t;
-
-typedef struct _SciPort
-{
-    uint8_t tx_buffer[TX_BUFFER_SIZE];
-    uint8_t tx_index;
-    uint8_t tx_end;
-
-    uint16_t rx_buffer[RX_BUFFER_SIZE];
-    int rx_index;               /**< The next write position */
-    int rx_readed;              /**< The next read position */
-    uint8_t rx_overflow;  /**< 0 - normal, 1 - rx buffer overflow */
-} SciPort;
 
 typedef union _PACKED
 {
     struct _PACKED
     {
-        uint8_t owner : 1;
+        uint8_t reserv1 : 1;
         uint8_t error : 1;
         uint8_t crc_error : 1;
         uint8_t wrong_stop : 1;
         uint8_t parity_error : 1;
-        uint8_t reserv : 3;
+        uint8_t reserv2 : 3;
     } fields;
     uint8_t raw;
 } STATUS_BYTE;
@@ -90,11 +69,11 @@ typedef union _PACKED
         uint8_t command;
     } fields;
     uint8_t data[PROTOCOL_MAX_LENGTH];
-} PACKAGE;
+} packet_t;
 
 typedef union
 {
-    struct _protocol_status
+    struct
     {
         uint8_t queryBufOver : 1;
         uint8_t waitForResponce : 1;
@@ -104,25 +83,21 @@ typedef union
         uint8_t reserv : 3;
     } fields;
     uint8_t raw;
-} PROTOCOL_STATUS;
+} protocol_status_t;
 
 typedef struct _protocol_context
 {
-    protocol_mode_t mode;
-
     protocol_state_t state;
-    PACKAGE receivedPackage;
-    PACKAGE packageToSend;
+    packet_t receivedPackage;
+    packet_t packageToSend;
 
     PFC_COMMAND_CALLBACK *handlers;
-    uint8_t handlersLen;
+    uint8_t handlers_count;
 
     uint8_t size;
     uint8_t *pdata;
 
-    PROTOCOL_STATUS status;
-
-    SciPort *port;
+    protocol_status_t status;
 } protocol_context_t;
 
 
@@ -348,21 +323,117 @@ enum
                        PUBLIC FUNCTIONTS
 --------------------------------------------------------------*/
 
-int protocol_work(void);
+/**
+ * @brief Process messages from the panel. Called in a cycle
+ * 
+ * @return The status of the operation
+ */
+status_t protocol_work(void);
+
+/**
+ * @brief Unknown command handler
+ * 
+ * @param pc The protocol context structure
+ * 
+ * @return The status of the operation
+ */
 void protocol_unknown_command_handle(protocol_context_t *pc);
-void protocol_init(protocol_mode_t mode,
-                   PFC_COMMAND_CALLBACK *handlers,
-                   uint8_t handlersLen,
-                   SciPort *_port);
-void protocol_send_package(protocol_context_t *pc);
+
+/**
+ * @brief Initialize potocol interface with handlers
+ * 
+ * @param handlers Pointer to handlers array
+ * @param handlers_count Handlers array size
+ * 
+ * @return Status of the operation
+ */
+status_t protocol_init(PFC_COMMAND_CALLBACK *handlers,
+											 uint8_t handlers_count);
+											 
+/**
+ * @brief Send a packet to the panel
+ * 
+ * @param pc Pointer to handlers array
+ * 
+ * @return Status of the operation
+ */
+status_t protocol_send_package(protocol_context_t *pc);
+
+/**
+ * @brief Send an error packet to the panel
+ * 
+ * @param pc The protocol context structure
+ * @param command The received command with error
+ * 
+ * @return The status of the operation
+ */
 void protocol_error_handle(protocol_context_t *pc, uint8_t command);
+
+/**
+ * @brief Initialize potocol interface
+ * 
+ * @return Status of the operation
+ */
 status_t protocol_hw_init(void);
-void package_set_data_len(PACKAGE *pac, uint32_t l);
-uint8_t package_get_command(PACKAGE *pac);
-uint16_t package_get_crc(PACKAGE *pac);
-uint16_t package_calculate_crc(PACKAGE *pac);
-void package_clear_status(PACKAGE *pac);
-void package_set_error(PACKAGE *pac, uint8_t err);
-void package_set_command(PACKAGE *pac, uint8_t comm);
+
+/**
+ * @brief Write data len into a packet
+ *
+ * @param packet A pointer to the packet structure
+ * @param len The length to write
+ *
+ * @return The status of the operation
+ */
+void package_set_data_len(packet_t *packet, uint32_t len);
+
+/**
+ * @brief Extract a command value from a packet
+ *
+ * @param packet A pointer to the packet structure
+ *
+ * @return The command value
+ */
+uint8_t package_get_command(packet_t *packet);
+
+/**
+ * @brief Extract a CRC value from a packet
+ *
+ * @param packet A pointer to the packet structure
+ *
+ * @return The CRC value
+ */
+uint16_t package_get_crc(packet_t *packet);
+
+/**
+ * @brief Return the CRC value for a packet
+ *
+ * @param packet A pointer to the packet structure
+ *
+ * @return The CRC value
+ */
+uint16_t package_calculate_crc(packet_t *packet);
+
+/**
+ * @brief Clear the status in a packet
+ *
+ * @param packet A pointer to the packet structure
+ */
+void package_clear_status(packet_t *packet);
+
+/**
+ * @brief Set the error field in a packet
+ *
+ * @param error The error value
+ * @param packet A pointer to the packet structure
+ */
+void package_set_error(packet_t *packet, uint8_t error);
+
+/**
+ * @brief Set the command field in a packet
+ *
+ * @param error The command value
+ * @param packet A pointer to the packet structure
+ */
+void package_set_command(packet_t *packet, uint8_t command);
 									 
 #endif /* __PROTOCOL_H__ */

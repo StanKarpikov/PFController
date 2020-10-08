@@ -53,7 +53,9 @@ typedef enum{
 	PFC_ERROR_DATA 		= -3,  /**< Wrong input arguments */
 	PFC_ERROR_HAL 		= -2,  /**< Error at the lower HAL level */
 	PFC_ERROR_GENERIC = -1,  /**< Generic error code */
-	PFC_SUCCESS 			=  0,	 /**< Successfull execution */
+	PFC_NULL	 				=  0,	 /**< Successfull execution, but no data provided */
+	PFC_SUCCESS 			=  1,	 /**< Successfull execution */
+	PFC_WARNING 			=  2,	 /**< Execution ok, but requires attention */
 }status_t;
 
 

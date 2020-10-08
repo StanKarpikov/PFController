@@ -552,7 +552,7 @@ void protocol_write_osc_data(float** osc_adc_ch)
 	memcpy(OSC_DATA[OSC_UD], osc_adc_ch[ADC_UD], sizeof(OSC_DATA[OSC_UD]));
 }
 
-void prothandlers_init(SciPort *_port)
+status_t prothandlers_init(void)
 {
-    protocol_init(p_mode_client, handlers_array, PFC_COMMAND_COUNT, _port);
+    return protocol_init(handlers_array, PFC_COMMAND_COUNT);
 }

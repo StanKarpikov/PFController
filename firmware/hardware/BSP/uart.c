@@ -13,6 +13,7 @@
 #include "BSP/bsp.h"
 #include "BSP/debug.h"
 #include "stm32f7xx_hal.h"
+#include "string.h"
 
 /*--------------------------------------------------------------
                        DEFINES
@@ -21,6 +22,25 @@
 #define UART_INTERFACE_TIMEOUT (2000)
 #define UART_DEBUG_TIMEOUT (2000)
 #define USE_INTERFACE_AS_DEBUG (0)
+#define UART_INTERFACE_BUFFER_DEFAULT_FILLER (0xFF)
+#define RX_BUFFER_SIZE (0x3FF)
+#define TX_BUFFER_SIZE (0x3FF)
+
+/*--------------------------------------------------------------
+                       PRIVATE TYPES
+--------------------------------------------------------------*/
+
+typedef struct
+{
+    uint8_t tx_buffer[TX_BUFFER_SIZE];
+    uint8_t tx_index;
+    uint8_t tx_end;
+
+    uint16_t rx_buffer[RX_BUFFER_SIZE];
+    int rx_index;               /**< The next write position */
+    int rx_readed;              /**< The next read position */
+    uint8_t rx_overflow;  			/**< 0 - normal, 1 - rx buffer overflow */
+} mcu_port_t;
 
 /*--------------------------------------------------------------
                        PRIVATE DATA
@@ -29,10 +49,61 @@
 static UART_HandleTypeDef huart_interface={0};
 static DMA_HandleTypeDef hdma_usart_interface_rx={0};
 static DMA_HandleTypeDef hdma_usart_interface_tx={0};
+static mcu_port_t mcu_port={0};
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
+
+status_t uart_interface_get_byte(uint8_t *byte)
+{
+    ARGUMENT_ASSERT(byte);
+    /*
+    if (mcu_port.rx_overflow) {
+        mcu_port.rx_overflow = 0;
+        mcu_port.rx_readed = mcu_port.rx_index;
+        return PFC_WARNING;
+    }
+    */
+    if (mcu_port.rx_buffer[mcu_port.rx_readed] != 0xFFFF)
+    {
+        *byte = mcu_port.rx_buffer[mcu_port.rx_readed] & 0xFF;
+        mcu_port.rx_buffer[mcu_port.rx_readed] = 0xFFFF;
+        mcu_port.rx_readed++;
+        if (mcu_port.rx_readed == RX_BUFFER_SIZE)
+        {
+            mcu_port.rx_readed = 0;
+        }
+        return PFC_SUCCESS;
+    }
+    return PFC_NULL;
+}
+
+status_t uart_interface_rx_init(void)
+{
+	memset(mcu_port.rx_buffer, UART_INTERFACE_BUFFER_DEFAULT_FILLER, RX_BUFFER_SIZE);
+	HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
+	HAL_UART_Receive_DMA(&huart_interface, (uint8_t*)mcu_port.rx_buffer, RX_BUFFER_SIZE);
+	
+	mcu_port.rx_readed = 0;
+	
+	return PFC_SUCCESS;
+}
+
+void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+{
+    HAL_UART_DMAStop(huart);
+    HAL_UART_DeInit(huart);
+    HAL_UART_MspDeInit(huart);
+    uart_init();
+    uart_interface_rx_init();
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+{
+    HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
+}
+
 
 status_t uart_interface_transmit(uint8_t* data, uint32_t length)
 {

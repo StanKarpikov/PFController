@@ -51,7 +51,7 @@ typedef enum
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
-void prothandlers_init(SciPort *_port);
+status_t prothandlers_init(void);
 void protocol_write_osc_data(float** osc_adc_ch);
 
 #endif  //_COMMAND_PROCESSOR_H

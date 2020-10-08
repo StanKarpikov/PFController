@@ -21,7 +21,7 @@
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
-/**
+/*
  * @brief Calculate CRC16 (CRC16-CCITT)
  * 
  * @datablock The pointer to the data block

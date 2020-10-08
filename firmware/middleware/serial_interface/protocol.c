@@ -21,128 +21,140 @@
                        DEFINES
 --------------------------------------------------------------*/
 
-#define PROTOCOL_START_BYTE ((uint8_t)0xAA)
-#define PROTOCOL_STOP_BYTE  ((uint8_t)0xBB)
+#define PROTOCOL_START_BYTE ((uint8_t)0x55) 
+#define PROTOCOL_STOPROTOCOL_BYTE  ((uint8_t)0x77)
 #define PROTOCOL_STATUS_MAX (31)  // 2**5bits - 1 = 31
 
-#define PROTOCOL_CRC_IGNORE             (0)
-#define PROTOCOL_UNKNOWN_COMMAND_IGNORE (1)
+#define PROTOCOL_IGNORE_CRC             (0)
+#define PROTOCOL_IGNORE_UNKNOWN_COMMAND (1)
 
 /*--------------------------------------------------------------
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
+/** Internal protocol context */
 static protocol_context_t protocol;
-static SciPort port;
 
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS
 --------------------------------------------------------------*/
 
 /**
- * @brief Send a packet to the interface
+ * @brief Send a packet to the interface adapter
  * 
  * @data Pointer to the data block
  * @len  Data block size
  */
-static void send_packet(uint8_t *data, uint32_t len)
+static void adapter_send_packet(uint8_t *data, uint32_t len)
 {
 	uart_interface_transmit(data, len);
 }
 
-static int get_byte(SciPort *port, unsigned char *b)
+/**
+ * @brief Read a byte from the interface adapter
+ * 
+ * @byte[out] Pointer to the data byte to read
+ * @return Status of the operation
+ */
+static status_t adapter_get_byte(uint8_t *byte)
 {
-    if (b==0) return -2;
-    /*
-    if (port->rx_overflow) {
-        port->rx_overflow = 0;
-        port->rx_readed = port->rx_index;
-        return -1;
-    }
-
-    if (port->rx_readed == port->rx_index)
-        return 0;
-
-    *b = port->rx_buffer[port->rx_readed];
-    port->rx_readed++;
-    if (port->rx_readed == RX_BUFFER_SIZE)
-        port->rx_readed = 0;
-    return 1;*/
-    if (port->rx_buffer[port->rx_readed] != 0xFFFF)
-    {
-        *b = port->rx_buffer[port->rx_readed] & 0xFF;
-        port->rx_buffer[port->rx_readed] = 0xFFFF;
-        port->rx_readed++;
-        if (port->rx_readed == RX_BUFFER_SIZE)
-        {
-            port->rx_readed = 0;
-        }
-        return 1;
-    }
-    return 0;
+	return uart_interface_get_byte(byte);
 }
 
+/**
+ * @brief Initialize interface adapter
+ * 
+ * @return Status of the operation
+ */
+static status_t adapter_rx_init(void)
+{
+	return uart_interface_rx_init();
+}
+
+/**
+ * @brief Reset the protocol context
+ * 
+ * @param pc The protocol context structure
+ */
+void protocol_reset(protocol_context_t *pc)
+{
+    memset(&pc->receivedPackage, 0, sizeof(packet_t));
+    memset(&pc->packageToSend, 0, sizeof(packet_t));
+
+    pc->state = PROTOCOL_START;
+    pc->size = 0;
+    pc->pdata = pc->receivedPackage.data;
+}
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
-void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
-{
-    HAL_UART_DMAStop(huart);
-    HAL_UART_DeInit(huart);
-    HAL_UART_MspDeInit(huart);
-    uart_init();
-    memset(port.rx_buffer, 0xFF, sizeof(port.rx_buffer));
-    HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
-    HAL_UART_Receive_DMA(huart, (uint8_t *)port.rx_buffer, RX_BUFFER_SIZE);
-    port.rx_readed = 0;
-}
-
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
-{
-    HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
-}
-
+/*
+ * @brief Initialize potocol interface
+ * 
+ * @return Status of the operation
+ */
 status_t protocol_hw_init(void)
 {
-	prothandlers_init(&port);
-	memset(port.rx_buffer, 0xFF, sizeof(port.rx_buffer));
-	HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
-	HAL_UART_Receive_DMA(&huart1, (uint8_t *)port.rx_buffer, RX_BUFFER_SIZE);
-	port.rx_readed = 0;
-	return PFC_SUCCESS;
+	status_t status;
+	
+	status = prothandlers_init();
+	if(status!= PFC_SUCCESS)return status;
+	
+	status = adapter_rx_init();
+	
+	return status;
 }
 
-void protocol_init(protocol_mode_t mode,
-                   PFC_COMMAND_CALLBACK *handlers,
-                   unsigned char handlersLen,
-                   SciPort *_port)
+/*
+ * @brief Initialize potocol interface with handlers
+ * 
+ * @param handlers Pointer to handlers array
+ * @param handlers_count Handlers array size
+ * 
+ * @return Status of the operation
+ */
+status_t protocol_init(PFC_COMMAND_CALLBACK *handlers,
+											 uint8_t handlers_count)
 {
-    protocol.mode = mode;
-
     protocol.handlers = handlers;
-    protocol.handlersLen = handlersLen;
-
-    protocol.port = _port;
+    protocol.handlers_count = handlers_count;
+	
+		return PFC_SUCCESS;
 }
 
-void protocol_send_package(protocol_context_t *pc)
+/*
+ * @brief Send a packet to the panel
+ * 
+ * @param pc Protocol context structure
+ * 
+ * @return Status of the operation
+ */
+status_t protocol_send_package(protocol_context_t *pc)
 {
-    pc->state = P_START;
+    pc->state = PROTOCOL_START;
     pc->packageToSend.fields.start = PROTOCOL_START_BYTE;
-    pc->packageToSend.fields.status.fields.owner = pc->mode;
     uint16_t crcsend = crc16(pc->packageToSend.data + 1,
                              pc->packageToSend.fields.len);
 
     pc->packageToSend.data[pc->packageToSend.fields.len + 1] = crcsend & 0xFF;
     pc->packageToSend.data[pc->packageToSend.fields.len + 2] = crcsend >> 8;
-    pc->packageToSend.data[pc->packageToSend.fields.len + 3] = PROTOCOL_STOP_BYTE;
-    send_packet(pc->packageToSend.data, pc->packageToSend.fields.len + MIN_PACKET_LEN);
+    pc->packageToSend.data[pc->packageToSend.fields.len + 3] = PROTOCOL_STOPROTOCOL_BYTE;
+    adapter_send_packet(pc->packageToSend.data, pc->packageToSend.fields.len + MIN_PACKET_LEN);
+		return PFC_SUCCESS;
 }
 
-void protocol_error_handle(protocol_context_t *pc, unsigned char command)
+/*
+ * @brief Send an error packet to the panel
+ * 
+ * @param pc The protocol context structure
+ * @param command The received command with error
+ * 
+ * @return The status of the operation
+ */
+void protocol_error_handle(protocol_context_t *pc, uint8_t command)
 {
-    PACKAGE *out;
+    packet_t *out;
     out = &pc->packageToSend;
     package_clear_status(out);
     package_set_error(out, 1);
@@ -151,204 +163,243 @@ void protocol_error_handle(protocol_context_t *pc, unsigned char command)
     protocol_send_package(pc);
 }
 
+/*
+ * @brief Unknown command handler
+ * 
+ * @param pc The protocol context structure
+ * 
+ * @return The status of the operation
+ */
 void protocol_unknown_command_handle(protocol_context_t *pc)
 {
     protocol_error_handle(pc, package_get_command(&pc->receivedPackage));
 }
 
-void protocol_reset(protocol_context_t *pc)
+/*
+ * @brief Process messages from the panel. Called in a cycle
+ * 
+ * @return The status of the operation
+ */
+status_t protocol_work(void)
 {
-    memset(&pc->receivedPackage, 0, sizeof(PACKAGE));
-    memset(&pc->packageToSend, 0, sizeof(PACKAGE));
-
-    pc->state = P_START;
-    pc->size = 0;
-    pc->pdata = pc->receivedPackage.data;
-}
-
-
-int protocol_work(void)
-{
-		protocol_context_t *pc = &protocol;
-    unsigned char b;
-    int prot_r = 0;
-    while ((prot_r = get_byte(pc->port, &b)) > 0)
+    uint8_t byte;
+    status_t receive_status = PFC_NULL;
+    while ((receive_status = adapter_get_byte(&byte)) == PFC_SUCCESS)
     {
-        switch (pc->state)
+        switch (protocol.state)
         {
-            case P_START:
-                if (b == PROTOCOL_START_BYTE)
+            case PROTOCOL_START:
+                if (byte == PROTOCOL_START_BYTE)
                 {
-                    pc->state = P_STATUS;
+                    protocol.state = PROTOCOL_STATUS;
                 }
                 break;
-            case P_STATUS:
-                if (b > PROTOCOL_STATUS_MAX)
+            case PROTOCOL_STATUS:
+                if (byte > PROTOCOL_STATUS_MAX)
                 {
-                    pc->state = P_START;
+                    protocol.state = PROTOCOL_START;
                 }
                 else
                 {
-                    pc->state = P_LEN;
-                    pc->receivedPackage.fields.status.raw = b;
+                    protocol.state = PROTOCOL_LEN;
+                    protocol.receivedPackage.fields.status.raw = byte;
                 }
                 break;
-            case P_LEN:
-                pc->state = P_COMMAND;
-                pc->receivedPackage.fields.len = b;
-                if (b < MIN_PACKET_LEN)
+            case PROTOCOL_LEN:
+                protocol.state = PROTOCOL_COMMAND;
+                protocol.receivedPackage.fields.len = byte;
+                if (byte < MIN_PACKET_LEN)
                 {
-                    pc->state = P_START;
+                    protocol.state = PROTOCOL_START;
                 }
                 else
                 {
-                    if (b > (PROTOCOL_MAX_LENGTH - 4))
+                    if (byte > (PROTOCOL_MAX_LENGTH - 4))
                     {
-                        pc->state = P_START;
+                        protocol.state = PROTOCOL_START;
                     }
-                    pc->size = b;
-                    pc->pdata = pc->receivedPackage.data + MIN_PACKET_LEN;
+                    protocol.size = byte;
+                    protocol.pdata = protocol.receivedPackage.data + MIN_PACKET_LEN;
                 }
                 break;
-            case P_COMMAND:
-                pc->receivedPackage.fields.command = b;
-                if (pc->receivedPackage.fields.len == MIN_PACKET_LEN)
+            case PROTOCOL_COMMAND:
+                protocol.receivedPackage.fields.command = byte;
+                if (protocol.receivedPackage.fields.len == MIN_PACKET_LEN)
                 {
-                    pc->state = P_CRC;
+                    protocol.state = PROTOCOL_CRC;
                 }
                 else
                 {
-                    pc->state = P_DATA;
+                    protocol.state = PROTOCOL_DATA;
                 }
-                pc->size--;
+                protocol.size--;
                 break;
-            case P_DATA:
-                *(pc->pdata) = b;
-                pc->size--;
-                pc->pdata++;
-                if (pc->size > (PROTOCOL_MAX_LENGTH - 4))
+            case PROTOCOL_DATA:
+                *(protocol.pdata) = byte;
+                protocol.size--;
+                protocol.pdata++;
+                if (protocol.size > (PROTOCOL_MAX_LENGTH - 4))
                 {
-                    pc->state = P_START;
+                    protocol.state = PROTOCOL_START;
                 }
-                if (pc->size <= MIN_PACKET_LEN - 1)
+                if (protocol.size <= MIN_PACKET_LEN - 1)
                 {
-                    pc->state = P_CRC;
-                }
-                break;
-            case P_CRC:
-                pc->size--;
-                *(pc->pdata) = b;
-                pc->pdata++;
-                if (pc->size == 1)
-                {
-                    pc->state = P_STOP;
+                    protocol.state = PROTOCOL_CRC;
                 }
                 break;
-            case P_STOP:
-                pc->size--;
-                if (b == PROTOCOL_STOP_BYTE)
+            case PROTOCOL_CRC:
+                protocol.size--;
+                *(protocol.pdata) = byte;
+                protocol.pdata++;
+                if (protocol.size == 1)
                 {
-                    *(pc->pdata) = b;
-                    pc->pdata++;
+                    protocol.state = PROTOCOL_STOP;
+                }
+                break;
+            case PROTOCOL_STOP:
+                protocol.size--;
+                if (byte == PROTOCOL_STOPROTOCOL_BYTE)
+                {
+                    *(protocol.pdata) = byte;
+                    protocol.pdata++;
 
-                    pc->status.fields.connectionOk = 1;
+                    protocol.status.fields.connectionOk = 1;
 
-                    /// if crc error
-                    uint16_t crcget = package_get_crc(&pc->receivedPackage);
-                    uint16_t crccalc = package_calculate_crc(&pc->receivedPackage);
+                    uint16_t crcget = package_get_crc(&protocol.receivedPackage);
+                    uint16_t crccalc = package_calculate_crc(&protocol.receivedPackage);
                     if (crcget != crccalc)
                     {
-#if PROTOCOL_CRC_IGNORE == 0
-                        package_clear_status(&pc->packageToSend);
-                        pc->packageToSend.fields.status.fields.crc_error = 1;
-                        package_set_data_len(&pc->packageToSend, 0);
-                        protocol_send_package(pc);
-#endif /* PROTOCOL_CRC_IGNORE */
-                        return 1;
+#if PROTOCOL_IGNORE_CRC == 0
+                        package_clear_status(&protocol.packageToSend);
+                        protocol.packageToSend.fields.status.fields.crc_error = 1;
+                        package_set_data_len(&protocol.packageToSend, 0);
+                        protocol_send_package(&protocol);
+#endif /* PROTOCOL_IGNORE_CRC */
+                        return PFC_WARNING;
                     }
 
-#if PROTOCOL_CRC_IGNORE == 0
-                    else if (pc->receivedPackage.fields.status.fields.crc_error)
+#if PROTOCOL_IGNORE_CRC == 0
+                    else if (protocol.receivedPackage.fields.status.fields.crc_error)
                     {
-                        protocol_send_package(pc);  //!< send last package again
-                        return 1;
+                        protocol_send_package(&protocol);
+                        return PFC_WARNING;
                     }
                     else
                     {
-                        pc->receivedPackage.fields.status.fields.crc_error = 0;
+                        protocol.receivedPackage.fields.status.fields.crc_error = 0;
                     }
-#endif /* PROTOCOL_CRC_IGNORE */
+#endif /* PROTOCOL_IGNORE_CRC */
 
-                    if (pc->receivedPackage.fields.command >= pc->handlersLen)
+                    if (protocol.receivedPackage.fields.command >= protocol.handlers_count)
                     {
-#if PROTOCOL_UNKNOWN_COMMAND_IGNORE == 1
-#else /* PROTOCOL_UNKNOWN_COMMAND_IGNORE */
-                        protocol_unknown_command_handler(pc);
-#endif /* PROTOCOL_UNKNOWN_COMMAND_IGNORE */
+#if PROTOCOL_IGNORE_UNKNOWN_COMMAND == 1
+#else /* PROTOCOL_IGNORE_UNKNOWN_COMMAND */
+                        protocol_unknown_command_handler(&protocol);
+#endif /* PROTOCOL_IGNORE_UNKNOWN_COMMAND */
                     }
                     else
                     {
-                        if (pc->handlers[pc->receivedPackage.fields.command])
-                            pc->handlers[pc->receivedPackage.fields.command](pc);
+												PFC_COMMAND_CALLBACK handler = protocol.handlers[protocol.receivedPackage.fields.command];
+                        if (handler)handler(&protocol);
                     }
-                    ///
-                    ///    --------- PROCESS PACKAGE --------- END      ------------------------------------------
-                    ///    ----------------------------------------- ------------------------------------------
-                    ///    -----------------------------------------  -----------------------------------------
                 }
                 else
                 {
-                    //pc->receivedPackage.fields.status.fields.wrong_stop = 1;
+                    //protocol.receivedPackage.fields.status.fields.wrong_stop = 1;
                 }
-                pc->state = P_START;
-                return 1;
+                protocol.state = PROTOCOL_START;
+                return PFC_SUCCESS;
             default:
-                pc->state = P_START;
+                protocol.state = PROTOCOL_START;
                 break;
         }
     }
-    if (prot_r < 0)
+    if (receive_status == PFC_WARNING)
     {
-        protocol_reset(pc);
-        return 1;
+        protocol_reset(&protocol);
+        return PFC_WARNING;
     }
     else
     {
-        return 0;
+        return PFC_SUCCESS;
     }
 }
 
-void package_set_data_len(PACKAGE *pac, uint32_t l)
+/*
+ * @brief Write data len into a packet
+ *
+ * @param packet A pointer to the packet structure
+ * @param len The length to write
+ */
+void package_set_data_len(packet_t *packet, uint32_t len)
 {
-	pac->fields.len = MIN_PACKET_LEN + l;
+	packet->fields.len = MIN_PACKET_LEN + len;
 }
 
-uint8_t package_get_command(PACKAGE *pac)
+/*
+ * @brief Extract a command value from a packet
+ *
+ * @param packet A pointer to the packet structure
+ *
+ * @return The command value
+ */
+uint8_t package_get_command(packet_t *packet)
 {
-	return pac->fields.command;
+	return packet->fields.command;
 }
 
-uint16_t package_get_crc(PACKAGE *pac)
+/*
+ * @brief Extract a CRC value from a packet
+ *
+ * @param packet A pointer to the packet structure
+ *
+ * @return The CRC value
+ */
+uint16_t package_get_crc(packet_t *packet)
 {
-	return ((pac)->data[(pac)->fields.len] | ((pac)->data[(pac)->fields.len + 1] << 8));
+	return ((packet)->data[(packet)->fields.len] | ((packet)->data[(packet)->fields.len + 1] << 8));
 }
 
-uint16_t package_calculate_crc(PACKAGE *pac)
+/*
+ * @brief Return the CRC value for a packet
+ *
+ * @param packet A pointer to the packet structure
+ *
+ * @return The CRC value
+ */
+uint16_t package_calculate_crc(packet_t *packet)
 {
-	return crc16((pac)->data + 1, (pac)->fields.len - 1);
+	return crc16((packet)->data + 1, (packet)->fields.len - 1);
 }
 
-void package_clear_status(PACKAGE *pac)
+/*
+ * @brief Clear the status in a packet
+ *
+ * @param packet A pointer to the packet structure
+ */
+void package_clear_status(packet_t *packet)
 {
-	(pac)->fields.status.raw = 0;
+	(packet)->fields.status.raw = 0;
 }
 
-void package_set_error(PACKAGE *pac, uint8_t err)
+/*
+ * @brief Set the error field in a packet
+ *
+ * @param error The error value
+ * @param packet A pointer to the packet structure
+ */
+void package_set_error(packet_t *packet, uint8_t error)
 {
-	(pac)->fields.status.fields.error = err;
+	(packet)->fields.status.fields.error = error;
 }
 
-void package_set_command(PACKAGE *pac, uint8_t comm)
+/*
+ * @brief Set the command field in a packet
+ *
+ * @param error The command value
+ * @param packet A pointer to the packet structure
+ */
+void package_set_command(packet_t *packet, uint8_t command)
 {
-	(pac)->fields.command = comm;
+	(packet)->fields.command = command;
 }
