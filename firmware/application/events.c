@@ -32,7 +32,7 @@ static uint16_t events_out = 0;/**< The number of events have been written from 
 static uint32_t lastEventTime[SUB_EVENT_TYPE_PROTECTION_IGBT + 1][ADC_CHANNEL_NUMBER]={0}; /**< The array of the last timestamps of events */
 
 /** Protection levels for different subevents */
-static const uint16_t ProtectionLevels[] = {
+static const uint16_t protection_levels[] = {
     PROTECTION_WARNING_STOP,  //SUB_EVENT_TYPE_PROTECTION_UD_MIN
     PROTECTION_ERROR_STOP,    //SUB_EVENT_TYPE_PROTECTION_UD_MAX
     PROTECTION_ERROR_STOP,    //SUB_EVENT_TYPE_PROTECTION_TEMPERATURE
@@ -52,11 +52,17 @@ static const uint16_t ProtectionLevels[] = {
                        PRIVATE FUNCTIONS
 --------------------------------------------------------------*/
 
+/**
+ * @brief Lock the events module data
+ */
 static void events_lock(void)
 {
 	DINT;
 }
 
+/**
+ * @brief Lock the events module data
+ */
 static void events_unlock(void)
 {
 	EINT;
@@ -66,9 +72,15 @@ static void events_unlock(void)
                        PRIVATE FUNCTIONS
 --------------------------------------------------------------*/
 
+/**
+ * @brief Check an event: apply a protection action if needed
+ * 
+ * @param subtype Event type
+ * @param info Event info
+ */
 static void events_check(uint16_t subtype, uint32_t info)
 {
-    switch (ProtectionLevels[subtype])
+    switch (protection_levels[subtype])
     {
         case PROTECTION_IGNORE:
             break;
@@ -87,6 +99,11 @@ static void events_check(uint16_t subtype, uint32_t info)
     }
 }
 
+/**
+ * @brief Add a new event
+ * 
+ * @param event The event data
+ */
 static void events_add(struct event_record_s* event)
 {
     if ((event->type & 0xFFFF) == EVENT_TYPE_PROTECTION)
@@ -121,23 +138,34 @@ static void events_add(struct event_record_s* event)
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
+/*
+ * @brief Add a new event (external function)
+ * 
+ * @param main The main event type
+ * @param sub The sub event type
+ * @param info The event info
+ * @param value The event data
+ */
 void events_new_event(event_type_t main, uint32_t sub, uint32_t info, float value)
 {                              
 	  struct event_record_s newevent={0};
-		newevent.unixTime_s_ms = system_get_time();                               
+		newevent.unix_time_s_ms = system_get_time();                               
 		newevent.type = (main) | (((uint32_t)sub) << 16); 
 		newevent.info = info;                             
 		newevent.value = value;                           
 		events_add(&newevent);                             
 }
 
+/*
+ * @brief Clear the events storage
+ */
 void events_clear(void)
 {
     events_lock();
     int i = 0;
     for (i = 0; i < EVENTS_RECORDS_NUM; i++)
     {
-        events[i].unixTime_s_ms = 0;
+        events[i].unix_time_s_ms = 0;
     }
     events_in = 0;
     events_out = 0;
@@ -145,6 +173,15 @@ void events_clear(void)
     events_unlock();
 }
 
+/*
+ * @brief Get events from the storage
+ * 
+ * @param after_index The start index in the events storage
+ * @param num The number of events to write
+ * @param buf The buffer to write events
+ *
+ * @return The count of events have been written
+ */
 uint16_t events_get(uint64_t after_index, uint16_t num, struct event_record_s* buf)
 {
     uint16_t count = 0;
@@ -152,11 +189,11 @@ uint16_t events_get(uint64_t after_index, uint16_t num, struct event_record_s* b
     uint16_t ev_out = events_out;
     while (ev_out != events_in)
     {
-        if (events[ev_out].unixTime_s_ms >= after_index)
+        if (events[ev_out].unix_time_s_ms >= after_index)
         {
             memcpy(buf, &events[ev_out], sizeof(struct event_record_s));
             buf++;
-            after_index = events[ev_out].unixTime_s_ms;
+            after_index = events[ev_out].unix_time_s_ms;
             count++;
             if (count >= num)
             {
