@@ -41,7 +41,7 @@
     } while (0)
 
 #define ENTER_CRITICAL() __disable_irq() /**< Enter a critical section (disable interrupts) */
-#define EXIT_CRITICAL() __enable_irq() /**< Exit a critical section (enable interrupts) */
+#define EXIT_CRITICAL()  __enable_irq()  /**< Exit a critical section (enable interrupts) */
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS
@@ -51,7 +51,7 @@
  * @brief  This function is executed in case of error occurrence.
  */
 void error_handler(void);
-		
+
 /**
  * @brief Check if the debug session is enabled (a debugger is connected)
  *

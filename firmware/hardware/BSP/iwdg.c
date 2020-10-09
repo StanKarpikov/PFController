@@ -16,17 +16,17 @@
                        PUBLIC DEFINES
 --------------------------------------------------------------*/
 
-#undef ENABLE_WATCHDOG /**< Define to enable Watchdog module */
-#define WATCHDOG_WINDOW (4095) /**< Window size for the watchdog module */
-#define WATCHDOG_RELOAD (4095) /**< Reload value for the watchdog module */
+#undef ENABLE_WATCHDOG                        /**< Define to enable Watchdog module */
+#define WATCHDOG_WINDOW    (4095)             /**< Window size for the watchdog module */
+#define WATCHDOG_RELOAD    (4095)             /**< Reload value for the watchdog module */
 #define WATCHDOG_PRESCALER IWDG_PRESCALER_128 /**< Prescaler for the watchdog module */
-		 
+
 /*--------------------------------------------------------------
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
 #if defined(ENABLE_WATCHDOG)
-static IWDG_HandleTypeDef hiwdg; 
+static IWDG_HandleTypeDef hiwdg;
 #endif
 
 /*--------------------------------------------------------------

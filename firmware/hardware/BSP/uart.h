@@ -54,7 +54,6 @@ status_t uart_init(void);
  */
 status_t uart_interface_rx_init(void);
 
-
 /**
  * @brief Get received byte (the oldest one)
  *

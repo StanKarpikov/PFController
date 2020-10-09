@@ -20,10 +20,10 @@
                        DEFINES
 --------------------------------------------------------------*/
 
-#define UART_INTERFACE_TIMEOUT               (2000) /**< Timeout [ms] while writing to the interface output */
-#define UART_DEBUG_TIMEOUT                   (2000) /**< Timeout [ms] while writing to the debug output */
-#define USE_INTERFACE_AS_DEBUG               (0)    /**< Set to 1 to use the interface output as a debug output */
-#define UART_INTERFACE_BUFFER_DEFAULT_FILLER (0xFF) /**< The default value to fill the buffer */
+#define UART_INTERFACE_TIMEOUT               (2000)  /**< Timeout [ms] while writing to the interface output */
+#define UART_DEBUG_TIMEOUT                   (2000)  /**< Timeout [ms] while writing to the debug output */
+#define USE_INTERFACE_AS_DEBUG               (0)     /**< Set to 1 to use the interface output as a debug output */
+#define UART_INTERFACE_BUFFER_DEFAULT_FILLER (0xFF)  /**< The default value to fill the buffer */
 #define RX_BUFFER_SIZE                       (0x3FF) /**< The size of the receive buffer, 0x3FF by default */
 #define TX_BUFFER_SIZE                       (0x3FF) /**< The size of the transmit buffer, 0x3FF by default */
 
@@ -35,23 +35,23 @@
 typedef struct
 {
     uint8_t tx_buffer[TX_BUFFER_SIZE]; /**< Transmit buffer */
-    uint8_t tx_index; /**< The next read position */
-    uint8_t tx_end; /**< The end position in the transmit buffer */
+    uint8_t tx_index;                  /**< The next read position */
+    uint8_t tx_end;                    /**< The end position in the transmit buffer */
 
     uint16_t rx_buffer[RX_BUFFER_SIZE]; /**< Receive buffer */
-    int rx_index;        /**< The next write position */
-    int rx_readed;       /**< The next read position */
-    uint8_t rx_overflow; /**< 0 - normal, 1 - rx buffer overflow */
+    int rx_index;                       /**< The next write position */
+    int rx_readed;                      /**< The next read position */
+    uint8_t rx_overflow;                /**< 0 - normal, 1 - rx buffer overflow */
 } mcu_port_t;
 
 /*--------------------------------------------------------------
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-static UART_HandleTypeDef huart_interface = {0}; /**< Interface output handle */
+static UART_HandleTypeDef huart_interface = {0};        /**< Interface output handle */
 static DMA_HandleTypeDef hdma_usart_interface_rx = {0}; /**< Interface output receive DMA handle */
 static DMA_HandleTypeDef hdma_usart_interface_tx = {0}; /**< Interface output transmit DMA handle */
-static mcu_port_t mcu_port = {0}; /**< Port instance */
+static mcu_port_t mcu_port = {0};                       /**< Port instance */
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS
@@ -280,9 +280,9 @@ status_t uart_init(void)
     if (HAL_RS485Ex_Init(&huart_interface, UART_DE_POLARITY_HIGH, 0, 0) != HAL_OK)
     {
         error_handler();
-			  return PFC_ERROR_HAL;
+        return PFC_ERROR_HAL;
     }
-		return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 /**

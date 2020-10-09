@@ -40,7 +40,7 @@ int fputc(int c, FILE *f)
 void error_handler(void)
 {
     BREAKPOINT();
-	  /* TODO: Add sophisticated error processing */
+    /* TODO: Add sophisticated error processing */
     /*
     for (volatile int i = 0; i < 0xFFFFFFF; i++);
     NVIC_SystemReset();
