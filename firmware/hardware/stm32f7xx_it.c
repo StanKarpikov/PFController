@@ -27,17 +27,16 @@
  */
 void get_registers_from_stack(uint32_t* stack_address)
 {
+    volatile unsigned int lr = stack_address[5];
+    volatile unsigned int pc = stack_address[6];
+    volatile unsigned int psr = stack_address[7];
 
-    volatile unsigned int lr = stack_address[ 5 ];
-    volatile unsigned int pc = stack_address[ 6 ];
-    volatile unsigned int psr = stack_address[ 7 ];
-
-		gpio_error_led_on();
+    gpio_error_led_on();
     /* See: 4.3.10. Configurable Fault Status Register for deyeils */
     /* http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.dui0553a/Cihcfefj.html */
 
     volatile uint32_t CFSR = SCB->CFSR;
-    char error_msg [96] = "";
+    char error_msg[96] = "";
 
     if (SCB->HFSR & SCB_HFSR_FORCED_Msk)
     {
@@ -170,7 +169,7 @@ void get_registers_from_stack(uint32_t* stack_address)
 
     BREAKPOINT();
 
-		/*
+    /*
 		for(volatile int i=0;i<0xFFFFFFF;i++);
 		NVIC_SystemReset();
 		*/
@@ -185,12 +184,15 @@ void get_registers_from_stack(uint32_t* stack_address)
  */
 __asm void HardFault_Handler(void)
 {
+    // clang-format off
+
     tst lr, #4
     ite eq
     mrseq r0, msp
     mrsne r0, psp
     ldr r1, [r0, #24]
     b __cpp(get_registers_from_stack)
+    // clang-format on
 }
 
 /**
@@ -200,15 +202,14 @@ void NMI_Handler(void)
 {
 }
 
-
 /**
   * @brief This function handles Memory management fault.
   */
 void MemManage_Handler(void)
 {
-  while (1)
-  {
-  }
+    while (1)
+    {
+    }
 }
 
 /**
@@ -216,9 +217,9 @@ void MemManage_Handler(void)
   */
 void BusFault_Handler(void)
 {
-  while (1)
-  {
-  }
+    while (1)
+    {
+    }
 }
 
 /**
@@ -226,9 +227,9 @@ void BusFault_Handler(void)
   */
 void UsageFault_Handler(void)
 {
-  while (1)
-  {
-  }
+    while (1)
+    {
+    }
 }
 
 /**

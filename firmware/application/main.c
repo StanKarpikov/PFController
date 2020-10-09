@@ -9,9 +9,9 @@
 --------------------------------------------------------------*/
 
 #include "EEPROM_emulation.h"
-#include "pfc_logic.h"
 #include "command_processor.h"
 #include "events_process.h"
+#include "pfc_logic.h"
 #include "settings.h"
 /* BSP */
 #include "BSP/adc.h"
@@ -46,7 +46,7 @@ int main(void)
     gpio_init();
     dma_init();
     adc_init();
-	  timer_init();
+    timer_init();
     uart_init();
     iwdg_init();
 
@@ -63,7 +63,7 @@ int main(void)
         protocol_work();
 
         algorithm_process();
-        
+
         adc_set_temperature(28);  //TODO: Add temperature sensor measurement
         events_check_temperature();
     }

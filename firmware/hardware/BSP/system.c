@@ -9,6 +9,7 @@
 --------------------------------------------------------------*/
 
 #include "BSP/system.h"
+
 #include "stm32f7xx_hal.h"
 
 /*--------------------------------------------------------------
@@ -21,7 +22,7 @@
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-static uint32_t current_time=0;
+static uint32_t current_time = 0;
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS
@@ -32,43 +33,42 @@ static uint32_t current_time=0;
  */
 void HAL_MspInit(void)
 {
-  __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_RCC_SYSCFG_CLK_ENABLE();
-
+    __HAL_RCC_PWR_CLK_ENABLE();
+    __HAL_RCC_SYSCFG_CLK_ENABLE();
 }
 void system_increment_time(void)
 {
-	uint64_t current_time_next = current_time;
-	current_time_next++;
-	
-	DINT;
-	current_time = current_time_next;
-	EINT;
+    uint64_t current_time_next = current_time;
+    current_time_next++;
+
+    DINT;
+    current_time = current_time_next;
+    EINT;
 }
 
 void system_set_time(uint64_t time)
 {
-	if (time > TIME_MAX_VALUE)
-	{
-			time = 0;
-	}
-	DINT;
-	current_time = time;
-	EINT;
+    if (time > TIME_MAX_VALUE)
+    {
+        time = 0;
+    }
+    DINT;
+    current_time = time;
+    EINT;
 }
 
 uint64_t system_get_time(void)
 {
-	DINT;
-	uint64_t time = current_time;
-	EINT;
-	return time;
+    DINT;
+    uint64_t time = current_time;
+    EINT;
+    return time;
 }
 
 status_t system_delay_ticks(uint32_t delay_ticks)
 {
-	HAL_Delay(delay_ticks);
-	return PFC_SUCCESS;
+    HAL_Delay(delay_ticks);
+    return PFC_SUCCESS;
 }
 
 /**
@@ -136,7 +136,7 @@ status_t system_init(void)
   */
 void SysTick_Handler(void)
 {
-	system_increment_time();
+    system_increment_time();
 
-  HAL_IncTick();
+    HAL_IncTick();
 }

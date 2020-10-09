@@ -7,6 +7,7 @@ AllowShortFunctionsOnASingleLine: false
 IndentCaseLabels: true
 BreakBeforeBraces: Allman
 AlignConsecutiveMacros: true
+SortIncludes: false
 
 Language: Cpp
 Standard: Cpp11

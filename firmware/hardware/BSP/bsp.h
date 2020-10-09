@@ -16,10 +16,9 @@
 #define BOARD_STM32F7
 
 #ifdef BOARD_STM32F7
-	#include "board/board_stm32f7.h"
+#include "board/board_stm32f7.h"
 #else
-	#error "Please define the board"
+#error "Please define the board"
 #endif
-
 
 #endif /* _BSP_H */

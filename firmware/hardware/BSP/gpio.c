@@ -9,6 +9,7 @@
 --------------------------------------------------------------*/
 
 #include "BSP/gpio.h"
+
 #include "BSP/bsp.h"
 #include "BSP/debug.h"
 #include "stm32f7xx_hal.h"
@@ -20,48 +21,48 @@
 status_t Relay_Main_Off(void)
 {
     HAL_GPIO_WritePin(GPIOD, RELAY_2_Pin, GPIO_PIN_RESET);
-	  return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 status_t Relay_Main_On(void)
 {
     HAL_GPIO_WritePin(GPIOD, RELAY_2_Pin, GPIO_PIN_SET);
-	  return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 status_t Relay_Preload_Off(void)
 {
     HAL_GPIO_WritePin(GPIOD, RELAY_1_Pin, GPIO_PIN_RESET);
-	  return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 status_t Relay_Preload_On(void)
 {
     HAL_GPIO_WritePin(GPIOD, RELAY_1_Pin, GPIO_PIN_SET);
-	  return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 status_t ventilators_on(void)
 {
     //TODO:
-	  return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 status_t ventilators_off(void)
 {
     //TODO:
-	  return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 status_t gpio_pwm_test_on(void)
 {
-	/* TODO: Test pin can be added to measure PWM set time */
-	return PFC_SUCCESS;
+    /* TODO: Test pin can be added to measure PWM set time */
+    return PFC_SUCCESS;
 }
 
 status_t gpio_pwm_test_off(void)
 {
-	/* TODO: Test pin can be added to measure PWM set time */
-	return PFC_SUCCESS;
+    /* TODO: Test pin can be added to measure PWM set time */
+    return PFC_SUCCESS;
 }
 
 status_t gpio_error_led_on(void)
@@ -119,6 +120,6 @@ status_t gpio_init(void)
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     HAL_GPIO_Init(RE_485_GPIO_Port, &GPIO_InitStruct);
-		
-		return PFC_SUCCESS;
+
+    return PFC_SUCCESS;
 }

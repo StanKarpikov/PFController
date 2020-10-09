@@ -9,6 +9,7 @@
 --------------------------------------------------------------*/
 
 #include "BSP/timer.h"
+
 #include "BSP/bsp.h"
 #include "BSP/debug.h"
 #include "defines.h"
@@ -18,7 +19,7 @@
                        DEFINES
 --------------------------------------------------------------*/
 
-#define TIMER_SYNC_PERIOD (15625UL) /**< Syncronisation timer period value */
+#define TIMER_SYNC_PERIOD      (15625UL) /**< Syncronisation timer period value */
 #define TIMER_COOLER_PRESCALER (20000UL) /**< Timer for cooler prescaler value */
 
 #define PWM_DEAD_TIME (100U) /**< Dead time for the PWM signal [ticks] */
@@ -27,13 +28,13 @@
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-static TIM_HandleTypeDef timer_pwm = {0}; /**< Timer PWM hardware handle */
-static TIM_HandleTypeDef timer_adc = {0}; /**< Timer ADC hardware handle */
-static TIM_HandleTypeDef htim_efmc = {0}; /**< Timer EFMC hardware handle */
-static TIM_HandleTypeDef timer_cooler = {0}; /**< Timer 9 hardware handle */
-static DMA_HandleTypeDef hdma_tim_pwm_ch1 = {0}; /**< Timer PWM channel 1 DMA handle */
-static DMA_HandleTypeDef hdma_tim_pwm_ch2 = {0}; /**< Timer PWM channel 2 DMA handle */
-static DMA_HandleTypeDef hdma_tim_pwm_ch3 = {0}; /**< Timer PWM channel 3 DMA handle */
+static TIM_HandleTypeDef timer_pwm = {0};         /**< Timer PWM hardware handle */
+static TIM_HandleTypeDef timer_adc = {0};         /**< Timer ADC hardware handle */
+static TIM_HandleTypeDef htim_efmc = {0};         /**< Timer EFMC hardware handle */
+static TIM_HandleTypeDef timer_cooler = {0};      /**< Timer 9 hardware handle */
+static DMA_HandleTypeDef hdma_tim_pwm_ch1 = {0};  /**< Timer PWM channel 1 DMA handle */
+static DMA_HandleTypeDef hdma_tim_pwm_ch2 = {0};  /**< Timer PWM channel 2 DMA handle */
+static DMA_HandleTypeDef hdma_tim_pwm_ch3 = {0};  /**< Timer PWM channel 3 DMA handle */
 static DMA_HandleTypeDef hdma_tim_efmc_ch2 = {0}; /**< Timer EFMC channel 1 DMA handle */
 static DMA_HandleTypeDef hdma_tim_efmc_ch3 = {0}; /**< Timer EFMC channel 2 DMA handle */
 
@@ -167,7 +168,7 @@ static status_t timer_pwm_init(void)
     }
     //~400ns
     tim_msp_post_init(&timer_pwm);
-		return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 /**
@@ -201,7 +202,7 @@ static status_t timer_sync_init(void)
     {
         error_handler();
     }
-		return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 /**
@@ -274,7 +275,7 @@ static status_t tim_efmc_Init(void)
         error_handler();
     }
     tim_msp_post_init(&htim_efmc);
-		return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 /**
@@ -305,7 +306,7 @@ static status_t timer_cooler_init(void)
         error_handler();
     }
     tim_msp_post_init(&timer_cooler);
-		return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 /*--------------------------------------------------------------
@@ -457,7 +458,6 @@ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim)
     }
 }
 
-
 /**
 * @brief TIM_Base MSP De-Initialization
 * This function freeze the hardware resources
@@ -518,10 +518,10 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim)
  */
 status_t timer_write_pwm(uint32_t ccr1, uint32_t ccr2, uint32_t ccr3)
 {
-	TIMER_PWM->CCR1 = ccr1;
-	TIMER_PWM->CCR2 = ccr2;
-	TIMER_PWM->CCR3 = ccr3;
-	return PFC_SUCCESS;
+    TIMER_PWM->CCR1 = ccr1;
+    TIMER_PWM->CCR2 = ccr2;
+    TIMER_PWM->CCR3 = ccr3;
+    return PFC_SUCCESS;
 }
 
 /*
@@ -533,11 +533,11 @@ status_t timer_write_pwm(uint32_t ccr1, uint32_t ccr2, uint32_t ccr3)
  */
 status_t timer_correct_period(uint32_t arr)
 {
-	DINT;
-	TIMER_SYNC->ARR = arr;
-	TIMER_SYNC->EGR = TIM_EGR_UG;
-	EINT;
-	return PFC_SUCCESS;
+    DINT;
+    TIMER_SYNC->ARR = arr;
+    TIMER_SYNC->EGR = TIM_EGR_UG;
+    EINT;
+    return PFC_SUCCESS;
 }
 
 /*
@@ -547,17 +547,17 @@ status_t timer_correct_period(uint32_t arr)
  */
 status_t timer_restore_pwm(void)
 {
-	TIMER_PWM->CCER |= (TIM_CCER_CC1E);
-	TIMER_PWM->CCER |= (TIM_CCER_CC1NE);
-	TIMER_PWM->CCER |= (TIM_CCER_CC2E);
-	TIMER_PWM->CCER |= (TIM_CCER_CC2NE);
-	TIMER_PWM->CCER |= (TIM_CCER_CC3E);
-	TIMER_PWM->CCER |= (TIM_CCER_CC3NE);
+    TIMER_PWM->CCER |= (TIM_CCER_CC1E);
+    TIMER_PWM->CCER |= (TIM_CCER_CC1NE);
+    TIMER_PWM->CCER |= (TIM_CCER_CC2E);
+    TIMER_PWM->CCER |= (TIM_CCER_CC2NE);
+    TIMER_PWM->CCER |= (TIM_CCER_CC3E);
+    TIMER_PWM->CCER |= (TIM_CCER_CC3NE);
 
-	__HAL_TIM_MOE_ENABLE(&timer_pwm);
-	__HAL_TIM_ENABLE(&timer_pwm);
-	
-	return PFC_SUCCESS;
+    __HAL_TIM_MOE_ENABLE(&timer_pwm);
+    __HAL_TIM_ENABLE(&timer_pwm);
+
+    return PFC_SUCCESS;
 }
 
 /*
@@ -597,11 +597,11 @@ status_t timer_start_adc_timer(void)
  */
 status_t timer_init(void)
 {
-	tim_efmc_Init();
-	timer_pwm_init();
-	timer_cooler_init();
-	timer_sync_init();
-	return PFC_SUCCESS;
+    tim_efmc_Init();
+    timer_pwm_init();
+    timer_cooler_init();
+    timer_sync_init();
+    return PFC_SUCCESS;
 }
 
 /**
@@ -609,7 +609,7 @@ status_t timer_init(void)
   */
 void TIMER_PWM_CH1_DMA_IRQ(void)
 {
-  HAL_DMA_IRQHandler(&hdma_tim_pwm_ch1);
+    HAL_DMA_IRQHandler(&hdma_tim_pwm_ch1);
 }
 
 /**
@@ -617,7 +617,7 @@ void TIMER_PWM_CH1_DMA_IRQ(void)
   */
 void TIMER_PWM_CH2_DMA_IRQ(void)
 {
-  HAL_DMA_IRQHandler(&hdma_tim_pwm_ch2);
+    HAL_DMA_IRQHandler(&hdma_tim_pwm_ch2);
 }
 
 /**
@@ -625,7 +625,7 @@ void TIMER_PWM_CH2_DMA_IRQ(void)
   */
 void TIMER_PWM_CH3_DMA_IRQ(void)
 {
-  HAL_DMA_IRQHandler(&hdma_tim_pwm_ch3);
+    HAL_DMA_IRQHandler(&hdma_tim_pwm_ch3);
 }
 
 /**
@@ -633,7 +633,7 @@ void TIMER_PWM_CH3_DMA_IRQ(void)
   */
 void TIMER_EFMC_CH1_DMA_IRQ(void)
 {
-  HAL_DMA_IRQHandler(&hdma_tim_efmc_ch2);
+    HAL_DMA_IRQHandler(&hdma_tim_efmc_ch2);
 }
 
 /**
@@ -641,6 +641,5 @@ void TIMER_EFMC_CH1_DMA_IRQ(void)
   */
 void TIMER_EFMC_CH2_DMA_IRQ(void)
 {
-  HAL_DMA_IRQHandler(&hdma_tim_efmc_ch3);
+    HAL_DMA_IRQHandler(&hdma_tim_efmc_ch3);
 }
-

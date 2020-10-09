@@ -3,7 +3,7 @@
  * @author Stanislav Karpikov
  * @brief Board support package: Independent watchdog
  */
- 
+
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -39,7 +39,7 @@ static IWDG_HandleTypeDef hiwdg;
 status_t iwdg_init(void)
 {
 #if defined(ENABLE_WATCHDOG)
-		/* Approx. 10 sec */ 
+    /* Approx. 10 sec */
     hiwdg.Instance = IWDG;
     hiwdg.Init.Prescaler = IWDG_PRESCALER_128;
     hiwdg.Init.Window = 4095;
@@ -49,5 +49,5 @@ status_t iwdg_init(void)
         error_handler();
     }
 #endif
-	return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }

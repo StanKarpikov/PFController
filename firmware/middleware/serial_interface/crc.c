@@ -3,7 +3,7 @@
  * @author Stanislav Karpikov
  * @brief Calculate CRC16
  */
- 
+
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -14,7 +14,7 @@
                        DEFINES
 --------------------------------------------------------------*/
 
-#define CRC16_INITIAL_VALUE (0x1D0F) /**< Initial CRC16 value, 0x1D0F for CRC16-CCITT */
+#define CRC16_INITIAL_VALUE    (0x1D0F) /**< Initial CRC16 value, 0x1D0F for CRC16-CCITT */
 #define CRC16_POLYNOMIAL_VALUE (0x1021) /**< Polynomial CRC16 value, 0x1021 = 0001 0000 0010 0001  (0, 5, 12) for CRC16-CCITT */
 
 /*--------------------------------------------------------------

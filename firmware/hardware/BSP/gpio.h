@@ -28,5 +28,5 @@ status_t Relay_Preload_Off(void);
 status_t Relay_Preload_On(void);
 status_t ventilators_on(void);
 status_t ventilators_off(void);
-	
+
 #endif /* _GPIO_H */

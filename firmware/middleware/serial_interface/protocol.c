@@ -3,17 +3,18 @@
  * @author Stanislav Karpikov
  * @brief Process received messages from the panel
  */
- 
+
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
 
 #include "protocol.h"
-#include "command_processor.h"
+
 #include <string.h>
 
 #include "BSP/bsp.h"
 #include "BSP/uart.h"
+#include "command_processor.h"
 #include "crc.h"
 #include "stm32f7xx_hal.h"
 
@@ -21,7 +22,7 @@
                        DEFINES
 --------------------------------------------------------------*/
 
-#define PROTOCOL_START_BYTE ((uint8_t)0x55) 
+#define PROTOCOL_START_BYTE ((uint8_t)0x55)
 #define PROTOCOL_STOP_BYTE  ((uint8_t)0x77)
 #define PROTOCOL_STATUS_MAX (31)  // 2**5bits - 1 = 31
 
@@ -47,7 +48,7 @@ static protocol_context_t protocol;
  */
 static void adapter_send_packet(uint8_t *data, uint32_t len)
 {
-	uart_interface_transmit(data, len);
+    uart_interface_transmit(data, len);
 }
 
 /**
@@ -58,7 +59,7 @@ static void adapter_send_packet(uint8_t *data, uint32_t len)
  */
 static status_t adapter_get_byte(uint8_t *byte)
 {
-	return uart_interface_get_byte(byte);
+    return uart_interface_get_byte(byte);
 }
 
 /**
@@ -68,7 +69,7 @@ static status_t adapter_get_byte(uint8_t *byte)
  */
 static status_t adapter_rx_init(void)
 {
-	return uart_interface_rx_init();
+    return uart_interface_rx_init();
 }
 
 /**
@@ -96,14 +97,14 @@ static void protocol_reset(protocol_context_t *pc)
  */
 status_t protocol_hw_init(void)
 {
-	status_t status;
-	
-	status = command_handlers_init();
-	if(status!= PFC_SUCCESS)return status;
-	
-	status = adapter_rx_init();
-	
-	return status;
+    status_t status;
+
+    status = command_handlers_init();
+    if (status != PFC_SUCCESS) return status;
+
+    status = adapter_rx_init();
+
+    return status;
 }
 
 /*
@@ -115,12 +116,12 @@ status_t protocol_hw_init(void)
  * @return Status of the operation
  */
 status_t protocol_init(PFC_COMMAND_CALLBACK *handlers,
-											 uint8_t handlers_count)
+                       uint8_t handlers_count)
 {
     protocol.handlers = handlers;
     protocol.handlers_count = handlers_count;
-	
-		return PFC_SUCCESS;
+
+    return PFC_SUCCESS;
 }
 
 /*
@@ -141,7 +142,7 @@ status_t protocol_send_packet(protocol_context_t *pc)
     pc->packet_to_send.data[pc->packet_to_send.fields.len + 2] = crcsend >> 8;
     pc->packet_to_send.data[pc->packet_to_send.fields.len + 3] = PROTOCOL_STOP_BYTE;
     adapter_send_packet(pc->packet_to_send.data, pc->packet_to_send.fields.len + MINIMUM_PACKET_LENGTH);
-		return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 /*
@@ -297,8 +298,8 @@ status_t protocol_work(void)
                     }
                     else
                     {
-												PFC_COMMAND_CALLBACK handler = protocol.handlers[protocol.packet_received.fields.command];
-                        if (handler)handler(&protocol);
+                        PFC_COMMAND_CALLBACK handler = protocol.handlers[protocol.packet_received.fields.command];
+                        if (handler) handler(&protocol);
                     }
                 }
                 else
@@ -331,7 +332,7 @@ status_t protocol_work(void)
  */
 void packet_set_data_len(packet_t *packet, uint32_t len)
 {
-	packet->fields.len = MINIMUM_PACKET_LENGTH + len;
+    packet->fields.len = MINIMUM_PACKET_LENGTH + len;
 }
 
 /*
@@ -343,7 +344,7 @@ void packet_set_data_len(packet_t *packet, uint32_t len)
  */
 uint8_t packet_get_command(packet_t *packet)
 {
-	return packet->fields.command;
+    return packet->fields.command;
 }
 
 /*
@@ -355,7 +356,7 @@ uint8_t packet_get_command(packet_t *packet)
  */
 uint16_t packet_get_crc(packet_t *packet)
 {
-	return (packet->data[packet->fields.len] | (packet->data[packet->fields.len + 1] << 8));
+    return (packet->data[packet->fields.len] | (packet->data[packet->fields.len + 1] << 8));
 }
 
 /*
@@ -367,7 +368,7 @@ uint16_t packet_get_crc(packet_t *packet)
  */
 uint16_t packet_calculate_crc(packet_t *packet)
 {
-	return crc16(packet->data + 1, packet->fields.len - 1);
+    return crc16(packet->data + 1, packet->fields.len - 1);
 }
 
 /*
@@ -377,7 +378,7 @@ uint16_t packet_calculate_crc(packet_t *packet)
  */
 void packet_clear_status(packet_t *packet)
 {
-	packet->fields.status.raw = 0;
+    packet->fields.status.raw = 0;
 }
 
 /*
@@ -388,7 +389,7 @@ void packet_clear_status(packet_t *packet)
  */
 void packet_set_error(packet_t *packet, uint8_t error)
 {
-	packet->fields.status.fields.error = error;
+    packet->fields.status.fields.error = error;
 }
 
 /*
@@ -399,5 +400,5 @@ void packet_set_error(packet_t *packet, uint8_t error)
  */
 void packet_set_command(packet_t *packet, uint8_t command)
 {
-	packet->fields.command = command;
+    packet->fields.command = command;
 }

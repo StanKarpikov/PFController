@@ -9,6 +9,7 @@
 --------------------------------------------------------------*/
 
 #include "BSP/debug.h"
+
 #include "BSP/uart.h"
 #include "stm32f7xx_hal.h"
 
@@ -33,7 +34,7 @@ int fputc(int c, FILE *f)
 void error_handler(void)
 {
     BREAKPOINT();
-	/*
+    /*
     for (volatile int i = 0; i < 0xFFFFFFF; i++);
     NVIC_SystemReset();
     while (1);

@@ -9,15 +9,16 @@
 --------------------------------------------------------------*/
 
 #include "pfc_logic.h"
+
 #include "BSP/bsp.h"
-#include "defines.h"
+#include "BSP/gpio.h"
+#include "BSP/timer.h"
+#include "adc_logic.h"
 #include "command_processor.h"
+#include "defines.h"
 #include "events.h"
 #include "math.h"
 #include "settings.h"
-#include "BSP/timer.h"
-#include "BSP/gpio.h"
-#include "adc_logic.h"
 
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS PROTOTYPES
@@ -43,14 +44,14 @@ static void pfc_faultblock_process(void);
 --------------------------------------------------------------*/
 
 static pfc_state_t last_status = PFC_STATE_INIT; /**< The last state of the PFC */
-static uint32_t period_counter = 0; /**< The number of periods since start */
-static uint8_t main_started = 0; /**< The main connector is switched on */
-static uint8_t preload_started = 0; /**< The preload connector is switched on */
-static uint32_t main_start_period = 0; /**< The period count when the main connector was switched on */
+static uint32_t period_counter = 0;              /**< The number of periods since start */
+static uint8_t main_started = 0;                 /**< The main connector is switched on */
+static uint8_t preload_started = 0;              /**< The preload connector is switched on */
+static uint32_t main_start_period = 0;           /**< The period count when the main connector was switched on */
 
 static uint8_t pwm_on = 0; /**< PWM is switched on */
 
-static pfc_state_t current_state = PFC_STATE_INIT;/**< The current state of the PFC */
+static pfc_state_t current_state = PFC_STATE_INIT; /**< The current state of the PFC */
 
 /*--------------------------------------------------------------
                        PRIVATE TYPES
@@ -60,24 +61,24 @@ typedef void (*FSM_PROCESS_CALLBACK)(void); /**< State machine state callback */
 
 /** State table array */
 static FSM_PROCESS_CALLBACK state_table[PFC_STATE_COUNT] = {
-	pfc_init_process,               /**< Initial state */
-  pfc_stop_process,               /**< Stop state (power hardware is switched off) */
-  pfc_sync_process,               /**< Syncronisation with the network */
-  pfc_precharge_prepare_process,  /**< Prepare precharge */
-  pfc_precharge_process,          /**< Precharge (connector is in on state) */
-  pfc_main_process,               /**< Main state. Precharge is finished */
-  pfc_precharge_disable_process,  /**< Precharge is switching off */
-  pfc_work_process,               /**< Ready state */
-  pfc_charge_process,             /**< Main capacitors charge is ongoing */
-  pfc_test_process,               /**< Test state */
-	pfc_stopping_process,           /**< Stoping work: disable sensitive and power peripheral */
-  pfc_faultblock_process,         /**< Fault state */
+    pfc_init_process,              /**< Initial state */
+    pfc_stop_process,              /**< Stop state (power hardware is switched off) */
+    pfc_sync_process,              /**< Syncronisation with the network */
+    pfc_precharge_prepare_process, /**< Prepare precharge */
+    pfc_precharge_process,         /**< Precharge (connector is in on state) */
+    pfc_main_process,              /**< Main state. Precharge is finished */
+    pfc_precharge_disable_process, /**< Precharge is switching off */
+    pfc_work_process,              /**< Ready state */
+    pfc_charge_process,            /**< Main capacitors charge is ongoing */
+    pfc_test_process,              /**< Test state */
+    pfc_stopping_process,          /**< Stoping work: disable sensitive and power peripheral */
+    pfc_faultblock_process,        /**< Fault state */
 };
 
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS
 --------------------------------------------------------------*/
-		
+
 /**
  * @brief Switch on the PFC
  */
@@ -112,8 +113,8 @@ static void pfc_disable_pwm(void)
         //epwm_disable(i);
     }
 
-		timer_disable_pwm();
-		
+    timer_disable_pwm();
+
     pwm_on = 0;
 }
 
@@ -127,9 +128,8 @@ static void pfc_restore_pwm(void)
 
     if (!pwm_on)
     {
-				adc_clear_accumulators();
-				timer_restore_pwm();
-        
+        adc_clear_accumulators();
+        timer_restore_pwm();
 
         pwm_on = 1;
     }
@@ -142,7 +142,7 @@ static void pfc_restore_pwm(void)
  */
 static bool is_voltage_ready(void)
 {
-		settings_capacitors_t capacitors = settings_get_capacitors();
+    settings_capacitors_t capacitors = settings_get_capacitors();
     if (adc_get_cap_voltage() > capacitors.Ucap_precharge)
     {
         return true;
@@ -158,20 +158,20 @@ static bool is_voltage_ready(void)
  */
 static void pfc_init_process(void)
 {
-		Relay_Main_Off();
-		Relay_Preload_Off();
-		ventilators_off();
+    Relay_Main_Off();
+    Relay_Preload_Off();
+    ventilators_off();
 
-		main_started = 0;
-		preload_started = 0;
+    main_started = 0;
+    preload_started = 0;
 
-		pfc_disable_pwm();
+    pfc_disable_pwm();
 
-	  /* Wait for transition processes to end */
-		if (period_counter > STARTUP_STABILISATION_TIME)
-		{
-				pfc_set_state(PFC_STATE_STOP);
-		}
+    /* Wait for transition processes to end */
+    if (period_counter > STARTUP_STABILISATION_TIME)
+    {
+        pfc_set_state(PFC_STATE_STOP);
+    }
 }
 
 /**
@@ -179,33 +179,33 @@ static void pfc_init_process(void)
  */
 static void pfc_stop_process(void)
 {
-		Relay_Main_Off();
-		Relay_Preload_Off();
-		ventilators_off();
+    Relay_Main_Off();
+    Relay_Preload_Off();
+    ventilators_off();
 
-		main_started = 0;
-		preload_started = 0;
+    main_started = 0;
+    preload_started = 0;
 
-		pfc_disable_pwm();
-	
-	/* TODO: Run PFC autotically. Currently the device wait for a command from the panel */
+    pfc_disable_pwm();
+
+    /* TODO: Run PFC autotically. Currently the device wait for a command from the panel */
 }
 
 /**
  * @brief Process the state callback: synd
  */
 static void pfc_sync_process(void)
-{	
-	pfc_disable_pwm();
-	complex_amp_t U_50Hz[PFC_NCHAN]={0};
-	float period_delta = 0;
-  adc_get_complex_phase(U_50Hz, &period_delta);
-	/* Wait for a phase stabilisation */
-	/* TODO: Check for float comparison */
-	if (period_delta == 0 && fabs(U_50Hz[PFC_ACHAN].phase) < SYNC_MINIMUM_PHASE)
-	{
-			pfc_set_state(PFC_STATE_PRECHARGE_PREPARE);
-	}
+{
+    pfc_disable_pwm();
+    complex_amp_t U_50Hz[PFC_NCHAN] = {0};
+    float period_delta = 0;
+    adc_get_complex_phase(U_50Hz, &period_delta);
+    /* Wait for a phase stabilisation */
+    /* TODO: Check for float comparison */
+    if (period_delta == 0 && fabs(U_50Hz[PFC_ACHAN].phase) < SYNC_MINIMUM_PHASE)
+    {
+        pfc_set_state(PFC_STATE_PRECHARGE_PREPARE);
+    }
 }
 
 /**
@@ -213,9 +213,9 @@ static void pfc_sync_process(void)
  */
 static void pfc_precharge_prepare_process(void)
 {
-	pfc_disable_pwm();
-	preload_started = 0;
-	pfc_set_state(PFC_STATE_PRECHARGE);
+    pfc_disable_pwm();
+    preload_started = 0;
+    pfc_set_state(PFC_STATE_PRECHARGE);
 }
 
 /**
@@ -223,18 +223,18 @@ static void pfc_precharge_prepare_process(void)
  */
 static void pfc_precharge_process(void)
 {
-	pfc_disable_pwm();
-	if (is_voltage_ready())
-	{
-			pfc_set_state(PFC_STATE_MAIN);
-			return;
-	}
-	if (!preload_started)
-	{
-			Relay_Preload_On();
-			//events_preload_start();
-			preload_started = 1;
-	}
+    pfc_disable_pwm();
+    if (is_voltage_ready())
+    {
+        pfc_set_state(PFC_STATE_MAIN);
+        return;
+    }
+    if (!preload_started)
+    {
+        Relay_Preload_On();
+        //events_preload_start();
+        preload_started = 1;
+    }
 }
 
 /**
@@ -242,21 +242,21 @@ static void pfc_precharge_process(void)
  */
 static void pfc_main_process(void)
 {
-	pfc_disable_pwm();
-	if (!main_started)
-	{
-			Relay_Main_On();
-			ventilators_on();
-			main_started = 1;
-			main_start_period = period_counter;
-	}
-	uint32_t period_delta = period_counter - main_start_period;
-	
-	/* Wait for transition processes to end */
-	if (period_delta > PRELOAD_STABILISATION_TIME)
-	{
-			pfc_set_state(PFC_STATE_PRECHARGE_DISABLE);
-	}
+    pfc_disable_pwm();
+    if (!main_started)
+    {
+        Relay_Main_On();
+        ventilators_on();
+        main_started = 1;
+        main_start_period = period_counter;
+    }
+    uint32_t period_delta = period_counter - main_start_period;
+
+    /* Wait for transition processes to end */
+    if (period_delta > PRELOAD_STABILISATION_TIME)
+    {
+        pfc_set_state(PFC_STATE_PRECHARGE_DISABLE);
+    }
 }
 
 /**
@@ -264,9 +264,9 @@ static void pfc_main_process(void)
  */
 static void pfc_precharge_disable_process(void)
 {
-	Relay_Preload_Off();
-	preload_started = 0;
-	pfc_set_state(PFC_STATE_WORK);
+    Relay_Preload_Off();
+    preload_started = 0;
+    pfc_set_state(PFC_STATE_WORK);
 }
 
 /**
@@ -274,7 +274,7 @@ static void pfc_precharge_disable_process(void)
  */
 static void pfc_work_process(void)
 {
-	pfc_disable_pwm();
+    pfc_disable_pwm();
 }
 
 /**
@@ -282,17 +282,17 @@ static void pfc_work_process(void)
  */
 static void pfc_charge_process(void)
 {
-	static uint8_t pulse=0;
-	pfc_restore_pwm();
+    static uint8_t pulse = 0;
+    pfc_restore_pwm();
 
-	pulse++;
-	if (pulse >= 4)
-	{
-			pulse = 0;
-			pfc_set_state(PFC_STATE_WORK);
-	}
+    pulse++;
+    if (pulse >= 4)
+    {
+        pulse = 0;
+        pfc_set_state(PFC_STATE_WORK);
+    }
 
-	/*
+    /*
 	TODO: Check the charge
 	if (adc_get_cap_voltage() < (PFC.settings.capacitors.Ucap_precharge*0.8)){//TODO:
 		events_new_event(
@@ -303,7 +303,6 @@ static void pfc_charge_process(void)
 			);
 	}
 	*/
-	
 }
 
 /**
@@ -311,7 +310,7 @@ static void pfc_charge_process(void)
  */
 static void pfc_test_process(void)
 {
-	/* NOTE: Test state can be added */
+    /* NOTE: Test state can be added */
 }
 
 /**
@@ -319,11 +318,11 @@ static void pfc_test_process(void)
  */
 static void pfc_stopping_process(void)
 {
-	Relay_Main_Off();
-	Relay_Preload_Off();
-	ventilators_off();
-	//events_preload_stop();
-	pfc_set_state(PFC_STATE_STOP);
+    Relay_Main_Off();
+    Relay_Preload_Off();
+    ventilators_off();
+    //events_preload_stop();
+    pfc_set_state(PFC_STATE_STOP);
 }
 
 /**
@@ -331,10 +330,10 @@ static void pfc_stopping_process(void)
  */
 static void pfc_faultblock_process(void)
 {
-	Relay_Main_Off();
-	Relay_Preload_Off();
-	ventilators_off();
-	pfc_disable_pwm();
+    Relay_Main_Off();
+    Relay_Preload_Off();
+    ventilators_off();
+    pfc_disable_pwm();
 }
 
 /**
@@ -356,7 +355,7 @@ static void pfc_set_state(pfc_state_t state)
  */
 void pfc_faultblock(void)
 {
-	pfc_set_state(PFC_STATE_FAULTBLOCK);
+    pfc_set_state(PFC_STATE_FAULTBLOCK);
 }
 
 /*
@@ -369,52 +368,52 @@ void pfc_faultblock(void)
  */
 status_t pfc_apply_command(pfc_commands_t command, uint32_t data)
 {
-	settings_pwm_t pwm_settings = settings_get_pwm();
-	switch (command)
-	{
-			case COMMAND_WORK_ON:
-					if (pfc_get_state() == PFC_STATE_STOP)
-					{
-							pfc_switch_on();
-					}
-					break;
-			case COMMAND_WORK_OFF:
-					pfc_switch_off();
-					break;
-			case COMMAND_CHARGE_ON:
-					if (pfc_get_state() == PFC_STATE_WORK)
-					{
-							pfc_set_state(PFC_STATE_CHARGE);
-					}
-					break;
-			case COMMAND_CHARGE_OFF:
-					if (pfc_get_state() == PFC_STATE_CHARGE)
-					{
-							pfc_set_state(PFC_STATE_WORK);
-					}
-					break;
-			case COMMAND_SETTINGS_SAVE:
-					if (pfc_get_state() == PFC_STATE_STOP)
-					{
-							settings_save();
-					}
-					break;
-			case COMMAND_CHANNEL0_DATA:
-					pwm_settings.active_channels[PFC_ACHAN] = data;
-					settings_set_pwm(pwm_settings);
-					break;
-			case COMMAND_CHANNEL1_DATA:
-					pwm_settings.active_channels[PFC_BCHAN] = data;
-					settings_set_pwm(pwm_settings);
-					break;
-			case COMMAND_CHANNEL2_DATA:
-					pwm_settings.active_channels[PFC_CCHAN] = data;
-					settings_set_pwm(pwm_settings);
-					break;
-			default:
-				  return PFC_ERROR_DATA;
-	}
-	return PFC_SUCCESS;
+    settings_pwm_t pwm_settings = settings_get_pwm();
+    switch (command)
+    {
+        case COMMAND_WORK_ON:
+            if (pfc_get_state() == PFC_STATE_STOP)
+            {
+                pfc_switch_on();
+            }
+            break;
+        case COMMAND_WORK_OFF:
+            pfc_switch_off();
+            break;
+        case COMMAND_CHARGE_ON:
+            if (pfc_get_state() == PFC_STATE_WORK)
+            {
+                pfc_set_state(PFC_STATE_CHARGE);
+            }
+            break;
+        case COMMAND_CHARGE_OFF:
+            if (pfc_get_state() == PFC_STATE_CHARGE)
+            {
+                pfc_set_state(PFC_STATE_WORK);
+            }
+            break;
+        case COMMAND_SETTINGS_SAVE:
+            if (pfc_get_state() == PFC_STATE_STOP)
+            {
+                settings_save();
+            }
+            break;
+        case COMMAND_CHANNEL0_DATA:
+            pwm_settings.active_channels[PFC_ACHAN] = data;
+            settings_set_pwm(pwm_settings);
+            break;
+        case COMMAND_CHANNEL1_DATA:
+            pwm_settings.active_channels[PFC_BCHAN] = data;
+            settings_set_pwm(pwm_settings);
+            break;
+        case COMMAND_CHANNEL2_DATA:
+            pwm_settings.active_channels[PFC_CCHAN] = data;
+            settings_set_pwm(pwm_settings);
+            break;
+        default:
+            return PFC_ERROR_DATA;
+    }
+    return PFC_SUCCESS;
 }
 
 /*
@@ -422,12 +421,12 @@ status_t pfc_apply_command(pfc_commands_t command, uint32_t data)
  */
 void pfc_process(void)
 {
-	  FSM_PROCESS_CALLBACK handler = state_table[pfc_get_state()];
-    if(handler)
+    FSM_PROCESS_CALLBACK handler = state_table[pfc_get_state()];
+    if (handler)
     {
-			handler();
-		}
-       
+        handler();
+    }
+
     if (pfc_get_state() != last_status)
     {
         events_new_event(EVENT_TYPE_CHANGESTATE, pfc_get_state(), 0, 0);
@@ -453,5 +452,5 @@ pfc_state_t pfc_get_state(void)
  */
 uint8_t pfc_is_pwm_on(void)
 {
-	return pwm_on;
+    return pwm_on;
 }

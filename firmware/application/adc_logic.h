@@ -58,30 +58,30 @@ typedef struct
  */
 enum
 {
-    ADC_UCAP,       /**< CH10 Voltage at the capacitors */
-    ADC_U_A,      /**< CH11 Voltage U, phase A */
-    ADC_U_B,      /**< CH12 Voltage U, phase B */
-    ADC_U_C,      /**< CH13 Voltage U, phase C */
-    ADC_I_A,      /**< CH0 Current I, phase A */
-    ADC_I_B,      /**< CH1 Current I, phase B */
-    ADC_I_C,      /**< CH2 Current I, phase C */
-    ADC_I_ET,     /**< CH3 Current I, load */
-    ADC_I_TEMP1,  /**< CH5 */
-    ADC_I_TEMP2,  /**< CH6 */
-    ADC_EDC_A,    /**< CH14 EMS A */
-    ADC_EDC_B,    /**< CH15 EMS B */
-    ADC_EDC_C,    /**< CH8 EMS C */
-    ADC_EDC_I,    /**< CH9 EMS I */
-    ADC_MATH_A,    /**< MATH channel A */
-    ADC_MATH_B,    /**< MATH channel B */
-    ADC_MATH_C,    /**< MATH channel C */
-    ADC_MATH_C_A,    /**< MATH channel CA */
-    ADC_MATH_C_B,    /**< MATH channel CB */
-    ADC_MATH_C_C,    /**< MATH channel CC */
-	  ADC_CHANNEL_FULL_COUNT /**< ADC channels count */
+    ADC_UCAP,              /**< CH10 Voltage at the capacitors */
+    ADC_U_A,               /**< CH11 Voltage U, phase A */
+    ADC_U_B,               /**< CH12 Voltage U, phase B */
+    ADC_U_C,               /**< CH13 Voltage U, phase C */
+    ADC_I_A,               /**< CH0 Current I, phase A */
+    ADC_I_B,               /**< CH1 Current I, phase B */
+    ADC_I_C,               /**< CH2 Current I, phase C */
+    ADC_I_ET,              /**< CH3 Current I, load */
+    ADC_I_TEMP1,           /**< CH5 */
+    ADC_I_TEMP2,           /**< CH6 */
+    ADC_EDC_A,             /**< CH14 EMS A */
+    ADC_EDC_B,             /**< CH15 EMS B */
+    ADC_EDC_C,             /**< CH8 EMS C */
+    ADC_EDC_I,             /**< CH9 EMS I */
+    ADC_MATH_A,            /**< MATH channel A */
+    ADC_MATH_B,            /**< MATH channel B */
+    ADC_MATH_C,            /**< MATH channel C */
+    ADC_MATH_C_A,          /**< MATH channel CA */
+    ADC_MATH_C_B,          /**< MATH channel CB */
+    ADC_MATH_C_C,          /**< MATH channel CC */
+    ADC_CHANNEL_FULL_COUNT /**< ADC channels count */
 };
 
-#define ADC_CHANNEL_NUMBER (ADC_EDC_I+1) /**< The number of ADC physical channels */
+#define ADC_CHANNEL_NUMBER (ADC_EDC_I + 1) /**< The number of ADC physical channels */
 #define ADC_MATH_NUMBER    (6) /**< The number of ADC mathematical channels */
 
 /*--------------------------------------------------------------

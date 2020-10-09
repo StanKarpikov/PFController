@@ -9,9 +9,10 @@
 --------------------------------------------------------------*/
 
 #include "events.h"
-#include "pfc_logic.h"
-#include "command_processor.h"
+
 #include "BSP/system.h"
+#include "command_processor.h"
+#include "pfc_logic.h"
 #include "string.h"
 
 /*--------------------------------------------------------------
@@ -25,11 +26,11 @@
 --------------------------------------------------------------*/
 
 /** Events storage */
-static struct event_record_s events[EVENTS_RECORDS_NUM + 1]={0};
+static struct event_record_s events[EVENTS_RECORDS_NUM + 1] = {0};
 
-static uint16_t events_in = 0; /**< The number of events have been written to the storage */
-static uint16_t events_out = 0;/**< The number of events have been written from the storage */
-static uint32_t lastEventTime[SUB_EVENT_TYPE_PROTECTION_IGBT + 1][ADC_CHANNEL_NUMBER]={0}; /**< The array of the last timestamps of events */
+static uint16_t events_in = 0;                                                               /**< The number of events have been written to the storage */
+static uint16_t events_out = 0;                                                              /**< The number of events have been written from the storage */
+static uint32_t lastEventTime[SUB_EVENT_TYPE_PROTECTION_IGBT + 1][ADC_CHANNEL_NUMBER] = {0}; /**< The array of the last timestamps of events */
 
 /** Protection levels for different subevents */
 static const uint16_t protection_levels[] = {
@@ -57,7 +58,7 @@ static const uint16_t protection_levels[] = {
  */
 static void events_lock(void)
 {
-	DINT;
+    DINT;
 }
 
 /**
@@ -65,7 +66,7 @@ static void events_lock(void)
  */
 static void events_unlock(void)
 {
-	EINT;
+    EINT;
 }
 
 /*--------------------------------------------------------------
@@ -147,13 +148,13 @@ static void events_add(struct event_record_s* event)
  * @param value The event data
  */
 void events_new_event(event_type_t main, uint32_t sub, uint32_t info, float value)
-{                              
-	  struct event_record_s newevent={0};
-		newevent.unix_time_s_ms = system_get_time();                               
-		newevent.type = (main) | (((uint32_t)sub) << 16); 
-		newevent.info = info;                             
-		newevent.value = value;                           
-		events_add(&newevent);                             
+{
+    struct event_record_s newevent = {0};
+    newevent.unix_time_s_ms = system_get_time();
+    newevent.type = (main) | (((uint32_t)sub) << 16);
+    newevent.info = info;
+    newevent.value = value;
+    events_add(&newevent);
 }
 
 /*

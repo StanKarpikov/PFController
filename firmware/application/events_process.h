@@ -11,8 +11,8 @@
                        INCLUDE
 --------------------------------------------------------------*/
 
-#include "defines.h"
 #include "command_processor.h"
+#include "defines.h"
 #include "events.h"
 #include "protocol.h"
 

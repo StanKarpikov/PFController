@@ -11,8 +11,8 @@
                        INCLUDES
 --------------------------------------------------------------*/
 
-#include "stdint.h"
 #include "BSP/debug.h"
+#include "stdint.h"
 
 /*--------------------------------------------------------------
                        PUBLIC TYPES
@@ -21,8 +21,7 @@
 /**
  * @brief DMA transfer complete callback type
  */
-typedef void (*ADC_TRANSFER_CALLBACK) (void);
-
+typedef void (*ADC_TRANSFER_CALLBACK)(void);
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS

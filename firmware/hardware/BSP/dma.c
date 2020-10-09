@@ -9,6 +9,7 @@
 --------------------------------------------------------------*/
 
 #include "BSP/dma.h"
+
 #include "BSP/debug.h"
 #include "stm32f7xx_hal.h"
 
@@ -49,6 +50,6 @@ status_t dma_init(void)
     /* DMA2_Stream7_IRQn interrupt configuration */
     HAL_NVIC_SetPriority(DMA2_Stream7_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn);
-		
-		return PFC_SUCCESS;
+
+    return PFC_SUCCESS;
 }

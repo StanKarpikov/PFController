@@ -9,9 +9,10 @@
 --------------------------------------------------------------*/
 
 #include "BSP/uart.h"
-#include "defines.h"
+
 #include "BSP/bsp.h"
 #include "BSP/debug.h"
+#include "defines.h"
 #include "stm32f7xx_hal.h"
 #include "string.h"
 
@@ -19,12 +20,12 @@
                        DEFINES
 --------------------------------------------------------------*/
 
-#define UART_INTERFACE_TIMEOUT (2000)
-#define UART_DEBUG_TIMEOUT (2000)
-#define USE_INTERFACE_AS_DEBUG (0)
+#define UART_INTERFACE_TIMEOUT               (2000)
+#define UART_DEBUG_TIMEOUT                   (2000)
+#define USE_INTERFACE_AS_DEBUG               (0)
 #define UART_INTERFACE_BUFFER_DEFAULT_FILLER (0xFF)
-#define RX_BUFFER_SIZE (0x3FF)
-#define TX_BUFFER_SIZE (0x3FF)
+#define RX_BUFFER_SIZE                       (0x3FF)
+#define TX_BUFFER_SIZE                       (0x3FF)
 
 /*--------------------------------------------------------------
                        PRIVATE TYPES
@@ -37,25 +38,25 @@ typedef struct
     uint8_t tx_end;
 
     uint16_t rx_buffer[RX_BUFFER_SIZE];
-    int rx_index;               /**< The next write position */
-    int rx_readed;              /**< The next read position */
-    uint8_t rx_overflow;  			/**< 0 - normal, 1 - rx buffer overflow */
+    int rx_index;        /**< The next write position */
+    int rx_readed;       /**< The next read position */
+    uint8_t rx_overflow; /**< 0 - normal, 1 - rx buffer overflow */
 } mcu_port_t;
 
 /*--------------------------------------------------------------
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-static UART_HandleTypeDef huart_interface={0};
-static DMA_HandleTypeDef hdma_usart_interface_rx={0};
-static DMA_HandleTypeDef hdma_usart_interface_tx={0};
-static mcu_port_t mcu_port={0};
+static UART_HandleTypeDef huart_interface = {0};
+static DMA_HandleTypeDef hdma_usart_interface_rx = {0};
+static DMA_HandleTypeDef hdma_usart_interface_tx = {0};
+static mcu_port_t mcu_port = {0};
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
-status_t uart_interface_get_byte(uint8_t *byte)
+status_t uart_interface_get_byte(uint8_t* byte)
 {
     ARGUMENT_ASSERT(byte);
     /*
@@ -81,16 +82,16 @@ status_t uart_interface_get_byte(uint8_t *byte)
 
 status_t uart_interface_rx_init(void)
 {
-	memset(mcu_port.rx_buffer, UART_INTERFACE_BUFFER_DEFAULT_FILLER, RX_BUFFER_SIZE);
-	HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
-	HAL_UART_Receive_DMA(&huart_interface, (uint8_t*)mcu_port.rx_buffer, RX_BUFFER_SIZE);
-	
-	mcu_port.rx_readed = 0;
-	
-	return PFC_SUCCESS;
+    memset(mcu_port.rx_buffer, UART_INTERFACE_BUFFER_DEFAULT_FILLER, RX_BUFFER_SIZE);
+    HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
+    HAL_UART_Receive_DMA(&huart_interface, (uint8_t*)mcu_port.rx_buffer, RX_BUFFER_SIZE);
+
+    mcu_port.rx_readed = 0;
+
+    return PFC_SUCCESS;
 }
 
-void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
+void HAL_UART_ErrorCallback(UART_HandleTypeDef* huart)
 {
     HAL_UART_DMAStop(huart);
     HAL_UART_DeInit(huart);
@@ -99,29 +100,28 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef *huart)
     uart_interface_rx_init();
 }
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
 {
     HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
 }
-
 
 status_t uart_interface_transmit(uint8_t* data, uint32_t length)
 {
     ARGUMENT_ASSERT(data);
 
-		HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_SET);
     if (HAL_UART_Transmit(&huart_interface, data, length, UART_INTERFACE_TIMEOUT) != HAL_OK)
     {
         return PFC_ERROR_HAL;
     };
-		HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
-		
+    HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
+
     return PFC_SUCCESS;
 }
 
 status_t uart_debug_transmit(uint8_t* data, uint32_t length)
 {
-#if USE_INTERFACE_AS_DEBUG==1
+#if USE_INTERFACE_AS_DEBUG == 1
     ARGUMENT_ASSERT(data);
 
     if (HAL_UART_Transmit(&huart_interface, data, length, UART_DEBUG_TIMEOUT) != HAL_OK)
@@ -210,9 +210,9 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
         USART_INTERFACE_RCC_DISABLE();
 
         HAL_GPIO_DeInit(RS485_UART_TX_GPIO_Port, RS485_UART_TX_Pin);
-				HAL_GPIO_DeInit(RS485_UART_RX_GPIO_Port, RS485_UART_RX_Pin);
-				HAL_GPIO_DeInit(RE_485_GPIO_Port, RE_485_Pin);
-			
+        HAL_GPIO_DeInit(RS485_UART_RX_GPIO_Port, RS485_UART_RX_Pin);
+        HAL_GPIO_DeInit(RE_485_GPIO_Port, RE_485_Pin);
+
         HAL_DMA_DeInit(huart->hdmarx);
         HAL_DMA_DeInit(huart->hdmatx);
 
@@ -248,7 +248,7 @@ void uart_init(void)
   */
 void USART_INTERFACE_IRQ(void)
 {
-  HAL_UART_IRQHandler(&huart_interface);
+    HAL_UART_IRQHandler(&huart_interface);
 }
 
 /**
@@ -256,7 +256,7 @@ void USART_INTERFACE_IRQ(void)
   */
 void USART_INTERFACE_DMA_RX_IRQ(void)
 {
-  HAL_DMA_IRQHandler(&hdma_usart_interface_rx);
+    HAL_DMA_IRQHandler(&hdma_usart_interface_rx);
 }
 
 /**
@@ -264,5 +264,5 @@ void USART_INTERFACE_DMA_RX_IRQ(void)
   */
 void USART_INTERFACE_DMA_TX_IRQ(void)
 {
-  HAL_DMA_IRQHandler(&hdma_usart_interface_tx);
+    HAL_DMA_IRQHandler(&hdma_usart_interface_tx);
 }

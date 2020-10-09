@@ -3,7 +3,7 @@
  * @author Stanislav Karpikov
  * @brief Events management (status, warnings, errors, faults)
  */
- 
+
 #ifndef EVENTS_H_
 #define EVENTS_H_
 
@@ -36,11 +36,11 @@ struct __attribute__((__packed__)) event_record_s
 /** Event types: main */
 typedef enum
 {
-    EVENT_TYPE_POWER, /**< Power parameters has been changed */
+    EVENT_TYPE_POWER,       /**< Power parameters has been changed */
     EVENT_TYPE_CHANGESTATE, /**< The PFC state has been changed */
-    EVENT_TYPE_PROTECTION, /**< The protection has been activated */
-    EVENT_TYPE_EVENT /**< An other event */
-}event_type_t;
+    EVENT_TYPE_PROTECTION,  /**< The protection has been activated */
+    EVENT_TYPE_EVENT        /**< An other event */
+} event_type_t;
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS

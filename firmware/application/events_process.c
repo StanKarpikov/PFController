@@ -9,8 +9,9 @@
 --------------------------------------------------------------*/
 
 #include "events_process.h"
-#include "pfc_logic.h"
+
 #include "math.h"
+#include "pfc_logic.h"
 
 /*--------------------------------------------------------------
                        DEFINES
@@ -19,7 +20,7 @@
 #undef ONLY_A_CHANNEL /**< Define to test work only on one channel */
 
 /** A margin is used to check ADC value to be close to the boundaries (possible short-circiut or open load) */
-#define ADC_RANGE_MARGIN                  (50U)
+#define ADC_RANGE_MARGIN (50U)
 
 /**
  * @brief Check an ADC value to be in the working range
@@ -38,21 +39,21 @@
 #ifdef ONLY_A_CHANNEL
 static inline uint16_t is_pass_adc_channel(uint16_t channel)
 {
-		static const uint16_t passing_adc_channels[] = {
-				1,  // ADC_IL_A;
-				0,  // ADC_IL_B;
-				0,  // ADC_IL_C;
-				1,  // ADC_IAFG_A;
-				0,  // ADC_IAFG_B;
-				0,  // ADC_IAFG_C;
-				1,  // ADC_U_A;
-				0,  // ADC_U_B;
-				0,  // ADC_U_C;
-				1,  // ADC_TEMP;
-				1,  // ADC_UREF;
-				1,  // ADC_UCAP_1;
-				1   // ADC_UCAP_2;
-		};
+    static const uint16_t passing_adc_channels[] = {
+        1,  // ADC_IL_A;
+        0,  // ADC_IL_B;
+        0,  // ADC_IL_C;
+        1,  // ADC_IAFG_A;
+        0,  // ADC_IAFG_B;
+        0,  // ADC_IAFG_C;
+        1,  // ADC_U_A;
+        0,  // ADC_U_B;
+        0,  // ADC_U_C;
+        1,  // ADC_TEMP;
+        1,  // ADC_UREF;
+        1,  // ADC_UCAP_1;
+        1   // ADC_UCAP_2;
+    };
     return !(passing_adc_channels[channel]);
 }
 #endif
@@ -70,7 +71,7 @@ static inline uint16_t is_pass_adc_channel(uint16_t channel)
  */
 status_t events_check_adc_overload(float *adc_values)
 {
-		static uint16_t adc_ov_ticks[ADC_EDC_I + 1]={0};
+    static uint16_t adc_ov_ticks[ADC_EDC_I + 1] = {0};
 
     for (int i = 0; i < ADC_EDC_I + 1; i++)
     {
@@ -83,9 +84,9 @@ status_t events_check_adc_overload(float *adc_values)
             if (adc_ov_ticks[i] > 3)
             {
                 events_new_event(EVENT_TYPE_PROTECTION,
-                         SUB_EVENT_TYPE_PROTECTION_ADC_OVERLOAD,
-                         i,
-                         adc_values[i]);
+                                 SUB_EVENT_TYPE_PROTECTION_ADC_OVERLOAD,
+                                 i,
+                                 adc_values[i]);
             }
         }
         else
@@ -106,9 +107,9 @@ status_t events_check_adc_overload(float *adc_values)
  */
 status_t events_check_ud(float Ucap)
 {
-	  static uint16_t ud_ov_ticks = 0;
+    static uint16_t ud_ov_ticks = 0;
     if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return PFC_SUCCESS;
-		settings_protection_t protection = settings_get_protection();
+    settings_protection_t protection = settings_get_protection();
     if (Ucap > protection.Ucap_max)
     {
         ud_ov_ticks++;
@@ -145,8 +146,8 @@ status_t events_check_ud(float Ucap)
 status_t events_check_temperature(void)
 {
     if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return PFC_SUCCESS;
-		float temperature = adc_get_temperature();
-		settings_protection_t protection = settings_get_protection();
+    float temperature = adc_get_temperature();
+    settings_protection_t protection = settings_get_protection();
     if (temperature > protection.temperature)
     {
         events_new_event(
@@ -155,7 +156,7 @@ status_t events_check_temperature(void)
             0,
             temperature);
     }
-		return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 /*
@@ -166,9 +167,9 @@ status_t events_check_temperature(void)
 status_t events_check_rms_voltage(void)
 {
     if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return PFC_SUCCESS;
-		float active[ADC_CHANNEL_FULL_COUNT]={0}; 
-		adc_get_active(active);
-		settings_protection_t protection = settings_get_protection();
+    float active[ADC_CHANNEL_FULL_COUNT] = {0};
+    adc_get_active(active);
+    settings_protection_t protection = settings_get_protection();
     for (int channel = 0; channel < PFC_NCHAN; channel++)
     {
 #ifdef ONLY_A_CHANNEL
@@ -183,7 +184,7 @@ status_t events_check_rms_voltage(void)
                 active[ADC_U_A + channel]);
         }
     }
-		return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 /*
@@ -195,16 +196,16 @@ status_t events_check_rms_voltage(void)
  */
 status_t events_check_overvoltage(float *U)
 {
-		static int ov_ticks[PFC_NCHAN] = {0, 0, 0};
+    static int ov_ticks[PFC_NCHAN] = {0, 0, 0};
 
     if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return PFC_SUCCESS;
-		settings_protection_t protection = settings_get_protection();
+    settings_protection_t protection = settings_get_protection();
     for (int channel = 0; channel < PFC_NCHAN; channel++)
     {
 #ifdef ONLY_A_CHANNEL
         if (channel > 0) return PFC_SUCCESS;
 #endif
-        if (fabs(U[channel]/MATH_SQRT2) > protection.U_max)
+        if (fabs(U[channel] / MATH_SQRT2) > protection.U_max)
         {
             ov_ticks[channel]++;
             if (ov_ticks[channel] > 3)
@@ -221,7 +222,7 @@ status_t events_check_overvoltage(float *U)
             ov_ticks[channel] = 0;
         }
     }
-		return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 /*
@@ -232,9 +233,9 @@ status_t events_check_overvoltage(float *U)
 status_t events_check_rms_overcurrent(void)
 {
     if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return PFC_SUCCESS;
-		float active[ADC_CHANNEL_FULL_COUNT]={0}; 
-		adc_get_active(active);
-		settings_protection_t protection = settings_get_protection();
+    float active[ADC_CHANNEL_FULL_COUNT] = {0};
+    adc_get_active(active);
+    settings_protection_t protection = settings_get_protection();
     for (int channel = 0; channel < PFC_NCHAN; channel++)
     {
 #ifdef ONLY_A_CHANNEL
@@ -262,8 +263,8 @@ status_t events_check_rms_overcurrent(void)
 status_t events_check_overcurrent(float *I)
 {
     if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return PFC_SUCCESS;
-	
-		settings_protection_t protection = settings_get_protection();
+
+    settings_protection_t protection = settings_get_protection();
     for (int channel = 0; channel < PFC_NCHAN; channel++)
     {
 #ifdef ONLY_A_CHANNEL
@@ -294,9 +295,9 @@ status_t events_check_period(uint32_t period)
     if (period == 0) return PFC_SUCCESS;
     float freq = 1.0f / ((float)period / 1e6f);
     if (pfc_get_state() >= PFC_STATE_STOPPING || pfc_get_state() <= PFC_STATE_STOP) return PFC_SUCCESS;
-	
-		settings_protection_t protection = settings_get_protection();
-	
+
+    settings_protection_t protection = settings_get_protection();
+
     if (freq > protection.F_max)
     {
         events_new_event(
@@ -313,7 +314,7 @@ status_t events_check_period(uint32_t period)
             0,
             freq);
     }
-		/*
+    /*
 		TODO: Check the nesessity of the U_50Hz verification
 		
 		if(pfc_get_state()>=PFC_STATE_PRECHARGE_PREPARE && fabs(PFC.U_50Hz[PFC_ACHAN].phase-MATH_PI/2)>0.1){
@@ -325,7 +326,7 @@ status_t events_check_period(uint32_t period)
 					);
 		}
 		*/
-		return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 /*
@@ -335,8 +336,8 @@ status_t events_check_period(uint32_t period)
  */
 status_t events_check_voltage_phase_rotation(void)
 {
-	/* TODO: Implement the check */
-		return PFC_SUCCESS;
+    /* TODO: Implement the check */
+    return PFC_SUCCESS;
 }
 
 /*
@@ -346,8 +347,8 @@ status_t events_check_voltage_phase_rotation(void)
  */
 status_t events_check_loading_current(void)
 {
-	/* TODO: Implement the check */
-		return PFC_SUCCESS;
+    /* TODO: Implement the check */
+    return PFC_SUCCESS;
 }
 
 /*
@@ -357,8 +358,8 @@ status_t events_check_loading_current(void)
  */
 status_t events_preload_start(void)
 {
-	/* TODO: Implement the check */
-		return PFC_SUCCESS;
+    /* TODO: Implement the check */
+    return PFC_SUCCESS;
 }
 
 /*
@@ -368,6 +369,6 @@ status_t events_preload_start(void)
  */
 status_t events_preload_stop(void)
 {
-	/* TODO: Implement the check */
-		return PFC_SUCCESS;
+    /* TODO: Implement the check */
+    return PFC_SUCCESS;
 }

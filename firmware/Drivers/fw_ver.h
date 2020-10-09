@@ -17,9 +17,9 @@
                        PUBLIC DEFINES
 --------------------------------------------------------------*/
 
-#define FW_VERSION_MAJOR (0) /**< The major number of the firmware version */
-#define FW_VERSION_MINOR (1) /**< The minor number of the firmware version */
-#define FW_VERSION_MICRO (1) /**< The micro number of the firmware version */
+#define FW_VERSION_MAJOR (0)            /**< The major number of the firmware version */
+#define FW_VERSION_MINOR (1)            /**< The minor number of the firmware version */
+#define FW_VERSION_MICRO (1)            /**< The micro number of the firmware version */
 #define FW_VERSION_BUILD (PLUGIN_BUILD) /**< The build number of the firmware version */
 
 /* Support macro to define the build date */
@@ -37,21 +37,19 @@
 #define BUILD_MONTH_IS_DEC (__DATE__[0] == 'D')
 
 /** Defines the build mounth as a number */
-#define BUILD_MONTH_CH1 \
-    ( \
-        (BUILD_MONTH_IS_JAN) ? 1 : \
-        (BUILD_MONTH_IS_FEB) ? 2 : \
-        (BUILD_MONTH_IS_MAR) ? 3 : \
-        (BUILD_MONTH_IS_APR) ? 4 : \
-        (BUILD_MONTH_IS_MAY) ? 5 : \
-        (BUILD_MONTH_IS_JUN) ? 6 : \
-        (BUILD_MONTH_IS_JUL) ? 7 : \
-        (BUILD_MONTH_IS_AUG) ? 8 : \
-        (BUILD_MONTH_IS_SEP) ? 9 : \
-        (BUILD_MONTH_IS_OCT) ? 10 : \
-        (BUILD_MONTH_IS_NOV) ? 11 : \
-        (BUILD_MONTH_IS_DEC) ? 12 : \
-        /* error default */    0 \
-    )
-		
+#define BUILD_MONTH_CH1                                      \
+    (                                                        \
+        (BUILD_MONTH_IS_JAN) ? 1 : (BUILD_MONTH_IS_FEB) ? 2  \
+                               : (BUILD_MONTH_IS_MAR)   ? 3  \
+                               : (BUILD_MONTH_IS_APR)   ? 4  \
+                               : (BUILD_MONTH_IS_MAY)   ? 5  \
+                               : (BUILD_MONTH_IS_JUN)   ? 6  \
+                               : (BUILD_MONTH_IS_JUL)   ? 7  \
+                               : (BUILD_MONTH_IS_AUG)   ? 8  \
+                               : (BUILD_MONTH_IS_SEP)   ? 9  \
+                               : (BUILD_MONTH_IS_OCT)   ? 10 \
+                               : (BUILD_MONTH_IS_NOV)   ? 11 \
+                               : (BUILD_MONTH_IS_DEC)   ? 12 \
+                                                        : /* error default */ 0)
+
 #endif /* _FW_VER_H */

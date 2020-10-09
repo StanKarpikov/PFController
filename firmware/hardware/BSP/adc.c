@@ -9,19 +9,20 @@
 --------------------------------------------------------------*/
 
 #include "BSP/adc.h"
+
 #include "BSP/bsp.h"
 #include "BSP/timer.h"
-#include "stm32f7xx_hal.h"
 #include "defines.h"
+#include "stm32f7xx_hal.h"
 
 /*--------------------------------------------------------------
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-static ADC_HandleTypeDef hadc = {0}; /**< ADC hardware handle */
+static ADC_HandleTypeDef hadc = {0};     /**< ADC hardware handle */
 static DMA_HandleTypeDef hdma_adc = {0}; /**< ADC DMA hardware handle */
 
-static ADC_TRANSFER_CALLBACK adc_cplt_callback = 0; /**< ADC DMA full complete callback */
+static ADC_TRANSFER_CALLBACK adc_cplt_callback = 0;      /**< ADC DMA full complete callback */
 static ADC_TRANSFER_CALLBACK adc_half_cplt_callback = 0; /**< ADC DMA half complete callback */
 
 /*--------------------------------------------------------------
@@ -38,9 +39,9 @@ static ADC_TRANSFER_CALLBACK adc_half_cplt_callback = 0; /**< ADC DMA half compl
  */
 status_t adc_register_callbacks(ADC_TRANSFER_CALLBACK cptl_callback, ADC_TRANSFER_CALLBACK half_cplt_callback)
 {
-	adc_cplt_callback = cptl_callback;
-	adc_half_cplt_callback = half_cplt_callback;
-	return PFC_SUCCESS;
+    adc_cplt_callback = cptl_callback;
+    adc_half_cplt_callback = half_cplt_callback;
+    return PFC_SUCCESS;
 }
 
 /**
@@ -50,9 +51,9 @@ status_t adc_register_callbacks(ADC_TRANSFER_CALLBACK cptl_callback, ADC_TRANSFE
  */
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	if(adc_cplt_callback)adc_cplt_callback();
+    if (adc_cplt_callback) adc_cplt_callback();
 }
-	
+
 /**
  * @brief HAL ADC conversion half complete callback (overrides the weak one)
  *
@@ -60,7 +61,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
  */
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	if(adc_half_cplt_callback)adc_half_cplt_callback();
+    if (adc_half_cplt_callback) adc_half_cplt_callback();
 }
 
 /*
@@ -73,9 +74,9 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
  */
 status_t adc_start(uint32_t* buffer, uint32_t buffer_size)
 {
-	HAL_ADC_Start(&hadc);
-	HAL_ADC_Start_DMA(&hadc, (uint32_t*)buffer, buffer_size);
-	return PFC_SUCCESS;
+    HAL_ADC_Start(&hadc);
+    HAL_ADC_Start_DMA(&hadc, (uint32_t*)buffer, buffer_size);
+    return PFC_SUCCESS;
 }
 
 /*
@@ -85,9 +86,9 @@ status_t adc_start(uint32_t* buffer, uint32_t buffer_size)
  */
 status_t adc_stop(void)
 {
-	HAL_ADC_Stop_DMA(&hadc);
-	
-	return PFC_SUCCESS;
+    HAL_ADC_Stop_DMA(&hadc);
+
+    return PFC_SUCCESS;
 }
 
 /**
@@ -290,7 +291,7 @@ status_t adc_init(void)
     {
         error_handler();
     }
-		return PFC_SUCCESS;
+    return PFC_SUCCESS;
 }
 
 /**
@@ -298,5 +299,5 @@ status_t adc_init(void)
   */
 void ADC_DMA_IRQ(void)
 {
-  HAL_DMA_IRQHandler(&hdma_adc);
+    HAL_DMA_IRQHandler(&hdma_adc);
 }

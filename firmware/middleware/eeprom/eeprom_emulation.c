@@ -11,8 +11,9 @@
 --------------------------------------------------------------*/
 
 #include "eeprom_emulation.h"
-#include "stm32f7xx_hal.h"
+
 #include "BSP/system.h"
+#include "stm32f7xx_hal.h"
 
 /*--------------------------------------------------------------
                        DEFINES
@@ -20,10 +21,10 @@
 
 #define __IO volatile
 
-#define EEPROM_PAGE_SIZE      ((uint32_t)8 * 1024)    /**< EEPROM memory storage size: 8 Kbytes */
-#define EEPROM_PAGE_FULL_SIZE ((uint32_t)256 * 1024)  /**< EEPROM memory storage full size: 256 Kbytes */
+#define EEPROM_PAGE_SIZE      ((uint32_t)8 * 1024)   /**< EEPROM memory storage size: 8 Kbytes */
+#define EEPROM_PAGE_FULL_SIZE ((uint32_t)256 * 1024) /**< EEPROM memory storage full size: 256 Kbytes */
 
-#define EEPROM_PAGE0_BASE ((uint32_t)(EEPROM_START_ADDRESS)) /**< EEPROM memory storage: the first page address */
+#define EEPROM_PAGE0_BASE ((uint32_t)(EEPROM_START_ADDRESS))                         /**< EEPROM memory storage: the first page address */
 #define EEPROM_PAGE1_BASE ((uint32_t)(EEPROM_START_ADDRESS + EEPROM_PAGE_FULL_SIZE)) /**< EEPROM memory storage: the second page address */
 
 #define EEPROM_DEFAULT_DATA (0xFFFF) /**< Default data. Should be 0xFFFF due to the flash technology limitations */
@@ -32,9 +33,9 @@
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-static uint32_t page_base_first = EEPROM_PAGE0_BASE; /**< The first page address */
-static uint32_t page_base_second = EEPROM_PAGE1_BASE; /**< The second page address */
-static uint32_t page_size  = EEPROM_PAGE_SIZE; /**< The size of a page */
+static uint32_t page_base_first = EEPROM_PAGE0_BASE;    /**< The first page address */
+static uint32_t page_base_second = EEPROM_PAGE1_BASE;   /**< The second page address */
+static uint32_t page_size = EEPROM_PAGE_SIZE;           /**< The size of a page */
 static eeprom_status_t eeprom_status = EEPROM_NOT_INIT; /**< The EEPROM module status */
 
 /*--------------------------------------------------------------
@@ -44,7 +45,7 @@ static eeprom_status_t eeprom_status = EEPROM_NOT_INIT; /**< The EEPROM module s
 /** The status of the page that is written in the base page address */
 typedef enum
 {
-		EEPROM_ERASED = ((uint16_t)0xFFFF),       /**< The page is erased and can be used as a storage after initialisation */
+    EEPROM_ERASED = ((uint16_t)0xFFFF),       /**< The page is erased and can be used as a storage after initialisation */
     EEPROM_RECEIVE_DATA = ((uint16_t)0xEEEE), /**< The page is receiving the data */
     EEPROM_VALID_PAGE = ((uint16_t)0x0000)    /**< The page is valid and can be used */
 } eeprom_page_state_t;
@@ -101,8 +102,8 @@ static eeprom_status_t eeprom_adapter_program_halfword(uint32_t page_base, uint3
         EINT;
         return EEPROM_BAD_FLASH;
     }
-    EINT;   
-		return EEPROM_OK;
+    EINT;
+    return EEPROM_OK;
 }
 
 /**
@@ -201,7 +202,7 @@ static eeprom_status_t eeprom_check_erase_page(uint32_t page_base, uint16_t stat
   */
 static uint32_t eeprom_find_valid_page(void)
 {
-    uint16_t status0 = (*(__IO uint16_t *)page_base_first);  // Get Page0 actual status
+    uint16_t status0 = (*(__IO uint16_t *)page_base_first);   // Get Page0 actual status
     uint16_t status1 = (*(__IO uint16_t *)page_base_second);  // Get Page1 actual status
 
     if (status0 == EEPROM_VALID_PAGE && status1 == EEPROM_ERASED)
@@ -271,7 +272,7 @@ static eeprom_status_t eeprom_transfer_page(uint32_t new_page, uint32_t old_page
     // Find first free element in new page
     for (new_index = new_page + 4; new_index < new_end; new_index += 4)
         if ((*(__IO uint32_t *)new_index) == 0xFFFFFFFF)  // Verify if element
-            break;                                     //  contents are 0xFFFFFFFF
+            break;                                        //  contents are 0xFFFFFFFF
     if (new_index >= new_end)
         return EEPROM_OUT_SIZE;
 
@@ -349,7 +350,7 @@ static eeprom_status_t eeprom_format_storage(void)
     }
     // Erase Page1
     status = eeprom_check_erase_page(page_base_second, EEPROM_ERASED);
-		return status;
+    return status;
 }
 
 /**
@@ -397,8 +398,8 @@ static eeprom_status_t eeprom_verify_page_full_write_variable(uint16_t address, 
 
     // Check each active page address starting from begining
     for (idx = page_base + 4; idx < page_end; idx += 4)
-        if ((*(__IO uint32_t *)idx) == 0xFFFFFFFF)           // Verify if element
-        {                                                    //  contents are 0xFFFFFFFF
+        if ((*(__IO uint32_t *)idx) == 0xFFFFFFFF)                      // Verify if element
+        {                                                               //  contents are 0xFFFFFFFF
             flash_status = eeprom_adapter_program_halfword(idx, data);  // Set variable data
             if (flash_status != EEPROM_OK)
                 return flash_status;
@@ -458,8 +459,8 @@ static eeprom_status_t eeprom_write(uint16_t address, uint16_t data)
     if (address == 0xFFFF)
         return EEPROM_BAD_ADDRESS;
 
-		eeprom_flash_unlock();
-		
+    eeprom_flash_unlock();
+
     // Write the variable virtual address and value in the EEPROM
     eeprom_status_t status = eeprom_verify_page_full_write_variable(address, data);
 
@@ -469,9 +470,9 @@ static eeprom_status_t eeprom_write(uint16_t address, uint16_t data)
         eeprom_adapter_erase(EEPROM_PAGE1_BASE);
         status = eeprom_verify_page_full_write_variable(address, data);
     }
-		
-		eeprom_flash_lock();
-		
+
+    eeprom_flash_lock();
+
     return status;
 }
 
@@ -497,7 +498,7 @@ eeprom_status_t eeprom_init(void)
 
     switch (status0)
     {
-/*
+            /*
 		Page0				Page1
 		-----				-----
 	EEPROM_ERASED		EEPROM_VALID_PAGE			Page1 valid, Page0 erased
@@ -581,7 +582,7 @@ eeprom_status_t eeprom_init(void)
             }
             break;
     }
-		eeprom_flash_lock();
+    eeprom_flash_lock();
     return eeprom_status;
 }
 
@@ -628,7 +629,6 @@ eeprom_status_t eeprom_read_variable(uint16_t address, uint16_t *data)
     return EEPROM_BAD_ADDRESS;
 }
 
-
 /*
   * @brief  Writes/upadtes the variable data in EEPROM.
             The value is written only if differs from the one already saved at the same address
@@ -646,7 +646,7 @@ eeprom_status_t eeprom_read_variable(uint16_t address, uint16_t *data)
   */
 eeprom_status_t eeprom_update_variable(uint16_t address, uint16_t data)
 {
-		uint16_t curent_data = 0;
+    uint16_t curent_data = 0;
     eeprom_status_t status = eeprom_read_variable(address, &curent_data);
     if (status != EEPROM_BAD_ADDRESS)
     {

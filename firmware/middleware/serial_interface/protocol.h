@@ -3,7 +3,7 @@
  * @author Stanislav Karpikov
  * @brief Process received messages from the panel
  */
- 
+
 #ifndef _PROTOCOL_H
 #define _PROTOCOL_H
 
@@ -12,8 +12,8 @@
 --------------------------------------------------------------*/
 
 #include "BSP/debug.h"
-#include "defines.h"
 #include "adc_logic.h"
+#include "defines.h"
 #include "events.h"
 
 /*--------------------------------------------------------------
@@ -23,15 +23,15 @@
 /** The packet attribute definition for structs (removes redundant gaps) */
 #define _PACKED __attribute__((__packed__))
 
-#define MINIMUM_PACKET_LENGTH (4) /**< The minimum length of a packet */
-#define MAXIMUM_PACKET_LENGTH (216)  /**< The maximum length of a packet: Max data - 210 + 6 service bytes */
+#define MINIMUM_PACKET_LENGTH  (4)   /**< The minimum length of a packet */
+#define MAXIMUM_PACKET_LENGTH  (216) /**< The maximum length of a packet: Max data - 210 + 6 service bytes */
 #define OSCILLOG_TRANSFER_SIZE (128) /**< The size of an oscillogram */
 
-#define MAX_EVENTS_PACKET_SIZE (150)  /**< The maximum size of the packet that can be occupied by events */
+#define MAX_EVENTS_PACKET_SIZE (150) /**< The maximum size of the packet that can be occupied by events */
 
 /** The maximum number of events that can be transferred */
-#define MAX_NUM_TRANSFERED_EVENTS (MAX_EVENTS_PACKET_SIZE / (sizeof(struct event_record_s)))  
-	
+#define MAX_NUM_TRANSFERED_EVENTS (MAX_EVENTS_PACKET_SIZE / (sizeof(struct event_record_s)))
+
 /*--------------------------------------------------------------
                        PUBLIC TYPES
 --------------------------------------------------------------*/
@@ -44,7 +44,7 @@
 typedef void (*PFC_COMMAND_CALLBACK)(void *pc);
 
 /** Protocol stage (accordingly to the structure) */
-typedef enum 
+typedef enum
 {
     PROTOCOL_START,
     PROTOCOL_STATUS,
@@ -53,7 +53,7 @@ typedef enum
     PROTOCOL_DATA,
     PROTOCOL_CRC,
     PROTOCOL_STOP,
-}protocol_stage_t;
+} protocol_stage_t;
 
 /** Protocol status byte structure */
 typedef union
@@ -86,16 +86,16 @@ typedef union
 /** The protocol context */
 typedef struct
 {
-	  PFC_COMMAND_CALLBACK *handlers;
+    PFC_COMMAND_CALLBACK *handlers;
     uint8_t handlers_count;
-	
+
     protocol_stage_t stage;
-	
+
     packet_t packet_received;
     packet_t packet_to_send;
 
     uint8_t *data_pointer;
-	  uint8_t size;
+    uint8_t size;
 } protocol_context_t;
 
 /*--------------------------------------------------------------
@@ -111,7 +111,7 @@ struct _PACKED s_command_get_adc_active
 /** Answer: get active ADC data */
 struct _PACKED s_answer_get_adc_active
 {
-    float ADC_UCAP;       //CH10
+    float ADC_UCAP;     //CH10
     float ADC_U_A;      //CH11
     float ADC_U_B;      //CH12
     float ADC_U_C;      //CH13
@@ -140,7 +140,7 @@ struct _PACKED s_command_get_adc_active_raw
 /** Answer: get active ADC data in raw format */
 struct _PACKED s_answer_get_adc_active_raw
 {
-    uint16_t ADC_UCAP;       //CH10
+    uint16_t ADC_UCAP;     //CH10
     uint16_t ADC_U_A;      //CH11
     uint16_t ADC_U_B;      //CH12
     uint16_t ADC_U_C;      //CH13
@@ -391,8 +391,8 @@ void protocol_unknown_command_handle(protocol_context_t *pc);
  * @return Status of the operation
  */
 status_t protocol_init(PFC_COMMAND_CALLBACK *handlers,
-											 uint8_t handlers_count);
-											 
+                       uint8_t handlers_count);
+
 /**
  * @brief Send a packet to the panel
  * 
@@ -478,5 +478,5 @@ void packet_set_error(packet_t *packet, uint8_t error);
  * @param packet A pointer to the packet structure
  */
 void packet_set_command(packet_t *packet, uint8_t command);
-									 
+
 #endif /* _PROTOCOL_H */

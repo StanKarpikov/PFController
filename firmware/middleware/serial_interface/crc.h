@@ -3,7 +3,7 @@
  * @author Stanislav Karpikov
  * @brief Calculate CRC16
  */
- 
+
 #ifndef __CRC_H__
 #define __CRC_H__
 

@@ -3,12 +3,13 @@
  * @author Stanislav Karpikov
  * @brief PFC settings to store in NV memory
  */
- 
+
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
 
 #include "settings.h"
+
 #include "EEPROM_emulation.h"
 #include "string.h"
 
@@ -16,24 +17,24 @@
                        DEFINES
 --------------------------------------------------------------*/
 
-#define DEFAULT_UCAP_MIN (200U) /**< Default settings: minimum capacitor voltage */
-#define DEFAULT_UCAP_MAX (800U) /**< Default settings: maximum capacitor voltage */
-#define DEFAULT_TEMPERATURE (50U) /**< Default settings: the device temperature */
-#define DEFAULT_U_MIN (220 * 0.8) /**< Default settings: minimum grid voltage */
-#define DEFAULT_U_MAX (200 * 1.3) /**< Default settings: maximum grid voltage */
-#define DEFAULT_F_MIN (45) /**< Default settings: minimum grid frequency */
-#define DEFAULT_F_MAX (55) /**< Default settings: maximum grid frequency */
-#define DEFAULT_I_MAX_RMS (10) /**< Default settings: maximum current (RMS) */
-#define DEFAULT_I_MAX_PEAK (15) /**< Default settings: maximum current (peak) */
-#define DEFAULT_UCAP_NOMINAL (750) /**< Default settings: nominal capacitor voltage */
-#define DEFAULT_UCAP_PRECHARGE (250) /**< Default settings: precharge level for capacitor voltage */
+#define DEFAULT_UCAP_MIN       (200U)      /**< Default settings: minimum capacitor voltage */
+#define DEFAULT_UCAP_MAX       (800U)      /**< Default settings: maximum capacitor voltage */
+#define DEFAULT_TEMPERATURE    (50U)       /**< Default settings: the device temperature */
+#define DEFAULT_U_MIN          (220 * 0.8) /**< Default settings: minimum grid voltage */
+#define DEFAULT_U_MAX          (200 * 1.3) /**< Default settings: maximum grid voltage */
+#define DEFAULT_F_MIN          (45)        /**< Default settings: minimum grid frequency */
+#define DEFAULT_F_MAX          (55)        /**< Default settings: maximum grid frequency */
+#define DEFAULT_I_MAX_RMS      (10)        /**< Default settings: maximum current (RMS) */
+#define DEFAULT_I_MAX_PEAK     (15)        /**< Default settings: maximum current (peak) */
+#define DEFAULT_UCAP_NOMINAL   (750)       /**< Default settings: nominal capacitor voltage */
+#define DEFAULT_UCAP_PRECHARGE (250)       /**< Default settings: precharge level for capacitor voltage */
 
 /*--------------------------------------------------------------
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-static settings_t settings={0}; /**< The internal settings storage in RAM */
-		
+static settings_t settings = {0}; /**< The internal settings storage in RAM */
+
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS
 --------------------------------------------------------------*/
@@ -116,7 +117,7 @@ static status_t eeprom_settings_write(settings_t *settings)
  */
 static void settings_lock(void)
 {
-	/*TODO: add mutex lock */
+    /*TODO: add mutex lock */
 }
 
 /**
@@ -124,7 +125,7 @@ static void settings_lock(void)
  */
 static void settings_unlock(void)
 {
-	/*TODO: add mutex unlock */
+    /*TODO: add mutex unlock */
 }
 
 /*--------------------------------------------------------------
@@ -171,11 +172,11 @@ status_t settings_read(void)
  */
 status_t settings_set_pwm(settings_pwm_t pwm)
 {
-	settings_lock();
-	settings.pwm = pwm;
-	settings_unlock();
-	
-	return PFC_SUCCESS;
+    settings_lock();
+    settings.pwm = pwm;
+    settings_unlock();
+
+    return PFC_SUCCESS;
 }
 
 /*
@@ -187,11 +188,11 @@ status_t settings_set_pwm(settings_pwm_t pwm)
  */
 status_t settings_set_filters(settings_filters_t filters)
 {
-	settings_lock();
-	settings.filters = filters;
-	settings_unlock();
-	
-	return PFC_SUCCESS;
+    settings_lock();
+    settings.filters = filters;
+    settings_unlock();
+
+    return PFC_SUCCESS;
 }
 
 /*
@@ -203,11 +204,11 @@ status_t settings_set_filters(settings_filters_t filters)
  */
 status_t settings_set_calibrations(settings_calibrations_t calibrations)
 {
-	settings_lock();
-	settings.calibrations = calibrations;
-	settings_unlock();
-	
-	return PFC_SUCCESS;
+    settings_lock();
+    settings.calibrations = calibrations;
+    settings_unlock();
+
+    return PFC_SUCCESS;
 }
 
 /*
@@ -219,11 +220,11 @@ status_t settings_set_calibrations(settings_calibrations_t calibrations)
  */
 status_t settings_set_protection(settings_protection_t protection)
 {
-	settings_lock();
-	settings.protection = protection;
-	settings_unlock();
-	
-	return PFC_SUCCESS;
+    settings_lock();
+    settings.protection = protection;
+    settings_unlock();
+
+    return PFC_SUCCESS;
 }
 
 /*
@@ -235,11 +236,11 @@ status_t settings_set_protection(settings_protection_t protection)
  */
 status_t settings_set_capacitors(settings_capacitors_t capacitors)
 {
-	settings_lock();
-	settings.capacitors = capacitors;
-	settings_unlock();
-	
-	return PFC_SUCCESS;
+    settings_lock();
+    settings.capacitors = capacitors;
+    settings_unlock();
+
+    return PFC_SUCCESS;
 }
 
 /*
@@ -249,11 +250,11 @@ status_t settings_set_capacitors(settings_capacitors_t capacitors)
  */
 settings_pwm_t settings_get_pwm(void)
 {
-	settings_pwm_t retval;
-	settings_lock();
-	retval = settings.pwm;
-	settings_unlock();
-	return retval;
+    settings_pwm_t retval;
+    settings_lock();
+    retval = settings.pwm;
+    settings_unlock();
+    return retval;
 }
 
 /*
@@ -263,11 +264,11 @@ settings_pwm_t settings_get_pwm(void)
  */
 settings_filters_t settings_get_filters(void)
 {
-	settings_filters_t retval;
-	settings_lock();
-	retval = settings.filters;
-	settings_unlock();
-	return retval;
+    settings_filters_t retval;
+    settings_lock();
+    retval = settings.filters;
+    settings_unlock();
+    return retval;
 }
 
 /*
@@ -277,11 +278,11 @@ settings_filters_t settings_get_filters(void)
  */
 settings_calibrations_t settings_get_calibrations(void)
 {
-	settings_calibrations_t retval;
-	settings_lock();
-	retval = settings.calibrations;
-	settings_unlock();
-	return retval;
+    settings_calibrations_t retval;
+    settings_lock();
+    retval = settings.calibrations;
+    settings_unlock();
+    return retval;
 }
 
 /*
@@ -291,11 +292,11 @@ settings_calibrations_t settings_get_calibrations(void)
  */
 settings_protection_t settings_get_protection(void)
 {
-	settings_protection_t retval;
-	settings_lock();
-	retval = settings.protection;
-	settings_unlock();
-	return retval;
+    settings_protection_t retval;
+    settings_lock();
+    retval = settings.protection;
+    settings_unlock();
+    return retval;
 }
 
 /*
@@ -305,9 +306,9 @@ settings_protection_t settings_get_protection(void)
  */
 settings_capacitors_t settings_get_capacitors(void)
 {
-	settings_capacitors_t retval;
-	settings_lock();
-	retval = settings.capacitors;
-	settings_unlock();
-	return retval;
+    settings_capacitors_t retval;
+    settings_lock();
+    retval = settings.capacitors;
+    settings_unlock();
+    return retval;
 }

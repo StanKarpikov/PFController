@@ -28,12 +28,12 @@
 /** EEPROM return codes */
 typedef enum
 {
-    EEPROM_OK = ((uint16_t)0x0000), /**< The operation succeded */
-    EEPROM_OUT_SIZE = ((uint16_t)0x0081), /**< No empty EEPROM slots */
-    EEPROM_BAD_ADDRESS = ((uint16_t)0x0082), /**< Wrong address of a variable or a page */
-    EEPROM_BAD_FLASH = ((uint16_t)0x0083), /**< An error at the flash memory level */
-    EEPROM_NOT_INIT = ((uint16_t)0x0084), /**< The EEPROM module is not initialized, or a page is not initialized */
-    EEPROM_SAME_VALUE = ((uint16_t)0x0085), /**< The value to write is the same with the currently stored value */
+    EEPROM_OK = ((uint16_t)0x0000),           /**< The operation succeded */
+    EEPROM_OUT_SIZE = ((uint16_t)0x0081),     /**< No empty EEPROM slots */
+    EEPROM_BAD_ADDRESS = ((uint16_t)0x0082),  /**< Wrong address of a variable or a page */
+    EEPROM_BAD_FLASH = ((uint16_t)0x0083),    /**< An error at the flash memory level */
+    EEPROM_NOT_INIT = ((uint16_t)0x0084),     /**< The EEPROM module is not initialized, or a page is not initialized */
+    EEPROM_SAME_VALUE = ((uint16_t)0x0085),   /**< The value to write is the same with the currently stored value */
     EEPROM_NO_VALID_PAGE = ((uint16_t)0x00AB) /**< There is no page that can receive data */
 } eeprom_status_t;
 
