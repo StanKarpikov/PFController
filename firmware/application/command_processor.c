@@ -190,22 +190,22 @@ static void	protocol_command_get_adc_active(void *pc)
 	adc_get_active(active);
 	
 	answer->ADC_UCAP = active[ADC_UCAP];
-	answer->ADC_U_A = active[ADC_EMS_A];
-	answer->ADC_U_B = active[ADC_EMS_B];
-	answer->ADC_U_C = active[ADC_EMS_C];
+	answer->ADC_U_A = active[ADC_EDC_A];
+	answer->ADC_U_B = active[ADC_EDC_B];
+	answer->ADC_U_C = active[ADC_EDC_C];
 	answer->ADC_I_A = active[ADC_I_A];
 	answer->ADC_I_B = active[ADC_I_B];
 	answer->ADC_I_C = active[ADC_I_C];
 	answer->ADC_I_ET = active[ADC_I_ET];
 	answer->ADC_I_TEMP1 = active[ADC_I_TEMP1];
 	answer->ADC_I_TEMP2 = active[ADC_I_TEMP2];
-	answer->ADC_EMS_A = active[ADC_EMS_A];
-	answer->ADC_EMS_B = active[ADC_EMS_B];
-	answer->ADC_EMS_C = active[ADC_EMS_C];
-	answer->ADC_EMS_I = active[ADC_EMS_I];
-	answer->ADC_MATH_A = active[ADC_EMS_A];
-	answer->ADC_MATH_B = active[ADC_EMS_B];
-	answer->ADC_MATH_C = active[ADC_EMS_C];
+	answer->ADC_EDC_A = active[ADC_EDC_A];
+	answer->ADC_EDC_B = active[ADC_EDC_B];
+	answer->ADC_EDC_C = active[ADC_EDC_C];
+	answer->ADC_EDC_I = active[ADC_EDC_I];
+	answer->ADC_MATH_A = active[ADC_EDC_A];
+	answer->ADC_MATH_B = active[ADC_EDC_B];
+	answer->ADC_MATH_C = active[ADC_EDC_C];
 
 	packet_set_data_len(&(((protocol_context_t*)pc)->packet_to_send), sizeof(struct s_answer_get_adc_active));
 	protocol_send_packet(pc); 	
@@ -275,10 +275,10 @@ static void	protocol_command_get_adc_active_raw(void *pc)
 	answer->ADC_I_ET = active_raw[ADC_I_ET];
 	answer->ADC_I_TEMP1 = active_raw[ADC_I_TEMP1];
 	answer->ADC_I_TEMP2 = active_raw[ADC_I_TEMP2];
-	answer->ADC_EMS_A = active_raw[ADC_EMS_A];
-	answer->ADC_EMS_B = active_raw[ADC_EMS_B];
-	answer->ADC_EMS_C = active_raw[ADC_EMS_C];
-	answer->ADC_EMS_I = active_raw[ADC_EMS_I];
+	answer->ADC_EDC_A = active_raw[ADC_EDC_A];
+	answer->ADC_EDC_B = active_raw[ADC_EDC_B];
+	answer->ADC_EDC_C = active_raw[ADC_EDC_C];
+	answer->ADC_EDC_I = active_raw[ADC_EDC_I];
 
 	packet_set_data_len(&(((protocol_context_t*)pc)->packet_to_send), sizeof(struct s_answer_get_adc_active_raw));
 	protocol_send_packet(pc); 

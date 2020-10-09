@@ -121,10 +121,10 @@ struct _PACKED s_answer_get_adc_active
     float ADC_I_ET;     //CH3
     float ADC_I_TEMP1;  //CH5
     float ADC_I_TEMP2;  //CH6
-    float ADC_EMS_A;    //CH14
-    float ADC_EMS_B;    //CH15
-    float ADC_EMS_C;    //CH8
-    float ADC_EMS_I;    //CH9
+    float ADC_EDC_A;    //CH14
+    float ADC_EDC_B;    //CH15
+    float ADC_EDC_C;    //CH8
+    float ADC_EDC_I;    //CH9
 
     float ADC_MATH_A;
     float ADC_MATH_B;
@@ -150,10 +150,10 @@ struct _PACKED s_answer_get_adc_active_raw
     uint16_t ADC_I_ET;     //CH3
     uint16_t ADC_I_TEMP1;  //CH5
     uint16_t ADC_I_TEMP2;  //CH6
-    uint16_t ADC_EMS_A;    //CH14
-    uint16_t ADC_EMS_B;    //CH15
-    uint16_t ADC_EMS_C;    //CH8
-    uint16_t ADC_EMS_I;    //CH9
+    uint16_t ADC_EDC_A;    //CH14
+    uint16_t ADC_EDC_B;    //CH15
+    uint16_t ADC_EDC_C;    //CH8
+    uint16_t ADC_EDC_I;    //CH9
 };
 
 /** Command: Switch ON/OFF control */

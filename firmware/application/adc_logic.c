@@ -56,8 +56,8 @@ static const uint8_t needSquare[] = {
     0,  /*CH3 - ADC_I_ET*/
     0,  /*CH5 - ADC_I_TEMP1*/
     0,  /*CH6 - ADC_I_TEMP2*/
-    1,  /*CH14 - ADC_EMS_A*/
-    1,  /*CH15 - ADC_EMS_B*/
+    1,  /*CH14 - ADC_EDC_A*/
+    1,  /*CH15 - ADC_EDC_B*/
     1,  /* - */
     1,  /* - */
     1,  /* - */
@@ -369,9 +369,9 @@ void algorithm_process(void)
         for (int i = 0; i < ADC_VAL_NUM; i++)
         {
             /* Calculate mathematical channels */
-            float Uab = pfc.adc.ch[last_buffer][ADC_EMS_B][i] - pfc.adc.ch[last_buffer][ADC_EMS_A][i];
-            float Ubc = pfc.adc.ch[last_buffer][ADC_EMS_C][i] - pfc.adc.ch[last_buffer][ADC_EMS_B][i];
-            float Uca = pfc.adc.ch[last_buffer][ADC_EMS_A][i] - pfc.adc.ch[last_buffer][ADC_EMS_C][i];
+            float Uab = pfc.adc.ch[last_buffer][ADC_EDC_B][i] - pfc.adc.ch[last_buffer][ADC_EDC_A][i];
+            float Ubc = pfc.adc.ch[last_buffer][ADC_EDC_C][i] - pfc.adc.ch[last_buffer][ADC_EDC_B][i];
+            float Uca = pfc.adc.ch[last_buffer][ADC_EDC_A][i] - pfc.adc.ch[last_buffer][ADC_EDC_C][i];
 
             float Uan = (2 * Uab + Ubc) / 3;
             float Ubn = (-Uab + Ubc) / 3;
@@ -399,9 +399,9 @@ void algorithm_process(void)
             for (int i_isr = 0; i_isr < PFC_NCHAN; i_isr++)
             {
                 IIR_1ORDER(
-                    pfc.adc.ch[last_buffer][ADC_EMS_A + i_isr][i],
-                    pfc.adc.ch[current_buffer][ADC_EMS_A + i_isr][i],
-                    pfc.adc.ch[last_buffer][ADC_EMS_A + i_isr][i],
+                    pfc.adc.ch[last_buffer][ADC_EDC_A + i_isr][i],
+                    pfc.adc.ch[current_buffer][ADC_EDC_A + i_isr][i],
+                    pfc.adc.ch[last_buffer][ADC_EDC_A + i_isr][i],
                     K_U,
                     K_Uinv);
 
@@ -412,8 +412,8 @@ void algorithm_process(void)
                     K_I,
                     K_Iinv);
 
-                if (umax[i_isr] < pfc.adc.ch[last_buffer][ADC_EMS_A + i_isr][i]) umax[i_isr] = pfc.adc.ch[last_buffer][ADC_EMS_A + i_isr][i];
-                if (umin[i_isr] > pfc.adc.ch[last_buffer][ADC_EMS_A + i_isr][i]) umin[i_isr] = pfc.adc.ch[last_buffer][ADC_EMS_A + i_isr][i];
+                if (umax[i_isr] < pfc.adc.ch[last_buffer][ADC_EDC_A + i_isr][i]) umax[i_isr] = pfc.adc.ch[last_buffer][ADC_EDC_A + i_isr][i];
+                if (umin[i_isr] > pfc.adc.ch[last_buffer][ADC_EDC_A + i_isr][i]) umin[i_isr] = pfc.adc.ch[last_buffer][ADC_EDC_A + i_isr][i];
             }
             IIR_1ORDER(
                 pfc.adc.ch[last_buffer][ADC_UCAP][i],
@@ -447,7 +447,7 @@ void algorithm_process(void)
         events_check_period(pfc.period_fact);
 				
         /* Adjust the frequency */
-        /*float f=auto_correlation_frequency(pfc.adc.ch[last_buffer][ADC_EMS_A]);
+        /*float f=auto_correlation_frequency(pfc.adc.ch[last_buffer][ADC_EDC_A]);
 					IIR_1ORDER(
 							pfc.period_fact,
 							f,

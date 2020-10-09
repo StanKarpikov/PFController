@@ -4,8 +4,8 @@
  * @brief Firmware version macro
  */
 
-#ifndef __FW_VER_H__
-#define __FW_VER_H__
+#ifndef _FW_VER_H
+#define _FW_VER_H
 
 /*--------------------------------------------------------------
                        INCLUDES
@@ -17,11 +17,12 @@
                        PUBLIC DEFINES
 --------------------------------------------------------------*/
 
-#define FW_VERSION_MAJOR (0)
-#define FW_VERSION_MINOR (1)
-#define FW_VERSION_MICRO (1)
-#define FW_VERSION_BUILD (PLUGIN_BUILD)
+#define FW_VERSION_MAJOR (0) /**< The major number of the firmware version */
+#define FW_VERSION_MINOR (1) /**< The minor number of the firmware version */
+#define FW_VERSION_MICRO (1) /**< The micro number of the firmware version */
+#define FW_VERSION_BUILD (PLUGIN_BUILD) /**< The build number of the firmware version */
 
+/* Support macro to define the build date */
 #define BUILD_MONTH_IS_JAN (__DATE__[0] == 'J' && __DATE__[1] == 'a' && __DATE__[2] == 'n')
 #define BUILD_MONTH_IS_FEB (__DATE__[0] == 'F')
 #define BUILD_MONTH_IS_MAR (__DATE__[0] == 'M' && __DATE__[1] == 'a' && __DATE__[2] == 'r')
@@ -35,6 +36,7 @@
 #define BUILD_MONTH_IS_NOV (__DATE__[0] == 'N')
 #define BUILD_MONTH_IS_DEC (__DATE__[0] == 'D')
 
+/** Defines the build mounth as a number */
 #define BUILD_MONTH_CH1 \
     ( \
         (BUILD_MONTH_IS_JAN) ? 1 : \
@@ -51,4 +53,5 @@
         (BUILD_MONTH_IS_DEC) ? 12 : \
         /* error default */    0 \
     )
-#endif
+		
+#endif /* _FW_VER_H */

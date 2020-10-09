@@ -68,10 +68,10 @@ enum
     ADC_I_ET,     /**< CH3 Current I, load */
     ADC_I_TEMP1,  /**< CH5 */
     ADC_I_TEMP2,  /**< CH6 */
-    ADC_EMS_A,    /**< CH14 EMS A */
-    ADC_EMS_B,    /**< CH15 EMS B */
-    ADC_EMS_C,    /**< CH8 EMS C */
-    ADC_EMS_I,    /**< CH9 EMS I */
+    ADC_EDC_A,    /**< CH14 EMS A */
+    ADC_EDC_B,    /**< CH15 EMS B */
+    ADC_EDC_C,    /**< CH8 EMS C */
+    ADC_EDC_I,    /**< CH9 EMS I */
     ADC_MATH_A,    /**< MATH channel A */
     ADC_MATH_B,    /**< MATH channel B */
     ADC_MATH_C,    /**< MATH channel C */
@@ -81,7 +81,7 @@ enum
 	  ADC_CHANNEL_FULL_COUNT /**< ADC channels count */
 };
 
-#define ADC_CHANNEL_NUMBER (ADC_EMS_I+1) /**< The number of ADC physical channels */
+#define ADC_CHANNEL_NUMBER (ADC_EDC_I+1) /**< The number of ADC physical channels */
 #define ADC_MATH_NUMBER    (6) /**< The number of ADC mathematical channels */
 
 /*--------------------------------------------------------------

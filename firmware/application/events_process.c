@@ -70,9 +70,9 @@ static inline uint16_t is_pass_adc_channel(uint16_t channel)
  */
 status_t events_check_adc_overload(float *adc_values)
 {
-		static uint16_t adc_ov_ticks[ADC_EMS_I + 1]={0};
+		static uint16_t adc_ov_ticks[ADC_EDC_I + 1]={0};
 
-    for (int i = 0; i < ADC_EMS_I + 1; i++)
+    for (int i = 0; i < ADC_EDC_I + 1; i++)
     {
 #ifdef ONLY_A_CHANNEL
         if (is_pass_adc_channel(i)) continue;

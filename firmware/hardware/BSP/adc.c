@@ -18,16 +18,24 @@
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-static ADC_HandleTypeDef hadc = {0};
-static DMA_HandleTypeDef hdma_adc = {0};
+static ADC_HandleTypeDef hadc = {0}; /**< ADC hardware handle */
+static DMA_HandleTypeDef hdma_adc = {0}; /**< ADC DMA hardware handle */
 
-static ADC_TRANSFER_CALLBACK adc_cplt_callback = 0;
-static ADC_TRANSFER_CALLBACK adc_half_cplt_callback = 0;
+static ADC_TRANSFER_CALLBACK adc_cplt_callback = 0; /**< ADC DMA full complete callback */
+static ADC_TRANSFER_CALLBACK adc_half_cplt_callback = 0; /**< ADC DMA half complete callback */
 
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS
 --------------------------------------------------------------*/
 
+/*
+ * @brief Set callbacks for the ADC module
+ *
+ * @param cptl_callback ADC DMA full complete callback
+ * @param half_cplt_callback ADC DMA half complete callback
+ *
+ * @return The status of the operation
+ */
 status_t adc_register_callbacks(ADC_TRANSFER_CALLBACK cptl_callback, ADC_TRANSFER_CALLBACK half_cplt_callback)
 {
 	adc_cplt_callback = cptl_callback;
@@ -35,16 +43,34 @@ status_t adc_register_callbacks(ADC_TRANSFER_CALLBACK cptl_callback, ADC_TRANSFE
 	return PFC_SUCCESS;
 }
 
+/**
+ * @brief HAL ADC conversion complete callback (overrides the weak one)
+ *
+ * @param hadc ADC hardware handle
+ */
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	if(adc_cplt_callback)adc_cplt_callback();
 }
 	
+/**
+ * @brief HAL ADC conversion half complete callback (overrides the weak one)
+ *
+ * @param hadc ADC hardware handle
+ */
 void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 {
 	if(adc_half_cplt_callback)adc_half_cplt_callback();
 }
 
+/*
+ * @brief Start the ADC DMA conversion 
+ *
+ * @param buffer A buffer for the data
+ * @param buffer_size The buffer size
+ *
+ * @return The status of the operation
+ */
 status_t adc_start(uint32_t* buffer, uint32_t buffer_size)
 {
 	HAL_ADC_Start(&hadc);
@@ -52,6 +78,11 @@ status_t adc_start(uint32_t* buffer, uint32_t buffer_size)
 	return PFC_SUCCESS;
 }
 
+/*
+ * @brief Stop the ADC DMA conversion
+ *
+ * @return The status of the operation
+ */
 status_t adc_stop(void)
 {
 	HAL_ADC_Stop_DMA(&hadc);
@@ -60,11 +91,11 @@ status_t adc_stop(void)
 }
 
 /**
-* @brief ADC MSP Initialization
-* This function configures the hardware resources used in this example
-* @param hadc: ADC handle pointer
-* @retval None
-*/
+ * @brief ADC MSP Initialization callback (overrides the default one)
+ * This function configures the hardware resources
+ *
+ * @param hadc ADC handle pointer
+ */
 void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -77,17 +108,17 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
         __HAL_RCC_GPIOA_CLK_ENABLE();
         __HAL_RCC_GPIOB_CLK_ENABLE();
 
-        GPIO_InitStruct.Pin = U_DC_ADC_Pin | A_HALF_ADC_Pin | B_HALF_ADC_Pin | C_HALF_ADC_Pin | A_EMS_ADC_Pin | B_EMS_ADC_Pin;
+        GPIO_InitStruct.Pin = U_DC_ADC_Pin | A_HALF_ADC_Pin | B_HALF_ADC_Pin | C_HALF_ADC_Pin | A_EDC_ADC_Pin | B_EDC_ADC_Pin;
         GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-        GPIO_InitStruct.Pin = I_ADC_PFC_A_Pin | I_ADC_PFC_B_Pin | I_ADC_PFC_C_Pin | I_ADC_ET_Pin | TEMP_1_Pin | TEMP_2_Pin;
+        GPIO_InitStruct.Pin = I_ADC_PFC_A_Pin | I_ADC_PFC_B_Pin | I_ADC_PFC_C_Pin | I_ADC_EFMC_Pin | TEST_1_Pin | TEST_2_Pin;
         GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-        GPIO_InitStruct.Pin = C_EMS_ADC_Pin | I_EMS_OUT_Pin;
+        GPIO_InitStruct.Pin = C_EDC_ADC_Pin | I_EDC_OUT_Pin;
         GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -114,31 +145,31 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
 }
 
 /**
-* @brief ADC MSP De-Initialization
-* This function freeze the hardware resources used in this example
-* @param hadc: ADC handle pointer
-* @retval None
-*/
-
+ * @brief ADC MSP De-Initialization (overrides the default one)
+ * This function freeze the hardware resources
+ *
+ * @param hadc ADC handle pointer
+ */
 void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
 {
     if (hadc->Instance == ADC1)
     {
         ADC_CLK_DISABLE();
 
-        HAL_GPIO_DeInit(GPIOC, U_DC_ADC_Pin | A_HALF_ADC_Pin | B_HALF_ADC_Pin | C_HALF_ADC_Pin | A_EMS_ADC_Pin | B_EMS_ADC_Pin);
-        HAL_GPIO_DeInit(GPIOA, I_ADC_PFC_A_Pin | I_ADC_PFC_B_Pin | I_ADC_PFC_C_Pin | I_ADC_ET_Pin | TEMP_1_Pin | TEMP_2_Pin);
-        HAL_GPIO_DeInit(GPIOB, C_EMS_ADC_Pin | I_EMS_OUT_Pin);
+        HAL_GPIO_DeInit(GPIOC, U_DC_ADC_Pin | A_HALF_ADC_Pin | B_HALF_ADC_Pin | C_HALF_ADC_Pin | A_EDC_ADC_Pin | B_EDC_ADC_Pin);
+        HAL_GPIO_DeInit(GPIOA, I_ADC_PFC_A_Pin | I_ADC_PFC_B_Pin | I_ADC_PFC_C_Pin | I_ADC_EFMC_Pin | TEST_1_Pin | TEST_2_Pin);
+        HAL_GPIO_DeInit(GPIOB, C_EDC_ADC_Pin | I_EDC_OUT_Pin);
 
         /* ADC1 DMA DeInit */
         HAL_DMA_DeInit(hadc->DMA_Handle);
     }
 }
-/**
-  * @brief ADC1 Initialization Function
-  * @param None
-  * @retval None
-  */
+
+/*
+ * @brief ADC Initialization Function
+ *
+ * @return The status of the operation
+ */
 status_t adc_init(void)
 {
     ADC_ChannelConfTypeDef sConfig = {0};
@@ -263,7 +294,7 @@ status_t adc_init(void)
 }
 
 /**
-  * @brief This function handles DMA global interrupt.
+  * @brief This function handles DMA global interrupt
   */
 void ADC_DMA_IRQ(void)
 {

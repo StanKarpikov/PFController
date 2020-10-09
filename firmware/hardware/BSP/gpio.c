@@ -19,25 +19,25 @@
 
 status_t Relay_Main_Off(void)
 {
-    HAL_GPIO_WritePin(GPIOD, RELE_2_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOD, RELAY_2_Pin, GPIO_PIN_RESET);
 	  return PFC_SUCCESS;
 }
 
 status_t Relay_Main_On(void)
 {
-    HAL_GPIO_WritePin(GPIOD, RELE_2_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOD, RELAY_2_Pin, GPIO_PIN_SET);
 	  return PFC_SUCCESS;
 }
 
 status_t Relay_Preload_Off(void)
 {
-    HAL_GPIO_WritePin(GPIOD, RELE_1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOD, RELAY_1_Pin, GPIO_PIN_RESET);
 	  return PFC_SUCCESS;
 }
 
 status_t Relay_Preload_On(void)
 {
-    HAL_GPIO_WritePin(GPIOD, RELE_1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOD, RELAY_1_Pin, GPIO_PIN_SET);
 	  return PFC_SUCCESS;
 }
 
@@ -94,7 +94,7 @@ status_t gpio_init(void)
     __HAL_RCC_GPIOD_CLK_ENABLE();
 
     /*Configure GPIO pin Output Level */
-    HAL_GPIO_WritePin(GPIOD, DISABLE_DRIVER_PFC_Pin | DISABLE_DRIVER_ET_Pin | LED_3_Pin | LED_2_Pin | LED_1_Pin | RELE_2_Pin | RELE_1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(GPIOD, DISABLE_DRIVER_PFC_Pin | DISABLE_DRIVER_ET_Pin | LED_3_Pin | LED_2_Pin | LED_1_Pin | RELAY_2_Pin | RELAY_1_Pin, GPIO_PIN_RESET);
 
     /*Configure GPIO pin Output Level */
     HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
@@ -106,8 +106,8 @@ status_t gpio_init(void)
     HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
     /*Configure GPIO pins : DISABLE_DRIVER_PFC_Pin DISABLE_DRIVER_ET_Pin LED_3_Pin LED_2_Pin 
-                           LED_1_Pin RELE_2_Pin RELE_1_Pin */
-    GPIO_InitStruct.Pin = DISABLE_DRIVER_PFC_Pin | DISABLE_DRIVER_ET_Pin | LED_3_Pin | LED_2_Pin | LED_1_Pin | RELE_2_Pin | RELE_1_Pin;
+                           LED_1_Pin RELAY_2_Pin RELAY_1_Pin */
+    GPIO_InitStruct.Pin = DISABLE_DRIVER_PFC_Pin | DISABLE_DRIVER_ET_Pin | LED_3_Pin | LED_2_Pin | LED_1_Pin | RELAY_2_Pin | RELAY_1_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
