@@ -40,7 +40,7 @@ int main(void)
 {
     system_init();
 
-    ReadSettings();
+    settings_read();
 
     /* Initialize all peripherals */
     gpio_init();

@@ -73,17 +73,17 @@ static PFC_COMMAND_CALLBACK handlers_array[]=
 /** Oscillogram channels */
 enum
 {
-    OSC_UD,
-    OSC_U_A,
-    OSC_U_B,
-    OSC_U_C,
-    OSC_I_A,
-    OSC_I_B,
-    OSC_I_C,
-    OSC_COMP_A,
-    OSC_COMP_B,
-    OSC_COMP_C,
-    OSC_CHANNEL_NUMBER
+    OSC_UCAP, /**< Capacitors voltage */
+    OSC_U_A, /**< Channel A voltage */
+    OSC_U_B, /**< Channel B voltage */
+    OSC_U_C, /**< Channel C voltage */
+    OSC_I_A, /**< Channel A current */
+    OSC_I_B, /**< Channel B current */
+    OSC_I_C, /**< Channel C current */
+    OSC_PFC_A, /**< Channel A PFC generated signal */
+    OSC_PFC_B, /**< Channel B PFC generated signal */
+    OSC_PFC_C, /**< Channel C PFC generated signal */
+    OSC_CHANNEL_NUMBER /**< The number of oscillog channels */
 };
 
 /*--------------------------------------------------------------
@@ -189,7 +189,7 @@ static void	protocol_command_get_adc_active(void *pc)
 	float active[ADC_CHANNEL_FULL_COUNT]={0}; 
 	adc_get_active(active);
 	
-	answer->ADC_UD = active[ADC_UD];
+	answer->ADC_UCAP = active[ADC_UCAP];
 	answer->ADC_U_A = active[ADC_EMS_A];
 	answer->ADC_U_B = active[ADC_EMS_B];
 	answer->ADC_U_C = active[ADC_EMS_C];
@@ -265,7 +265,7 @@ static void	protocol_command_get_adc_active_raw(void *pc)
 	float active_raw[ADC_CHANNEL_NUMBER]={0}; 
 	adc_get_active_raw(active_raw);
 		
-	answer->ADC_UD = active_raw[ADC_UD];
+	answer->ADC_UCAP = active_raw[ADC_UCAP];
 	answer->ADC_U_A = active_raw[ADC_U_A];
 	answer->ADC_U_B = active_raw[ADC_U_B];
 	answer->ADC_U_C = active_raw[ADC_U_C];
@@ -301,9 +301,9 @@ static void	protocol_command_get_work_state(void *pc)
 	answer->state = pfc_get_state();
 	
 	settings_pwm_t pwm_settings = settings_get_pwm();
-	answer->activeChannels[PFC_ACHAN] = pwm_settings.activeChannels[PFC_ACHAN];
-	answer->activeChannels[PFC_BCHAN] = pwm_settings.activeChannels[PFC_BCHAN];
-	answer->activeChannels[PFC_CCHAN] = pwm_settings.activeChannels[PFC_CCHAN];
+	answer->active_channels[PFC_ACHAN] = pwm_settings.active_channels[PFC_ACHAN];
+	answer->active_channels[PFC_BCHAN] = pwm_settings.active_channels[PFC_BCHAN];
+	answer->active_channels[PFC_CCHAN] = pwm_settings.active_channels[PFC_CCHAN];
 
 	packet_set_data_len(&(((protocol_context_t*)pc)->packet_to_send), sizeof(struct s_answer_get_work_state));
 	protocol_send_packet(pc); 
@@ -454,13 +454,13 @@ static void	protocol_command_get_settings_protection(void *pc)
 	
 	settings_protection_t protection = settings_get_protection();
 	
-	answer->Ud_min = protection.Ud_min;
-	answer->Ud_max = protection.Ud_max;
+	answer->Ucap_min = protection.Ucap_min;
+	answer->Ucap_max = protection.Ucap_max;
 	answer->temperature = protection.temperature;
 	answer->U_min = protection.U_min;
 	answer->U_max = protection.U_max;
-	answer->Fnet_min = protection.Fnet_min;
-	answer->Fnet_max = protection.Fnet_max;
+	answer->F_min = protection.F_min;
+	answer->F_max = protection.F_max;
 	answer->I_max_rms = protection.I_max_rms;
 	answer->I_max_peak = protection.I_max_peak;
 
@@ -482,13 +482,13 @@ static void	protocol_command_set_settings_protection(void *pc)
 	
 	settings_protection_t protection = settings_get_protection();
 	
-	protection.Ud_min = req->Ud_min;
-	protection.Ud_max = req->Ud_max;
+	protection.Ucap_min = req->Ucap_min;
+	protection.Ucap_max = req->Ucap_max;
 	protection.temperature = req->temperature;
 	protection.U_min = req->U_min;
 	protection.U_max = req->U_max;
-	protection.Fnet_min = req->Fnet_min;
-	protection.Fnet_max = req->Fnet_max;
+	protection.F_min = req->F_min;
+	protection.F_max = req->F_max;
 	protection.I_max_rms = req->I_max_rms;
 	protection.I_max_peak = req->I_max_peak;
 	
@@ -512,11 +512,11 @@ static void	protocol_command_get_settings_capacitors(void *pc)
 	
 	settings_capacitors_t capacitors = settings_get_capacitors();
 	
-	answer->ctrlUd_Kp = capacitors.ctrlUd_Kp;
-	answer->ctrlUd_Ki = capacitors.ctrlUd_Ki;
-	answer->ctrlUd_Kd = capacitors.ctrlUd_Kd;
-	answer->Ud_nominal = capacitors.Ud_nominal;
-	answer->Ud_precharge = capacitors.Ud_precharge;
+	answer->ctrl_Ucap_Kp = capacitors.ctrl_Ucap_Kp;
+	answer->ctrl_Ucap_Ki = capacitors.ctrl_Ucap_Ki;
+	answer->ctrl_Ucap_Kd = capacitors.ctrl_Ucap_Kd;
+	answer->Ucap_nominal = capacitors.Ucap_nominal;
+	answer->Ucap_precharge = capacitors.Ucap_precharge;
 
 	packet_set_data_len(&(((protocol_context_t*)pc)->packet_to_send), sizeof(struct s_answer_get_settings_capacitors));
 	protocol_send_packet(pc); 
@@ -536,11 +536,11 @@ static void	protocol_command_set_settings_capacitors(void *pc)
 	
 	settings_capacitors_t capacitors = settings_get_capacitors();
 	
-	capacitors.ctrlUd_Kp = req->ctrlUd_Kp;
-	capacitors.ctrlUd_Ki = req->ctrlUd_Ki;
-	capacitors.ctrlUd_Kd = req->ctrlUd_Kd;
-	capacitors.Ud_nominal = req->Ud_nominal;
-	capacitors.Ud_precharge = req->Ud_precharge;
+	capacitors.ctrl_Ucap_Kp = req->ctrl_Ucap_Kp;
+	capacitors.ctrl_Ucap_Ki = req->ctrl_Ucap_Ki;
+	capacitors.ctrl_Ucap_Kd = req->ctrl_Ucap_Kd;
+	capacitors.Ucap_nominal = req->Ucap_nominal;
+	capacitors.Ucap_precharge = req->Ucap_precharge;
 	
 	settings_set_capacitors(capacitors);
 
@@ -564,7 +564,7 @@ static void	protocol_command_get_settings_filters(void *pc)
 	
 	answer->K_I = filters.K_I;
 	answer->K_U = filters.K_U;
-	answer->K_UD = filters.K_UD;
+	answer->K_Ucap = filters.K_Ucap;
 	
 
 	packet_set_data_len(&(((protocol_context_t*)pc)->packet_to_send), sizeof(struct s_answer_get_settings_filters));
@@ -587,7 +587,7 @@ static void	protocol_command_set_settings_filters(void *pc)
 	
 	filters.K_I = req->K_I;
 	filters.K_U = req->K_U;
-	filters.K_UD = req->K_UD;
+	filters.K_Ucap = req->K_Ucap;
 	
 	settings_set_filters(filters);
 
@@ -640,9 +640,9 @@ status_t protocol_write_osc_data(float** osc_adc_ch)
 	{
 			memcpy(OSC_DATA[OSC_U_A + i], osc_adc_ch[ADC_MATH_A + i], sizeof(OSC_DATA[OSC_U_A + i]));
 			memcpy(OSC_DATA[OSC_I_A + i], osc_adc_ch[ADC_I_A + i], sizeof(OSC_DATA[OSC_I_A + i]));
-			memcpy(OSC_DATA[OSC_COMP_A + i], osc_adc_ch[ADC_MATH_C_A + i], sizeof(OSC_DATA[OSC_COMP_A + i]));
+			memcpy(OSC_DATA[OSC_PFC_A + i], osc_adc_ch[ADC_MATH_C_A + i], sizeof(OSC_DATA[OSC_PFC_A + i]));
 	}
-	memcpy(OSC_DATA[OSC_UD], osc_adc_ch[ADC_UD], sizeof(OSC_DATA[OSC_UD]));
+	memcpy(OSC_DATA[OSC_UCAP], osc_adc_ch[ADC_UCAP], sizeof(OSC_DATA[OSC_UCAP]));
 	return PFC_SUCCESS;
 }
 

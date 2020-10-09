@@ -34,7 +34,8 @@
 #define PFC_BCHAN   (1U)    /**< Channel B */
 #define PFC_CCHAN   (2U)    /**< Channel C */
 
-#define MATH_PI (3.141592653589793)    /**< The PI value */
+#define MATH_SQRT2  ((float)1.414213562373095)		 /**< The value of sqrt(2) */
+#define MATH_PI 	  ((float)3.141592653589793)    /**< The PI value */
 
 /*--------------------------------------------------------------
 											PUBLIC DEFINES::EEPROM

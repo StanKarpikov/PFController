@@ -20,23 +20,98 @@
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
-char events_was_CT_overload(float *adc_Iloading_values);
-int events_check_Ud(float Ud);
-void events_check_temperature(void);
-void events_check_voltage_RMS(void);
-void events_check_overvoltage_transient(float *U);
-int events_check_overcurrent_rms(void);
-int events_check_overcurrent_peak(float *Iafg);
-void events_check_period(unsigned int period_length);
+/**
+ * @brief ADC DMA half complete callback
+ * 
+ * @param adc_values ADC active values
+ *
+ * @return The status of the operation
+ */
+status_t events_check_adc_overload(float *adc_values);
 
-void events_check_voltage_rms(void);
-void events_check_supply(void);
-void events_check_voltage_phase_rotation(void);
-void events_check_loading_current(void);
+/**
+ * @brief Check capacitors voltage
+ * 
+ * @param Ucap The capacitors voltage
+ *
+ * @return The status of the operation
+ */
+status_t events_check_ud(float Ucap);
 
-void events_preload_start(void);
-void events_preload_stop(void);
-void events_preload_is_started(void);
-void events_check_preload(void);
+/**
+ * @brief Check the temperature
+ *
+ * @return The status of the operation
+ */
+status_t events_check_temperature(void);
+
+/**
+ * @brief Check the RMS voltage
+ *
+ * @return The status of the operation
+ */
+status_t events_check_rms_voltage(void);
+
+/**
+ * @brief Check overvoltage (amplitude)
+ *
+ * @param U A pointer to the channel voltages
+ *
+ * @return The status of the operation
+ */
+status_t events_check_overvoltage(float *U);
+
+/**
+ * @brief Check RMS overcurrent
+ *
+ * @return The status of the operation
+ */
+status_t events_check_rms_overcurrent(void);
+
+/**
+ * @brief Check overcurrent (amplitude)
+ *
+ * @param I A pointer to the currents array
+ *
+ * @return The status of the operation
+ */
+status_t events_check_overcurrent(float *I);
+
+/**
+ * @brief Check the period and frequency
+ *
+ * @param period The value of the period
+ *
+ * @return The status of the operation
+ */
+status_t events_check_period(uint32_t period);
+
+/**
+ * @brief Check the input channel phases
+ *
+ * @return The status of the operation
+ */
+status_t events_check_voltage_phase_rotation(void);
+
+/**
+ * @brief Check the current on the load
+ *
+ * @return The status of the operation
+ */
+status_t events_check_loading_current(void);
+
+/**
+ * @brief Check preloading operation (preloading has been started and is ongoing in the right direction)
+ *
+ * @return The status of the operation
+ */
+status_t events_check_preload_start(void);
+
+/**
+ * @brief Check preloading operation (preloading was stopped)
+ *
+ * @return The status of the operation
+ */
+status_t events_check_preload_stop(void);
 
 #endif /*__EVENTS_PROCESS_H__ */

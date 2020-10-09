@@ -58,7 +58,7 @@ typedef struct
  */
 enum
 {
-    ADC_UD,       /**< CH10 Voltage at the capacitors */
+    ADC_UCAP,       /**< CH10 Voltage at the capacitors */
     ADC_U_A,      /**< CH11 Voltage U, phase A */
     ADC_U_B,      /**< CH12 Voltage U, phase B */
     ADC_U_C,      /**< CH13 Voltage U, phase C */

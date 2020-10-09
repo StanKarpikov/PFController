@@ -46,7 +46,7 @@ static float diff = 0; /**< The period difference (between required and measured
 
 /** A channel needs the square calculation (e.g. effective value) */
 static const uint8_t needSquare[] = {
-    0,  /*CH10 - ADC_UD*/
+    0,  /*CH10 - ADC_UCAP*/
     1,  /*CH11 - ADC_U_A*/
     1,  /*CH12 - ADC_U_B*/
     1,  /*CH13 - ADC_U_C*/
@@ -191,7 +191,7 @@ static void adc_half_cplt_callback(void)
     {
         adc_values[i_isr] = adc_values_raw[i_isr];
     }
-    //events_was_CT_overload(adc_values);//TODO: Add event protection
+    //events_check_adc_overload(adc_values);//TODO: Add event protection
 			
 		settings_calibrations_t calibrations = settings_get_calibrations();
 	
@@ -203,11 +203,11 @@ static void adc_half_cplt_callback(void)
 
         pfc.adc.ch[current_buffer][i_isr][symbol] = adc_values[i_isr];
     }
-    //events_check_overcurrent_peak(&adc_values[ADC_I_A]);
-    //events_check_overvoltage_transient(&adc_values[ADC_U_A]);
+    //events_check_overcurrent(&adc_values[ADC_I_A]);
+    //events_check_overvoltage(&adc_values[ADC_U_A]);
     if (pfc_get_state() >= PFC_STATE_CHARGE && pfc_get_state() < PFC_STATE_FAULTBLOCK)
     {
-        events_check_Ud(adc_values[ADC_UD]);
+        events_check_ud(adc_values[ADC_UCAP]);
     }
     //restart adc
     //HAL_ADC_Start(&hadc1);
@@ -222,10 +222,10 @@ static void adc_half_cplt_callback(void)
     {
 				settings_capacitors_t capacitors = settings_get_capacitors();
         float VL = PID(
-            capacitors.Ud_nominal - adc_get_cap_voltage(),
+            capacitors.Ucap_nominal - adc_get_cap_voltage(),
             &VLet_1,
-            capacitors.ctrlUd_Kp,
-            capacitors.ctrlUd_Ki,
+            capacitors.ctrl_Ucap_Kp,
+            capacitors.ctrl_Ucap_Ki,
             0,
             &VLIt_1);
 
@@ -358,10 +358,10 @@ void algorithm_process(void)
 			
         float K_I = (filters.K_I);
         float K_U = (filters.K_U);
-        float K_UD = (filters.K_UD);
+        float K_Ucap = (filters.K_Ucap);
         float K_Iinv = (1 - filters.K_I);
         float K_Uinv = (1 - filters.K_U);
-        float K_UDinv = (1 - filters.K_UD);
+        float K_Ucapinv = (1 - filters.K_Ucap);
 
         float umax[3] = {UMAX_INITIAL_VALUE};
         float umin[3] = {UMIN_INITIAL_VALUE};
@@ -416,11 +416,11 @@ void algorithm_process(void)
                 if (umin[i_isr] > pfc.adc.ch[last_buffer][ADC_EMS_A + i_isr][i]) umin[i_isr] = pfc.adc.ch[last_buffer][ADC_EMS_A + i_isr][i];
             }
             IIR_1ORDER(
-                pfc.adc.ch[last_buffer][ADC_UD][i],
-                pfc.adc.ch[current_buffer][ADC_UD][i],
-                pfc.adc.ch[last_buffer][ADC_UD][i],
-                K_UD,
-                K_UDinv);
+                pfc.adc.ch[last_buffer][ADC_UCAP][i],
+                pfc.adc.ch[current_buffer][ADC_UCAP][i],
+                pfc.adc.ch[last_buffer][ADC_UCAP][i],
+                K_Ucap,
+                K_Ucapinv);
         }
 				
         /* Calculate grid parameters */
@@ -442,8 +442,8 @@ void algorithm_process(void)
         protocol_write_osc_data((float**)pfc.adc.ch[last_buffer]);
 				
         /* Process events */
-        events_check_overcurrent_rms();
-        events_check_voltage_RMS();
+        events_check_rms_overcurrent();
+        events_check_rms_voltage();
         events_check_period(pfc.period_fact);
 				
         /* Adjust the frequency */
@@ -525,7 +525,7 @@ void algorithm_process(void)
 float adc_get_cap_voltage(void)
 {
 	adc_lock();
-	float ud_ret = pfc.adc.active[ADC_UD];
+	float ud_ret = pfc.adc.active[ADC_UCAP];
 	adc_unlock();
 	return ud_ret;
 }

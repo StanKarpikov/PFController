@@ -122,8 +122,8 @@ static void pfc_disable_pwm(void)
  */
 static void pfc_restore_pwm(void)
 {
-    //et_1=0;//Last Ud error value
-    //It_1=0;//Last Ud integral accumulator value
+    //et_1=0;//Last Ucap error value
+    //It_1=0;//Last Ucap integral accumulator value
 
     if (!pwm_on)
     {
@@ -143,7 +143,7 @@ static void pfc_restore_pwm(void)
 static bool is_voltage_ready(void)
 {
 		settings_capacitors_t capacitors = settings_get_capacitors();
-    if (adc_get_cap_voltage() > capacitors.Ud_precharge)
+    if (adc_get_cap_voltage() > capacitors.Ucap_precharge)
     {
         return true;
     }
@@ -294,10 +294,10 @@ static void pfc_charge_process(void)
 
 	/*
 	TODO: Check the charge
-	if (adc_get_cap_voltage() < (PFC.settings.CAPACITORS.Ud_precharge*0.8)){//TODO:
+	if (adc_get_cap_voltage() < (PFC.settings.capacitors.Ucap_precharge*0.8)){//TODO:
 		events_new_event(
 				EVENT_TYPE_PROTECTION,
-				SUB_EVENT_TYPE_PROTECTION_UD_MIN,
+				SUB_EVENT_TYPE_PROTECTION_UCAP_MIN,
 				0,
 				adc_get_cap_voltage()
 			);
@@ -396,19 +396,19 @@ status_t pfc_apply_command(pfc_commands_t command, uint32_t data)
 			case COMMAND_SETTINGS_SAVE:
 					if (pfc_get_state() == PFC_STATE_STOP)
 					{
-							SaveSettings();
+							settings_save();
 					}
 					break;
 			case COMMAND_CHANNEL0_DATA:
-					pwm_settings.activeChannels[PFC_ACHAN] = data;
+					pwm_settings.active_channels[PFC_ACHAN] = data;
 					settings_set_pwm(pwm_settings);
 					break;
 			case COMMAND_CHANNEL1_DATA:
-					pwm_settings.activeChannels[PFC_BCHAN] = data;
+					pwm_settings.active_channels[PFC_BCHAN] = data;
 					settings_set_pwm(pwm_settings);
 					break;
 			case COMMAND_CHANNEL2_DATA:
-					pwm_settings.activeChannels[PFC_CCHAN] = data;
+					pwm_settings.active_channels[PFC_CCHAN] = data;
 					settings_set_pwm(pwm_settings);
 					break;
 			default:

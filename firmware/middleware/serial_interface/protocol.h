@@ -111,7 +111,7 @@ struct _PACKED s_command_get_adc_active
 /** Answer: get active ADC data */
 struct _PACKED s_answer_get_adc_active
 {
-    float ADC_UD;       //CH10
+    float ADC_UCAP;       //CH10
     float ADC_U_A;      //CH11
     float ADC_U_B;      //CH12
     float ADC_U_C;      //CH13
@@ -140,7 +140,7 @@ struct _PACKED s_command_get_adc_active_raw
 /** Answer: get active ADC data in raw format */
 struct _PACKED s_answer_get_adc_active_raw
 {
-    uint16_t ADC_UD;       //CH10
+    uint16_t ADC_UCAP;       //CH10
     uint16_t ADC_U_A;      //CH11
     uint16_t ADC_U_B;      //CH12
     uint16_t ADC_U_C;      //CH13
@@ -179,7 +179,7 @@ struct _PACKED s_command_get_work_state
 struct _PACKED s_answer_get_work_state
 {
     uint8_t state;
-    uint32_t activeChannels[PFC_NCHAN];
+    uint32_t active_channels[PFC_NCHAN];
 };
 
 /** Command: Get the version info */
@@ -242,13 +242,13 @@ struct _PACKED s_command_get_settings_protection
 /** Answer: Get protection settings */
 struct _PACKED s_answer_get_settings_protection
 {
-    float Ud_min;
-    float Ud_max;
+    float Ucap_min;
+    float Ucap_max;
     float temperature;
     float U_min;
     float U_max;
-    float Fnet_min;
-    float Fnet_max;
+    float F_min;
+    float F_max;
     float I_max_rms;
     float I_max_peak;
 };
@@ -262,11 +262,11 @@ struct _PACKED s_command_get_settings_capacitors
 /** Answer: Get capacitor settings */
 struct _PACKED s_answer_get_settings_capacitors
 {
-    float ctrlUd_Kp;
-    float ctrlUd_Ki;
-    float ctrlUd_Kd;
-    float Ud_nominal;
-    float Ud_precharge;
+    float ctrl_Ucap_Kp;
+    float ctrl_Ucap_Ki;
+    float ctrl_Ucap_Kd;
+    float Ucap_nominal;
+    float Ucap_precharge;
 };
 
 /** Command: Get filter settings */
@@ -280,7 +280,7 @@ struct _PACKED s_answer_get_settings_filters
 {
     float K_I;
     float K_U;
-    float K_UD;
+    float K_Ucap;
 };
 
 /** Command: Get network settings */
@@ -329,8 +329,8 @@ enum
 /** Event types: subevents for protection */
 enum
 {
-    SUB_EVENT_TYPE_PROTECTION_UD_MIN,
-    SUB_EVENT_TYPE_PROTECTION_UD_MAX,
+    SUB_EVENT_TYPE_PROTECTION_UCAP_MIN,
+    SUB_EVENT_TYPE_PROTECTION_UCAP_MAX,
     SUB_EVENT_TYPE_PROTECTION_TEMPERATURE,
     SUB_EVENT_TYPE_PROTECTION_U_MIN,
     SUB_EVENT_TYPE_PROTECTION_U_MAX,
