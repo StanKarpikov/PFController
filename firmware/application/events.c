@@ -58,7 +58,7 @@ static const uint16_t protection_levels[] = {
  */
 static void events_lock(void)
 {
-    DINT;
+    ENTER_CRITICAL();
 }
 
 /**
@@ -66,7 +66,7 @@ static void events_lock(void)
  */
 static void events_unlock(void)
 {
-    EINT;
+    EXIT_CRITICAL();
 }
 
 /*--------------------------------------------------------------

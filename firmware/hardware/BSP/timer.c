@@ -533,10 +533,10 @@ status_t timer_write_pwm(uint32_t ccr1, uint32_t ccr2, uint32_t ccr3)
  */
 status_t timer_correct_period(uint32_t arr)
 {
-    DINT;
+    ENTER_CRITICAL();
     TIMER_SYNC->ARR = arr;
     TIMER_SYNC->EGR = TIM_EGR_UG;
-    EINT;
+    EXIT_CRITICAL();
     return PFC_SUCCESS;
 }
 

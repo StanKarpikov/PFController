@@ -13,7 +13,7 @@
 
 #include "BSP/debug.h"
 
-#define BOARD_STM32F7
+#define BOARD_STM32F7 /**< Defines the hardware that is used */
 
 #ifdef BOARD_STM32F7
 #include "board/board_stm32f7.h"

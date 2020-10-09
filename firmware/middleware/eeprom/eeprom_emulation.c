@@ -72,14 +72,14 @@ static eeprom_status_t eeprom_adapter_erase(uint32_t page_base)
     EraseInitStruct.Sector = (page_base == EEPROM_PAGE0_BASE) ? EEPROM_PAGE0_SECTOR : EEPROM_PAGE1_SECTOR;
     EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
 
-    DINT;
+    ENTER_CRITICAL();
     if (HAL_FLASHEx_Erase(&EraseInitStruct, &page_error) != HAL_OK)
     {
         //EEPROM_LOG( "HAL_FLASHEx_Erase Err: %X, %X\n",HAL_FLASH_GetError(),page_error);
-        EINT;
+        EXIT_CRITICAL();
         return EEPROM_BAD_FLASH;
     }
-    EINT;
+    EXIT_CRITICAL();
     return EEPROM_OK;
 }
 
@@ -95,14 +95,14 @@ static eeprom_status_t eeprom_adapter_program_halfword(uint32_t page_base, uint3
 {
     __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
 
-    DINT;
+    ENTER_CRITICAL();
     if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, page_base, data) != HAL_OK)
     {
         //EEPROM_LOG("Write error at 0x%08X\n",page_base);
-        EINT;
+        EXIT_CRITICAL();
         return EEPROM_BAD_FLASH;
     }
-    EINT;
+    EXIT_CRITICAL();
     return EEPROM_OK;
 }
 

@@ -9,62 +9,82 @@
 --------------------------------------------------------------*/
 
 #include "BSP/system.h"
-
 #include "stm32f7xx_hal.h"
 
 /*--------------------------------------------------------------
                        PRIVATE DEFINES
 --------------------------------------------------------------*/
 
-#define TIME_MAX_VALUE (4133894400000ULL)
+#define TIME_MAX_VALUE (4133894400000ULL) /**< Maximum time constant (used to exclude wrong packets) */
 
 /*--------------------------------------------------------------
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-static uint32_t current_time = 0;
+static uint32_t current_time = 0; /**< Time accumulator variable, 64-bit Unix timestamp (with us) */
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
-/*
- * Initializes the Global MSP.
+/**
+ * @brief Initializes the Global MSP
  */
 void HAL_MspInit(void)
 {
     __HAL_RCC_PWR_CLK_ENABLE();
     __HAL_RCC_SYSCFG_CLK_ENABLE();
 }
+
+/*
+ * @brief Increment the time tick
+ */
 void system_increment_time(void)
 {
     uint64_t current_time_next = current_time;
     current_time_next++;
 
-    DINT;
+    ENTER_CRITICAL();
     current_time = current_time_next;
-    EINT;
+    EXIT_CRITICAL();
 }
 
+/*
+ * @brief Set the local time
+ *
+ * @param time 64-bit Unix timestamp (with us)
+ */
 void system_set_time(uint64_t time)
 {
     if (time > TIME_MAX_VALUE)
     {
         time = 0;
     }
-    DINT;
+    ENTER_CRITICAL();
     current_time = time;
-    EINT;
+    EXIT_CRITICAL();
 }
 
+/*
+ * @brief Get the local time
+ *
+ * @return 64-bit Unix timestamp (with us)
+ */
 uint64_t system_get_time(void)
 {
-    DINT;
+    ENTER_CRITICAL();
     uint64_t time = current_time;
-    EINT;
+    EXIT_CRITICAL();
     return time;
 }
 
+/*
+ * @brief Wait for a delay (hard waiting)
+ *
+ * @param delay_ticks Ticks to wait
+ *
+ * @return The status of the operation
+ */
 status_t system_delay_ticks(uint32_t delay_ticks)
 {
     HAL_Delay(delay_ticks);
@@ -73,7 +93,6 @@ status_t system_delay_ticks(uint32_t delay_ticks)
 
 /**
   * @brief System Clock Configuration
-  * @retval None
   */
 void SystemClock_Config(void)
 {
@@ -81,10 +100,10 @@ void SystemClock_Config(void)
     RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
     RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
-    /**Configure the main internal regulator output voltage   */
+    /* Configure the main internal regulator output voltage   */
     __HAL_RCC_PWR_CLK_ENABLE();
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
-    /**Initializes the CPU, AHB and APB busses clocks   */
+    /* Initializes the CPU, AHB and APB busses clocks   */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_LSI;
     RCC_OscInitStruct.HSIState = RCC_HSI_ON;
     RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -99,12 +118,12 @@ void SystemClock_Config(void)
     {
         error_handler();
     }
-    /**Activate the Over-Drive mode   */
+    /* Activate the Over-Drive mode   */
     if (HAL_PWREx_EnableOverDrive() != HAL_OK)
     {
         error_handler();
     }
-    /**Initializes the CPU, AHB and APB busses clocks   */
+    /* Initializes the CPU, AHB and APB busses clocks   */
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
     RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
@@ -115,6 +134,7 @@ void SystemClock_Config(void)
     {
         error_handler();
     }
+		
     PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_USART1;
     PeriphClkInitStruct.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
@@ -123,7 +143,11 @@ void SystemClock_Config(void)
     }
 }
 
-/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+/*
+ * @brief Reset of all peripherals, Initializes the Flash interface and the Systick
+ *
+ * @param The status of the operation
+ */
 status_t system_init(void)
 {
     HAL_Init();
@@ -132,8 +156,8 @@ status_t system_init(void)
 }
 
 /**
-  * @brief This function handles System tick timer.
-  */
+ * @brief This function handles System tick timer
+ */
 void SysTick_Handler(void)
 {
     system_increment_time();

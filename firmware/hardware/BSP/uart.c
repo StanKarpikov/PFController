@@ -20,24 +20,25 @@
                        DEFINES
 --------------------------------------------------------------*/
 
-#define UART_INTERFACE_TIMEOUT               (2000)
-#define UART_DEBUG_TIMEOUT                   (2000)
-#define USE_INTERFACE_AS_DEBUG               (0)
-#define UART_INTERFACE_BUFFER_DEFAULT_FILLER (0xFF)
-#define RX_BUFFER_SIZE                       (0x3FF)
-#define TX_BUFFER_SIZE                       (0x3FF)
+#define UART_INTERFACE_TIMEOUT               (2000) /**< Timeout [ms] while writing to the interface output */
+#define UART_DEBUG_TIMEOUT                   (2000) /**< Timeout [ms] while writing to the debug output */
+#define USE_INTERFACE_AS_DEBUG               (0)    /**< Set to 1 to use the interface output as a debug output */
+#define UART_INTERFACE_BUFFER_DEFAULT_FILLER (0xFF) /**< The default value to fill the buffer */
+#define RX_BUFFER_SIZE                       (0x3FF) /**< The size of the receive buffer, 0x3FF by default */
+#define TX_BUFFER_SIZE                       (0x3FF) /**< The size of the transmit buffer, 0x3FF by default */
 
 /*--------------------------------------------------------------
                        PRIVATE TYPES
 --------------------------------------------------------------*/
 
+/** UART port structure */
 typedef struct
 {
-    uint8_t tx_buffer[TX_BUFFER_SIZE];
-    uint8_t tx_index;
-    uint8_t tx_end;
+    uint8_t tx_buffer[TX_BUFFER_SIZE]; /**< Transmit buffer */
+    uint8_t tx_index; /**< The next read position */
+    uint8_t tx_end; /**< The end position in the transmit buffer */
 
-    uint16_t rx_buffer[RX_BUFFER_SIZE];
+    uint16_t rx_buffer[RX_BUFFER_SIZE]; /**< Receive buffer */
     int rx_index;        /**< The next write position */
     int rx_readed;       /**< The next read position */
     uint8_t rx_overflow; /**< 0 - normal, 1 - rx buffer overflow */
@@ -47,15 +48,22 @@ typedef struct
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-static UART_HandleTypeDef huart_interface = {0};
-static DMA_HandleTypeDef hdma_usart_interface_rx = {0};
-static DMA_HandleTypeDef hdma_usart_interface_tx = {0};
-static mcu_port_t mcu_port = {0};
+static UART_HandleTypeDef huart_interface = {0}; /**< Interface output handle */
+static DMA_HandleTypeDef hdma_usart_interface_rx = {0}; /**< Interface output receive DMA handle */
+static DMA_HandleTypeDef hdma_usart_interface_tx = {0}; /**< Interface output transmit DMA handle */
+static mcu_port_t mcu_port = {0}; /**< Port instance */
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
+/*
+ * @brief Get received byte (the oldest one)
+ *
+ * @param byte A byte read from the interface
+ *
+ * @return The status of the operation
+ */
 status_t uart_interface_get_byte(uint8_t* byte)
 {
     ARGUMENT_ASSERT(byte);
@@ -80,6 +88,13 @@ status_t uart_interface_get_byte(uint8_t* byte)
     return PFC_NULL;
 }
 
+/*
+ * @brief Init receiving process
+ *
+ * @param byte A byte read from the interface
+ *
+ * @return The status of the operation
+ */
 status_t uart_interface_rx_init(void)
 {
     memset(mcu_port.rx_buffer, UART_INTERFACE_BUFFER_DEFAULT_FILLER, RX_BUFFER_SIZE);
@@ -91,6 +106,11 @@ status_t uart_interface_rx_init(void)
     return PFC_SUCCESS;
 }
 
+/**
+ * @brief Error callback
+ *
+ * @param huart A pointer to the UART hardware handler
+ */
 void HAL_UART_ErrorCallback(UART_HandleTypeDef* huart)
 {
     HAL_UART_DMAStop(huart);
@@ -100,11 +120,24 @@ void HAL_UART_ErrorCallback(UART_HandleTypeDef* huart)
     uart_interface_rx_init();
 }
 
+/**
+ * @brief Transmission complete callback
+ *
+ * @param huart A pointer to the UART hardware handler
+ */
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
 {
     HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
 }
 
+/*
+ * @brief Transmit data to the interface UART
+ *
+ * @param data The data block pointer
+ * @param length The size of the data block
+ *
+ * @return The status of the operation
+ */
 status_t uart_interface_transmit(uint8_t* data, uint32_t length)
 {
     ARGUMENT_ASSERT(data);
@@ -119,6 +152,14 @@ status_t uart_interface_transmit(uint8_t* data, uint32_t length)
     return PFC_SUCCESS;
 }
 
+/*
+ * @brief Transmit data to the debug UART
+ *
+ * @param data The data block pointer
+ * @param length The size of the data block
+ *
+ * @return The status of the operation
+ */
 status_t uart_debug_transmit(uint8_t* data, uint32_t length)
 {
 #if USE_INTERFACE_AS_DEBUG == 1
@@ -133,11 +174,11 @@ status_t uart_debug_transmit(uint8_t* data, uint32_t length)
 }
 
 /**
-* @brief UART MSP Initialization
-* This function configures the hardware resources used in this example
-* @param huart: UART handle pointer
-* @retval None
-*/
+ * @brief UART MSP Initialization
+ * This function configures the hardware resources
+ *
+ * @param huart UART handle 
+ */
 void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -197,12 +238,11 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
 }
 
 /**
-* @brief UART MSP De-Initialization
-* This function freeze the hardware resources used in this example
-* @param huart: UART handle pointer
-* @retval None
-*/
-
+ * @brief UART MSP De-Initialization
+ * This function freeze the hardware resources
+ *
+ * @param huart UART handle pointer
+ */
 void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
 {
     if (huart->Instance == USART_INTERFACE)
@@ -220,12 +260,12 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* huart)
     }
 }
 
-/**
-  * @brief USART1 Initialization Function
-  * @param None
-  * @retval None
-  */
-void uart_init(void)
+/*
+ * @brief USART interface Initialization Function
+ *
+ * @return The status of the operation
+ */
+status_t uart_init(void)
 {
     huart_interface.Instance = USART_INTERFACE;
     huart_interface.Init.BaudRate = USART_INTERFACE_BAUDRATE;
@@ -240,28 +280,30 @@ void uart_init(void)
     if (HAL_RS485Ex_Init(&huart_interface, UART_DE_POLARITY_HIGH, 0, 0) != HAL_OK)
     {
         error_handler();
+			  return PFC_ERROR_HAL;
     }
+		return PFC_SUCCESS;
 }
 
 /**
-  * @brief This function handles USART1 global interrupt.
-  */
+ * @brief This function handles interface USART global interrupt
+ */
 void USART_INTERFACE_IRQ(void)
 {
     HAL_UART_IRQHandler(&huart_interface);
 }
 
 /**
-  * @brief This function handles DMA2 stream5 global interrupt.
-  */
+ * @brief This function handles interface USART RX DMA global interrupt.
+ */
 void USART_INTERFACE_DMA_RX_IRQ(void)
 {
     HAL_DMA_IRQHandler(&hdma_usart_interface_rx);
 }
 
 /**
-  * @brief This function handles DMA2 stream7 global interrupt.
-  */
+ * @brief This function handles interface USART RX DMA global interrupt.
+ */
 void USART_INTERFACE_DMA_TX_IRQ(void)
 {
     HAL_DMA_IRQHandler(&hdma_usart_interface_tx);

@@ -18,10 +18,50 @@
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
+/**
+ * @brief Transmit data to the interface UART
+ *
+ * @param data The data block pointer
+ * @param length The size of the data block
+ *
+ * @return The status of the operation
+ */
 status_t uart_interface_transmit(uint8_t* data, uint32_t length);
+
+/**
+ * @brief Transmit data to the interface UART
+ *
+ * @param data The data block pointer
+ * @param length The size of the data block
+ *
+ * @return The status of the operation
+ */
 status_t uart_debug_transmit(uint8_t* data, uint32_t length);
-void uart_init(void);
+
+/**
+ * @brief USART interface Initialization Function
+ *
+ * @return The status of the operation
+ */
+status_t uart_init(void);
+
+/**
+ * @brief Init receiving process
+ *
+ * @param byte A byte read from the interface
+ *
+ * @return The status of the operation
+ */
 status_t uart_interface_rx_init(void);
+
+
+/**
+ * @brief Get received byte (the oldest one)
+ *
+ * @param byte A byte read from the interface
+ *
+ * @return The status of the operation
+ */
 status_t uart_interface_get_byte(uint8_t* byte);
 
 #endif /* _UART_H */

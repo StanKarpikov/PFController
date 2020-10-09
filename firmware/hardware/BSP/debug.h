@@ -17,18 +17,20 @@
                        PUBLIC DEFINES
 --------------------------------------------------------------*/
 
-#define UNUSED(X) (void)X
+#define UNUSED(X) (void)X /**< Unused variable */
 
 /*--------------------------------------------------------------
                        PUBLIC MACRO
 --------------------------------------------------------------*/
 
+/** Check an argument for a NULL value */
 #define ARGUMENT_ASSERT(ARGUMENT)                 \
     do                                            \
     {                                             \
         if (ARGUMENT == 0) return PFC_ERROR_DATA; \
     } while (0)
 
+/** Set a software breakpoint */
 #define BREAKPOINT()            \
     do                          \
     {                           \
@@ -38,14 +40,24 @@
         }                       \
     } while (0)
 
-#define DINT __disable_irq()
-#define EINT __enable_irq()
+#define ENTER_CRITICAL() __disable_irq() /**< Enter a critical section (disable interrupts) */
+#define EXIT_CRITICAL() __enable_irq() /**< Exit a critical section (enable interrupts) */
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
+/**
+ * @brief  This function is executed in case of error occurrence.
+ */
 void error_handler(void);
+		
+/**
+ * @brief Check if the debug session is enabled (a debugger is connected)
+ *
+ * @retval true A debug session is enabled
+ * @retval false A debug session is disabled
+ */
 bool is_debug_session(void);
 
 /*--------------------------------------------------------------

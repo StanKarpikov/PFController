@@ -158,9 +158,9 @@ static bool is_voltage_ready(void)
  */
 static void pfc_init_process(void)
 {
-    Relay_Main_Off();
-    Relay_Preload_Off();
-    ventilators_off();
+    gpio_main_relay_switch_off();
+    gpio_preload_relay_switch_off();
+    gpio_ventilators_switch_off();
 
     main_started = 0;
     preload_started = 0;
@@ -179,9 +179,9 @@ static void pfc_init_process(void)
  */
 static void pfc_stop_process(void)
 {
-    Relay_Main_Off();
-    Relay_Preload_Off();
-    ventilators_off();
+    gpio_main_relay_switch_off();
+    gpio_preload_relay_switch_off();
+    gpio_ventilators_switch_off();
 
     main_started = 0;
     preload_started = 0;
@@ -231,7 +231,7 @@ static void pfc_precharge_process(void)
     }
     if (!preload_started)
     {
-        Relay_Preload_On();
+        gpio_preload_relay_switch_on();
         //events_preload_start();
         preload_started = 1;
     }
@@ -245,8 +245,8 @@ static void pfc_main_process(void)
     pfc_disable_pwm();
     if (!main_started)
     {
-        Relay_Main_On();
-        ventilators_on();
+        gpio_main_relay_switch_on();
+        gpio_ventilators_switch_on();
         main_started = 1;
         main_start_period = period_counter;
     }
@@ -264,7 +264,7 @@ static void pfc_main_process(void)
  */
 static void pfc_precharge_disable_process(void)
 {
-    Relay_Preload_Off();
+    gpio_preload_relay_switch_off();
     preload_started = 0;
     pfc_set_state(PFC_STATE_WORK);
 }
@@ -318,9 +318,9 @@ static void pfc_test_process(void)
  */
 static void pfc_stopping_process(void)
 {
-    Relay_Main_Off();
-    Relay_Preload_Off();
-    ventilators_off();
+    gpio_main_relay_switch_off();
+    gpio_preload_relay_switch_off();
+    gpio_ventilators_switch_off();
     //events_preload_stop();
     pfc_set_state(PFC_STATE_STOP);
 }
@@ -330,9 +330,9 @@ static void pfc_stopping_process(void)
  */
 static void pfc_faultblock_process(void)
 {
-    Relay_Main_Off();
-    Relay_Preload_Off();
-    ventilators_off();
+    gpio_main_relay_switch_off();
+    gpio_preload_relay_switch_off();
+    gpio_ventilators_switch_off();
     pfc_disable_pwm();
 }
 

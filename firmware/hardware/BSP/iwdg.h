@@ -17,6 +17,11 @@
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
+/**
+  * @brief IWDG Initialization Function
+	*
+  * @return The status of the operation
+  */
 status_t iwdg_init(void);
 
 #endif /* _IWDG_H */

@@ -9,7 +9,6 @@
 --------------------------------------------------------------*/
 
 #include "BSP/dma.h"
-
 #include "BSP/debug.h"
 #include "stm32f7xx_hal.h"
 
@@ -17,9 +16,11 @@
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
-/** 
-  * Enable DMA controller clock
-  */
+/*
+ * @breif Enable DMA controller clock
+ * 
+ * @return The status of the operation
+ */
 status_t dma_init(void)
 {
     /* DMA controller clock enable */
