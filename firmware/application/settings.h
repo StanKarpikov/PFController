@@ -58,21 +58,22 @@ typedef struct
 /** Protection settings */
 typedef struct
 {
-		float ctrl_Ucap_Kp;
-		float ctrl_Ucap_Ki;
-		float ctrl_Ucap_Kd;
-		float Ucap_nominal;
+		float ctrl_Ucap_Kp; /**< The capacitors charge PID settings: the proportional coefficient */
+		float ctrl_Ucap_Ki; /**< The capacitors charge PID settings: the integral coefficient */
+		float ctrl_Ucap_Kd; /**< The capacitors charge PID settings: the differential coefficient */
+		float Ucap_nominal; /**< The capacitors nominal voltage */
 		float Ucap_precharge;  /**< The precharge level (capacitor voltage) */
 } settings_capacitors_t;
 		
+/** Settings structure */
 typedef struct
 {
-    settings_calibrations_t calibrations;
-    settings_filters_t filters;
-    settings_pwm_t pwm;
-    settings_protection_t protection;
-    settings_capacitors_t capacitors;
-    uint16_t magic;
+    settings_calibrations_t calibrations; /**< The calibrations settings */
+    settings_filters_t filters; /**< The filters settings */
+    settings_pwm_t pwm; /**< The PWM settings */
+    settings_protection_t protection; /**< The protection settings */
+    settings_capacitors_t capacitors; /**< The capacitors settings */
+    uint16_t magic; /**< The maic word */
 } settings_t;
 
 /*--------------------------------------------------------------

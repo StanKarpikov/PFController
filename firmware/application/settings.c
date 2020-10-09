@@ -54,7 +54,7 @@ static status_t eeprom_settings_read(settings_t *settings)
         if (EEPROM_OK != eeprom_read_variable(address, &mem[address])) return PFC_ERROR_GENERIC;
     }
     memcpy(settings, mem, sizeof(settings_t));
-    if (settings->magic != MAGIC_2BYTE) return PFC_ERROR_GENERIC;
+    if (settings->magic != MAGIC_WORD) return PFC_ERROR_GENERIC;
 
     return PFC_SUCCESS;
 }
@@ -101,7 +101,7 @@ static status_t eeprom_settings_write(settings_t *settings)
     uint16_t data;
     uint16_t mem[sizeof(settings_t) / 2];
 
-    settings->magic = MAGIC_2BYTE;
+    settings->magic = MAGIC_WORD;
     memcpy(mem, settings, sizeof(settings_t));
     for (int address = 0; address < sizeof(settings_t) / 2; address++)
     {

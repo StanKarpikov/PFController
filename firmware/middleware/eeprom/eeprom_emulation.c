@@ -20,40 +20,46 @@
 
 #define __IO volatile
 
-#define EEPROM_PAGE_SIZE      ((uint32_t)8 * 1024)    //8 Kbytes
-#define EEPROM_PAGE_FULL_SIZE ((uint32_t)256 * 1024)  //256 Kbytes
+#define EEPROM_PAGE_SIZE      ((uint32_t)8 * 1024)    /**< EEPROM memory storage size: 8 Kbytes */
+#define EEPROM_PAGE_FULL_SIZE ((uint32_t)256 * 1024)  /**< EEPROM memory storage full size: 256 Kbytes */
 
-/* Pages 0 and 1 base and end addresses */
-#define EEPROM_PAGE0_BASE ((uint32_t)(EEPROM_START_ADDRESS))
-#define EEPROM_PAGE1_BASE ((uint32_t)(EEPROM_START_ADDRESS + EEPROM_PAGE_FULL_SIZE))
+#define EEPROM_PAGE0_BASE ((uint32_t)(EEPROM_START_ADDRESS)) /**< EEPROM memory storage: the first page address */
+#define EEPROM_PAGE1_BASE ((uint32_t)(EEPROM_START_ADDRESS + EEPROM_PAGE_FULL_SIZE)) /**< EEPROM memory storage: the second page address */
 
-
-#define EEPROM_DEFAULT_DATA (0xFFFF)
+#define EEPROM_DEFAULT_DATA (0xFFFF) /**< Default data. Should be 0xFFFF due to the flash technology limitations */
 
 /*--------------------------------------------------------------
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-static uint32_t page_base_first = EEPROM_PAGE0_BASE;
-static uint32_t page_base_second = EEPROM_PAGE1_BASE;
-static uint32_t page_size  = EEPROM_PAGE_SIZE;
-static eeprom_status_t eeprom_status = EEPROM_NOT_INIT;
+static uint32_t page_base_first = EEPROM_PAGE0_BASE; /**< The first page address */
+static uint32_t page_base_second = EEPROM_PAGE1_BASE; /**< The second page address */
+static uint32_t page_size  = EEPROM_PAGE_SIZE; /**< The size of a page */
+static eeprom_status_t eeprom_status = EEPROM_NOT_INIT; /**< The EEPROM module status */
 
 /*--------------------------------------------------------------
                        PRIVATE TYPES
 --------------------------------------------------------------*/
 
+/** The status of the page that is written in the base page address */
 typedef enum
 {
-		EEPROM_ERASED = ((uint16_t)0xFFFF),       /**<  */
-    EEPROM_RECEIVE_DATA = ((uint16_t)0xEEEE), /**<  */
-    EEPROM_VALID_PAGE = ((uint16_t)0x0000)    /**<  */
+		EEPROM_ERASED = ((uint16_t)0xFFFF),       /**< The page is erased and can be used as a storage after initialisation */
+    EEPROM_RECEIVE_DATA = ((uint16_t)0xEEEE), /**< The page is receiving the data */
+    EEPROM_VALID_PAGE = ((uint16_t)0x0000)    /**< The page is valid and can be used */
 } eeprom_page_state_t;
 
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS
 --------------------------------------------------------------*/
 
+/**
+ * @brief Connection to the flash adapter: erate a page
+ *
+ * @param page_base The address of the memory range to erase
+ * 
+ * @return The status of the operation
+ */
 static eeprom_status_t eeprom_adapter_erase(uint32_t page_base)
 {
     __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
@@ -76,6 +82,14 @@ static eeprom_status_t eeprom_adapter_erase(uint32_t page_base)
     return EEPROM_OK;
 }
 
+/**
+ * @brief Connection to the flash adapter: program a half word (16 bit)
+ *
+ * @param page_base The address of the half word
+ * @param data The data to be wriiten
+ * 
+ * @return The status of the operation
+ */
 static eeprom_status_t eeprom_adapter_program_halfword(uint32_t page_base, uint32_t data)
 {
     __HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_ALL_ERRORS);
@@ -91,12 +105,22 @@ static eeprom_status_t eeprom_adapter_program_halfword(uint32_t page_base, uint3
 		return EEPROM_OK;
 }
 
+/**
+ * @brief Unlock the flash memory
+ *
+ * @return The status of the operation
+ */
 static eeprom_status_t eeprom_flash_unlock(void)
 {
     HAL_FLASH_Unlock();
     return EEPROM_OK;
 }
 
+/**
+ * @brief Lock the flash memory
+ *
+ * @return The status of the operation
+ */
 static eeprom_status_t eeprom_flash_lock(void)
 {
     HAL_FLASH_Lock();
@@ -104,11 +128,13 @@ static eeprom_status_t eeprom_flash_lock(void)
 }
 
 /**
-  * @brief  Check page for blank
-  * @param  page base address
-  * @retval Success or error
-  *		EEPROM_BAD_FLASH:	page not empty after erase
-  *		EEPROM_OK:			page blank
+  * @brief  Check if a page is blank
+  *
+  * @param  page_base The address of the page
+  *
+  * @return The status of the page
+  *	@retval -1 The page not empty after being erased
+  *	@retval 0 The page is blank
   */
 static int eeprom_check_page(uint32_t page_base, uint16_t status)
 {
@@ -124,11 +150,11 @@ static int eeprom_check_page(uint32_t page_base, uint16_t status)
 }
 
 /**
-  * @brief  Erase page with increment erase counter (page + 2)
-  * @param  page base address
-  * @retval Success or error
-  *			0: success erase
-  *			- Flash error code: on write Flash error
+  * @brief  Erase page and increment the erase counter (address: page + 2)
+  *
+  * @param  page_base The address of the page
+  * 
+  * @return The status of the operation
   */
 static eeprom_status_t eeprom_erase_page(uint32_t page_base)
 {
@@ -147,12 +173,13 @@ static eeprom_status_t eeprom_erase_page(uint32_t page_base)
 }
 
 /**
-  * @brief  Check page for blank and erase it
-  * @param  page base address
-  * @retval Success or error
-  *			- Flash error code: on write Flash error
-  *			- EEPROM_BAD_FLASH:	page not empty after erase
-  *			- EEPROM_OK:			page blank
+  * @brief  Check if a page is blank and erase the page
+  *
+  * @param  page_base The address of the page
+  *
+  * @return The status of the operation. Flash error code on write Flash error
+  *	@retval EEPROM_BAD_FLASH	The page not empty after erase
+  *	@retval EEPROM_OK		The page is blank
   */
 static eeprom_status_t eeprom_check_erase_page(uint32_t page_base, uint16_t status)
 {
@@ -168,10 +195,9 @@ static eeprom_status_t eeprom_check_erase_page(uint32_t page_base, uint16_t stat
 }
 
 /**
-  * @brief  Find valid Page for write or read operation
-  * @param	Page0: Page0 base address
-  *			Page1: Page1 base address
-  * @retval Valid page address (PAGE0 or PAGE1) or NULL in case of no valid page was found
+  * @brief  Find a valid page for write or read operation
+  *
+  * @return Valid page address (PAGE0 or PAGE1) or NULL in case of no valid page was found
   */
 static uint32_t eeprom_find_valid_page(void)
 {
@@ -187,11 +213,12 @@ static uint32_t eeprom_find_valid_page(void)
 }
 
 /**
-  * @brief  Calculate unique variables in EEPROM
-  * @param  start: address of first slot to check (page + 4)
-  * @param	end: page end address
-  * @param	address: 16 bit virtual address of the variable to excluse (or 0XFFFF)
-  * @retval count of variables
+  * @brief  Calculate the count of unique variables in the EEPROM memory
+  *
+	* @param  page_base The address of the first slot to check (address: page + 4)
+  * @param	address_to_skip A 16 bit virtual address of the variable to excluse (or 0XFFFF)
+  *
+  * @return The count of variables
   */
 static uint16_t eeprom_get_variables_count(uint32_t page_base, uint16_t address_to_skip)
 {
@@ -221,14 +248,15 @@ static uint16_t eeprom_get_variables_count(uint32_t page_base, uint16_t address_
 }
 
 /**
-  * @brief  Transfers last updated variables data from the full Page to an empty one.
-  * @param  new_page: new page base address
-  * @param	old_page: old page base address
-  *	@param	address_to_skip: 16 bit virtual address of the variable (or 0xFFFF)
-  * @retval Success or error status:
-  *           - 0: on success
-  *           - EEPROM_OUT_SIZE: if valid new page is full
-  *           - Flash error code: on write Flash error
+  * @brief  Transfer the last updated variables data from a full page to an empty one.
+  *
+  * @param  new_page The new page base address
+  * @param	old_page The old page base address
+  *	@param	address_to_skip A 16 bit virtual address of the variable (or 0xFFFF)
+  *
+  * @return The status of the operation, Flash error code on write Flash error
+  * @retval EEPROM_OK On success
+  * @retval EEPROM_OUT_SIZE If valid new page is full
   */
 static eeprom_status_t eeprom_transfer_page(uint32_t new_page, uint32_t old_page, uint16_t address_to_skip)
 {
@@ -299,9 +327,9 @@ static eeprom_status_t eeprom_transfer_page(uint32_t new_page, uint32_t old_page
 }
 
 /**
-  * @brief  Erases PAGE0 and PAGE1 and writes EEPROM_VALID_PAGE / 0 header to PAGE0
-  * @param  PAGE0 and PAGE1 base addresses
-  * @retval eeprom_status of the last operation (Flash write or erase) done during EEPROM formating
+  * @brief  Format the storage: erase PAGE0 and PAGE1 and write the EEPROM_VALID_PAGE / 0 header to PAGE0
+  *
+  * @retval The status of the last operation (Flash write or erase) during EEPROM formating
   */
 static eeprom_status_t eeprom_format_storage(void)
 {
@@ -326,14 +354,15 @@ static eeprom_status_t eeprom_format_storage(void)
 
 /**
   * @brief  Verify if active page is full and Writes variable in EEPROM.
+  *
   * @param  address: 16 bit virtual address of the variable
   * @param  data: 16 bit data to be written as variable value
-  * @retval Success or error status:
-  *           - 0: on success
-  *           - EEPROM_PAGE_FULL: if valid page is full (need page transfer)
-  *           - EEPROM_NO_VALID_PAGE: if no valid page was found
-  *           - EEPROM_OUT_SIZE: if EEPROM size exceeded
-  *           - Flash error code: on write Flash error
+  *
+  * @return The status of the operation, Flash error code: on write Flash error
+  * @retval EEPROM_OK on success
+  * @retval EEPROM_PAGE_FULL if valid page is full (need page transfer)
+  * @retval EEPROM_NO_VALID_PAGE if no valid page was found
+  * @retval EEPROM_OUT_SIZE if EEPROM size exceeded
   */
 static eeprom_status_t eeprom_verify_page_full_write_variable(uint16_t address, uint16_t data)
 {
@@ -408,16 +437,17 @@ static eeprom_status_t eeprom_verify_page_full_write_variable(uint16_t address, 
 }
 
 /**
-  * @brief  Writes/upadtes variable data in EEPROM.
-  * @param  VirtAddress: Variable virtual address
-  * @param  data: 16 bit data to be written
-  * @retval Success or error status:
-  *			- 0: on success
-  *			- EEPROM_BAD_ADDRESS: if address = 0xFFFF
-  *			- EEPROM_PAGE_FULL: if valid page is full
-  *			- EEPROM_NO_VALID_PAGE: if no valid page was found
-  *			- EEPROM_OUT_SIZE: if no empty EEPROM variables
-  *			- Flash error code: on write Flash error
+  * @brief  Writes/updates the variable data in EEPROM
+  *
+  * @param  address The variable virtual address
+  * @param  data A 16 bit data to be written
+  *
+  * @return The status of the operation, or Flash error code on write Flash error
+  *	@retval EEPROM_OK on success
+  *	@retval EEPROM_BAD_ADDRESS if address = 0xFFFF
+  *	@retval EEPROM_PAGE_FULL if valid page is full
+  *	@retval EEPROM_NO_VALID_PAGE if no valid page was found
+  *	@retval EEPROM_OUT_SIZE if no empty EEPROM variables
   */
 static eeprom_status_t eeprom_write(uint16_t address, uint16_t data)
 {
@@ -449,6 +479,11 @@ static eeprom_status_t eeprom_write(uint16_t address, uint16_t data)
                        PUBLIC FUNCTIONS
 --------------------------------------------------------------*/
 
+/*
+  * @brief  Init the EEPROM module
+  *
+  * @return The status of the operation
+  */
 eeprom_status_t eeprom_init(void)
 {
     eeprom_page_state_t status0, status1;
@@ -550,16 +585,17 @@ eeprom_status_t eeprom_init(void)
     return eeprom_status;
 }
 
-
 /**
   * @brief	Returns the last stored variable data, if found,
   *			which correspond to the passed virtual address
-  * @param  address: Variable virtual address
-  * @param  data: Pointer to data variable
-  * @retval Success or error status:
-  *           - EEPROM_OK: if variable was found
-  *           - EEPROM_BAD_ADDRESS: if the variable was not found
-  *           - EEPROM_NO_VALID_PAGE: if no valid page was found.
+  *
+  * @param  address The variable virtual address
+  * @param  data A pointer to data variable
+  *
+  * @return The status of the operation
+  * @retval EEPROM_OK if variable was found
+  * @retval EEPROM_BAD_ADDRESS if the variable was not found
+  * @retval EEPROM_NO_VALID_PAGE if no valid page was found.
   */
 eeprom_status_t eeprom_read_variable(uint16_t address, uint16_t *data)
 {
@@ -593,19 +629,20 @@ eeprom_status_t eeprom_read_variable(uint16_t address, uint16_t *data)
 }
 
 
-/**
-  * @brief  Writes/upadtes variable data in EEPROM.
-            The value is written only if differs from the one already saved at the same address.
-  * @param  VirtAddress: Variable virtual address
-  * @param  data: 16 bit data to be written
-  * @retval Success or error status:
-  *			- EEPROM_SAME_VALUE: If new data matches existing EEPROM data
-  *			- 0: on success
-  *			- EEPROM_BAD_ADDRESS: if address = 0xFFFF
-  *			- EEPROM_PAGE_FULL: if valid page is full
-  *			- EEPROM_NO_VALID_PAGE: if no valid page was found
-  *			- EEPROM_OUT_SIZE: if no empty EEPROM variables
-  *			- Flash error code: on write Flash error
+/*
+  * @brief  Writes/upadtes the variable data in EEPROM.
+            The value is written only if differs from the one already saved at the same address
+  *
+  * @param  address The variable virtual address
+  * @param  data A 16 bit data to be written
+  *
+  * @return The status of the operation, Flash error code: on write Flash error
+  *	@retval EEPROM_SAME_VALUE If new data matches existing EEPROM data
+  *	@retval EEPROM_OK on success
+  *	@retval EEPROM_BAD_ADDRESS if address = 0xFFFF
+  *	@retval EEPROM_PAGE_FULL if valid page is full
+  *	@retval EEPROM_NO_VALID_PAGE if no valid page was found
+  *	@retval EEPROM_OUT_SIZE if no empty EEPROM slots
   */
 eeprom_status_t eeprom_update_variable(uint16_t address, uint16_t data)
 {
