@@ -79,11 +79,15 @@ docs > doxygen doxygen_сfg
 
 The documentation will be generated under the folder:
 
-* `firmware/docs/html`
+```
+firmware/docs/html
+```
 
 To view the documentation open the following file in the browser:
 
-* `firmware/docs/html/index.html`
+```
+firmware/docs/html/index.html
+```
 
 ## Code format
 
