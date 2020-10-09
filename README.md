@@ -40,7 +40,9 @@ The firmware v0.1.1 implement the PFC operation and a load control.
 Keil uVision was used as a development IDE. The firmware was tested with the following software and toolckain versions:
 
 > IDE-Version: µVision V5.28.0.0
+
 > Toolchain: MDK-ARM Professional Version: 5.28.0.0
+
 > C Compiler: V5.06 update 6 (build 750)
 
 ### Dependencies
