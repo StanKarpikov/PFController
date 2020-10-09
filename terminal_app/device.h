@@ -277,7 +277,7 @@ enum P_AFG_COMMANDS {
     FAULT //ошибка
 } AFG_STATUS;*/
 //============================================================================
-class KKM : public QObject{
+class PFC : public QObject{
     Q_OBJECT
 
 public:
@@ -285,7 +285,7 @@ public:
     //typedef void ( *prot_handler )          ( void * );
     //prot_handler handlers[lenP_AFG_COMMANDS];
     QString handlers[lenP_AFG_COMMANDS];
-    KKM(){
+    PFC(){
         QThread* thread = new QThread;
         // Передаем права владения "рабочим" классом, классу QThread.
         _interface = new ADFSerialInterface(NULL);

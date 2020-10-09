@@ -7,7 +7,7 @@
 #include <QGraphicsDropShadowEffect>
 #include <QListWidgetItem>
 
-void MainWindow::page_SettingsCalibrations_Init(){
+void MainWindow::pageSettingsCalibrationsInit(){
     //------------------------------------------------------
     for(int row=0;row<ui->tableWidget_settings_calibrations->rowCount();row++){
         ui->tableWidget_settings_calibrations->setItem(row,0,new QTableWidgetItem());
@@ -20,7 +20,7 @@ void MainWindow::page_SettingsCalibrations_Init(){
         QHBoxLayout* pLayout;
         QPushButton *btn_edit;
         btn_edit=new QPushButton();
-        btns_edit.append(btn_edit);
+        buttons_edit.append(btn_edit);
         //Ячейка для авто значения
           eFlags = ui->tableWidget_settings_calibrations->item(row, 1)->flags();
           eFlags &= ~Qt::ItemIsEditable;
@@ -42,8 +42,8 @@ void MainWindow::page_SettingsCalibrations_Init(){
     }
     connect(ui->tableWidget_settings_calibrations, SIGNAL(cellChanged(int,int)),
             this, SLOT(tableSettingsCalibrations_changed(int,int)));
-    KKM_var.SETTINGS.CALIBRATIONS.calibration.resize(ADC_CHANNEL_NUMBER);
-    KKM_var.SETTINGS.CALIBRATIONS.offset.resize(ADC_CHANNEL_NUMBER);
+    pfc_settings.SETTINGS.CALIBRATIONS.calibration.resize(ADC_CHANNEL_NUMBER);
+    pfc_settings.SETTINGS.CALIBRATIONS.offset.resize(ADC_CHANNEL_NUMBER);
 }
 /*void MainWindow::tableSettingsCalibrations_SetAutoSettings(){
     float autoval=0;
@@ -138,13 +138,13 @@ void MainWindow::tableSettingsCalibrations_changed(int row, int col){
     QTableWidgetItem *item=ui->tableWidget_settings_calibrations->item(row,col);
     float val=item->text().toFloat();
     if(row<ADC_CHANNEL_NUMBER){
-       KKM_var.SETTINGS.CALIBRATIONS.offset[row]=val;
+       pfc_settings.SETTINGS.CALIBRATIONS.offset[row]=val;
     }else{
-       KKM_var.SETTINGS.CALIBRATIONS.calibration[row-ADC_CHANNEL_NUMBER]=val;
+       pfc_settings.SETTINGS.CALIBRATIONS.calibration[row-ADC_CHANNEL_NUMBER]=val;
     }
     writeSettingsCalibrations(
-                KKM_var.SETTINGS.CALIBRATIONS.calibration,
-                KKM_var.SETTINGS.CALIBRATIONS.offset);
+                pfc_settings.SETTINGS.CALIBRATIONS.calibration,
+                pfc_settings.SETTINGS.CALIBRATIONS.offset);
 }
 //========================================================================
 void MainWindow::setSettingsCalibrations(
@@ -157,7 +157,7 @@ void MainWindow::setSettingsCalibrations(
        ui->tableWidget_settings_calibrations->item(i,0)->setText(QString().sprintf("%.2f",offset[i]));
     }
     ui->tableWidget_settings_calibrations->blockSignals(false);
-    KKM_var.SETTINGS.CALIBRATIONS.calibration=calibration;
-    KKM_var.SETTINGS.CALIBRATIONS.offset=offset;
+    pfc_settings.SETTINGS.CALIBRATIONS.calibration=calibration;
+    pfc_settings.SETTINGS.CALIBRATIONS.offset=offset;
     //tableSettingsCalibrations_SetAutoSettings();
 }

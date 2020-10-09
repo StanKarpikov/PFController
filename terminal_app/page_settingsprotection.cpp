@@ -19,7 +19,7 @@ enum {
     table_protection_row_I_max_peak
 };
 
-void MainWindow::page_SettingsProtection_Init(){
+void MainWindow::pageSettingsProtectionInit(){
     for(int i=0;i<ui->tableWidget_settings_protection->rowCount();i++){
         ui->tableWidget_settings_protection->item(i, 0)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
         ui->tableWidget_settings_protection->item(i, 1)->setFlags(0);
@@ -35,43 +35,43 @@ void MainWindow::tableSettingsProtection_changed(int row, int col){
     float val=item->text().toFloat();
     switch(row){
         case table_protection_row_Ud_min:
-            KKM_var.SETTINGS.PROTECTION.Ud_min=val;
+            pfc_settings.SETTINGS.PROTECTION.Ud_min=val;
         break;
         case table_protection_row_Ud_max:
-            KKM_var.SETTINGS.PROTECTION.Ud_max=val;
+            pfc_settings.SETTINGS.PROTECTION.Ud_max=val;
         break;
         case table_protection_row_temperature:
-            KKM_var.SETTINGS.PROTECTION.temperature=val;
+            pfc_settings.SETTINGS.PROTECTION.temperature=val;
         break;
         case table_protection_row_U_min:
-            KKM_var.SETTINGS.PROTECTION.U_min=val;
+            pfc_settings.SETTINGS.PROTECTION.U_min=val;
         break;
         case table_protection_row_U_max:
-            KKM_var.SETTINGS.PROTECTION.U_max=val;
+            pfc_settings.SETTINGS.PROTECTION.U_max=val;
         break;
         case table_protection_row_Fnet_min:
-            KKM_var.SETTINGS.PROTECTION.Fnet_min=val;
+            pfc_settings.SETTINGS.PROTECTION.Fnet_min=val;
         break;
         case table_protection_row_Fnet_max:
-            KKM_var.SETTINGS.PROTECTION.Fnet_max=val;
+            pfc_settings.SETTINGS.PROTECTION.Fnet_max=val;
         break;
         case table_protection_row_I_max_rms:
-            KKM_var.SETTINGS.PROTECTION.I_max_rms=val;
+            pfc_settings.SETTINGS.PROTECTION.I_max_rms=val;
         break;
         case table_protection_row_I_max_peak:
-            KKM_var.SETTINGS.PROTECTION.I_max_peak=val;
+            pfc_settings.SETTINGS.PROTECTION.I_max_peak=val;
         break;
     }
     writeSettingsProtection(
-                KKM_var.SETTINGS.PROTECTION.Ud_min,
-                KKM_var.SETTINGS.PROTECTION.Ud_max,
-                KKM_var.SETTINGS.PROTECTION.temperature,
-                KKM_var.SETTINGS.PROTECTION.U_min,
-                KKM_var.SETTINGS.PROTECTION.U_max,
-                KKM_var.SETTINGS.PROTECTION.Fnet_min,
-                KKM_var.SETTINGS.PROTECTION.Fnet_max,
-                KKM_var.SETTINGS.PROTECTION.I_max_rms,
-                KKM_var.SETTINGS.PROTECTION.I_max_peak
+                pfc_settings.SETTINGS.PROTECTION.Ud_min,
+                pfc_settings.SETTINGS.PROTECTION.Ud_max,
+                pfc_settings.SETTINGS.PROTECTION.temperature,
+                pfc_settings.SETTINGS.PROTECTION.U_min,
+                pfc_settings.SETTINGS.PROTECTION.U_max,
+                pfc_settings.SETTINGS.PROTECTION.Fnet_min,
+                pfc_settings.SETTINGS.PROTECTION.Fnet_max,
+                pfc_settings.SETTINGS.PROTECTION.I_max_rms,
+                pfc_settings.SETTINGS.PROTECTION.I_max_peak
                 );
 }
 //========================================================================
@@ -87,15 +87,15 @@ void MainWindow::setSettingsProtection(
         float I_max_rms, //!< Максимальное граничное значение тока фильтра по RMS
         float I_max_peak //!< Максимальное граничное мгновенное значение тока фильтра
         ){
-    KKM_var.SETTINGS.PROTECTION.Ud_min         =Ud_min;
-    KKM_var.SETTINGS.PROTECTION.Ud_max         =Ud_max;
-    KKM_var.SETTINGS.PROTECTION.temperature    =temperature;
-    KKM_var.SETTINGS.PROTECTION.U_min          =U_min;
-    KKM_var.SETTINGS.PROTECTION.U_max          =U_max;
-    KKM_var.SETTINGS.PROTECTION.Fnet_min       =Fnet_min;
-    KKM_var.SETTINGS.PROTECTION.Fnet_max       =Fnet_max;
-    KKM_var.SETTINGS.PROTECTION.I_max_rms      =I_max_rms;
-    KKM_var.SETTINGS.PROTECTION.I_max_peak     =I_max_peak;
+    pfc_settings.SETTINGS.PROTECTION.Ud_min         =Ud_min;
+    pfc_settings.SETTINGS.PROTECTION.Ud_max         =Ud_max;
+    pfc_settings.SETTINGS.PROTECTION.temperature    =temperature;
+    pfc_settings.SETTINGS.PROTECTION.U_min          =U_min;
+    pfc_settings.SETTINGS.PROTECTION.U_max          =U_max;
+    pfc_settings.SETTINGS.PROTECTION.Fnet_min       =Fnet_min;
+    pfc_settings.SETTINGS.PROTECTION.Fnet_max       =Fnet_max;
+    pfc_settings.SETTINGS.PROTECTION.I_max_rms      =I_max_rms;
+    pfc_settings.SETTINGS.PROTECTION.I_max_peak     =I_max_peak;
 
 #define SET_TABLE_PROT(VAL)\
     ui->tableWidget_settings_protection->item(table_protection_row_##VAL,0)->setText(QString().sprintf("%.2f",VAL));

@@ -10,7 +10,7 @@
 
 QMap<uint32_t,uint32_t> OSCILLOG_ARR;
 
-void MainWindow::page_Oscillog_Init(){
+void MainWindow::pageOscillogInit(){
     OSCILLOG_ARR[OSC_U_A]=OSCILLOG_U_A;
     OSCILLOG_ARR[OSC_U_B]=OSCILLOG_U_B;
     OSCILLOG_ARR[OSC_U_C]=OSCILLOG_U_C;
@@ -70,7 +70,7 @@ void MainWindow::page_Oscillog_Init(){
 
     oscillog_xval.resize(128);
 
-    for(int i=0;i<OSCILLOG_size;i++){
+    for(int i=0;i<OSCILLOG_SIZE;i++){
         oscillog_data[i].resize(128);
     }
     for(int i=0;i<128;i++){
@@ -101,7 +101,7 @@ void MainWindow::mouseWheel(QWheelEvent *event) {
     factor = qPow(ui->OscillogPlot->axisRect()->rangeZoomFactor(Qt::Vertical), wheelSteps);
     ui->OscillogPlot->yAxis2->scaleRange(factor, ui->OscillogPlot->yAxis2->pixelToCoord(event->pos().y()));
 }
-void MainWindow::on_pushButton_clicked(){
+void MainWindow::onPushButtonClicked(){
     ui->OscillogPlot->rescaleAxes(true);
 }
 void MainWindow::setOscillog(uint16_t channel, std::vector<double> data){

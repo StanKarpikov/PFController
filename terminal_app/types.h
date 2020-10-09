@@ -31,6 +31,4 @@ enum eMESSAGE_LEVELS{
         Q_ARG(quint8,  target ), \
         Q_ARG(QString, str ) \
     );
-class  MainWindow;
-extern MainWindow *w;
 #endif // TYPES_H

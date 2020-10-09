@@ -7,7 +7,7 @@
 #include <QGraphicsDropShadowEffect>
 #include <QListWidgetItem>
 
-void MainWindow::page_Main_Init(){
+void MainWindow::pageMainInit(){
     ui->radioButton_Connection->setDisabled(true);    
 }
 void MainWindow::setConnection(bool connected){
@@ -16,21 +16,21 @@ void MainWindow::setConnection(bool connected){
     ui->groupBox_net->setDisabled(!connected);
     ui->tabWidget->setDisabled(!connected);
 
-    _connected=connected;
+    connected=connected;
     if(connected){        
         ui->radioButton_Connection->setText("Есть связь");
     }else{
-        lastIndexEvents=0;
+        last_index_events=0;
         ui->radioButton_Connection->setText("Нет связи");
     }
 }
 void MainWindow::setWorkState(uint32_t state,uint32_t chA,uint32_t chB,uint32_t chC){
-    KKM_var.status=state;
-    KKM_var.activeChannels[0]=chA;
-    KKM_var.activeChannels[1]=chB;
-    KKM_var.activeChannels[2]=chC;
+    pfc_settings.status=state;
+    pfc_settings.activeChannels[0]=chA;
+    pfc_settings.activeChannels[1]=chB;
+    pfc_settings.activeChannels[2]=chC;
 
-    if(KKM_var.status!=KKM_STATE_STOP){
+    if(pfc_settings.status!=PFC_STATE_STOP){
         ui->pushButton_Save->setDisabled(true);
     }else{
         ui->pushButton_Save->setDisabled(false);
@@ -45,41 +45,41 @@ void MainWindow::setWorkState(uint32_t state,uint32_t chA,uint32_t chB,uint32_t 
     UPDATE_CHECKBOX(ui->checkBox_channelB,chB);
     UPDATE_CHECKBOX(ui->checkBox_channelC,chC);
 
-    switch(KKM_var.status){
-        case KKM_STATE_INIT: //предзаряд
+    switch(pfc_settings.status){
+        case PFC_STATE_INIT: //предзаряд
             ui->label_WorkState->setText("Инициализация");
         break;
-        case KKM_STATE_STOP: //не работает
+        case PFC_STATE_STOP: //не работает
             ui->label_WorkState->setText("Остановлен");
         break;
-        case KKM_STATE_SYNC: //синхронизация с сетью
+        case PFC_STATE_SYNC: //синхронизация с сетью
             ui->label_WorkState->setText("Синхронизация");
         break;
-        case KKM_STATE_PRECHARGE_PREPARE:
+        case PFC_STATE_PRECHARGE_PREPARE:
             ui->label_WorkState->setText("Подг.предзаряда");
         break;
-        case KKM_STATE_PRECHARGE: //предзаряд
+        case PFC_STATE_PRECHARGE: //предзаряд
             ui->label_WorkState->setText("Предзаряд");
         break;
-        case KKM_STATE_MAIN:
+        case PFC_STATE_MAIN:
             ui->label_WorkState->setText("Контактор");
         break;
-        case KKM_STATE_PRECHARGE_DISABLE: //работает, но без компенсации
+        case PFC_STATE_PRECHARGE_DISABLE: //работает, но без компенсации
             ui->label_WorkState->setText("Выкл.предзаряд");
         break;
-        case KKM_STATE_WORK: //работает, но без компенсации
+        case PFC_STATE_WORK: //работает, но без компенсации
              ui->label_WorkState->setText("Работа");
         break;
-        case KKM_STATE_CHARGE: //работает, но без компенсации
+        case PFC_STATE_CHARGE: //работает, но без компенсации
              ui->label_WorkState->setText("Заряд");
         break;
-        case KKM_STATE_TEST: //тестирование сети
+        case PFC_STATE_TEST: //тестирование сети
             ui->label_WorkState->setText("Тест");
         break;
-        case KKM_STATE_STOPPING: //ошибка
+        case PFC_STATE_STOPPING: //ошибка
             ui->label_WorkState->setText("Остановка..");
         break;
-        case KKM_STATE_FAULTBLOCK: //ошибка
+        case PFC_STATE_FAULTBLOCK: //ошибка
             ui->label_WorkState->setText("Авария");
         break;
     }

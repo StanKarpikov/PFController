@@ -6,28 +6,31 @@
 #include <QtGlobal>
 #include <QDateTime>
 
-enum class Sender {
+enum class Sender
+{
     PFC,
     GUI
 };
-enum class ADFMessagePriority{
+enum class ADFMessagePriority
+{
     HIGH,
     NORMAL,
     LOW,
 };
 
-class DeviceSerialMessage {
-public:
-    static const int MAX_LENGTH; 
+class DeviceSerialMessage
+{
+   public:
+    static const int MAX_LENGTH;
     static const unsigned char START_BYTE;
     static const unsigned char STOP_BYTE;
 
-public:
+   public:
     std::vector<unsigned char> _data;
     explicit DeviceSerialMessage(void);
-    DeviceSerialMessage(const ADFMessagePriority prior,const unsigned char command, const Sender sender,
-            const bool error, const bool crcError, unsigned char crc,
-            const std::vector<unsigned char> &data);
+    DeviceSerialMessage(const ADFMessagePriority prior, const unsigned char command, const Sender sender,
+                        const bool error, const bool crcError, unsigned char crc,
+                        const std::vector<unsigned char> &data);
 
     DeviceSerialMessage(const DeviceSerialMessage &other);
 
@@ -67,10 +70,10 @@ public:
 
     void setCrc(quint16 crc);
 
-    quint32 timestamp(){
+    quint32 timestamp()
+    {
         return _timestamp;
     }
-
 
     ADFMessagePriority priority() const;
     void setPriority(ADFMessagePriority priority);
@@ -78,26 +81,26 @@ public:
     std::vector<unsigned char> toBuffer() const;
 
     void fill(
-            ADFMessagePriority priority,
-            Sender sender,
-            unsigned char comm,
-            const std::vector<unsigned char> &data){
+        ADFMessagePriority priority,
+        Sender sender,
+        unsigned char comm,
+        const std::vector<unsigned char> &data)
+    {
         setPriority(priority);
         setSender(sender);
         addData(data);
         setCommand(comm);
-        _timestamp=QDateTime::currentMSecsSinceEpoch();
+        _timestamp = QDateTime::currentMSecsSinceEpoch();
     }
 
-public:
-
+   public:
     static DeviceSerialMessage *popFromBuffer(std::vector<unsigned char> &data);
 
-private:
+   private:
     static const int MIN_LENGTH = 7;
     static const int HEADER_LEN = 3;
 
-private:
+   private:
     Sender _sender;
     bool _error;
     bool _crcError;

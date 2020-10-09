@@ -13,7 +13,7 @@ enum {
     table_filters_row_K_Ud
 };
 
-void MainWindow::page_SettingsFilters_Init(){
+void MainWindow::pageSettingsFiltersInit(){
     for(int i=0;i<ui->tableWidget_settings_filters->rowCount();i++){
         ui->tableWidget_settings_filters->item(i, 0)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
         ui->tableWidget_settings_filters->item(i, 1)->setFlags(0);
@@ -29,19 +29,19 @@ void MainWindow::tableSettingsFilters_changed(int row, int col){
     float val=item->text().toFloat();
     switch(row){       
         case table_filters_row_K_I:
-            KKM_var.SETTINGS.FILTERS.K_I=val;
+            pfc_settings.SETTINGS.FILTERS.K_I=val;
         break;
         case table_filters_row_K_U:
-            KKM_var.SETTINGS.FILTERS.K_U=val;
+            pfc_settings.SETTINGS.FILTERS.K_U=val;
         break;
         case table_filters_row_K_Ud:
-            KKM_var.SETTINGS.FILTERS.K_Ud=val;
+            pfc_settings.SETTINGS.FILTERS.K_Ud=val;
         break;
     }
     writeSettingsFilters(
-                KKM_var.SETTINGS.FILTERS.K_I,
-                KKM_var.SETTINGS.FILTERS.K_U,
-                KKM_var.SETTINGS.FILTERS.K_Ud
+                pfc_settings.SETTINGS.FILTERS.K_I,
+                pfc_settings.SETTINGS.FILTERS.K_U,
+                pfc_settings.SETTINGS.FILTERS.K_Ud
                 );
 }
 //========================================================================
@@ -50,9 +50,9 @@ void MainWindow::setSettingsFilters(
         float K_U,
         float K_Ud
         ){
-    KKM_var.SETTINGS.FILTERS.K_I         =K_I;
-    KKM_var.SETTINGS.FILTERS.K_U         =K_U;
-    KKM_var.SETTINGS.FILTERS.K_Ud        =K_Ud;
+    pfc_settings.SETTINGS.FILTERS.K_I         =K_I;
+    pfc_settings.SETTINGS.FILTERS.K_U         =K_U;
+    pfc_settings.SETTINGS.FILTERS.K_Ud        =K_Ud;
 
 #define SET_TABLE_FILTERS(VAL)\
     ui->tableWidget_settings_filters->item(table_filters_row_##VAL,0)->setText(QString().sprintf("%.3f",VAL));

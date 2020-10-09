@@ -5,18 +5,19 @@
 #include "DeviceSerialMessage.h"
 #include "types.h"
 
-class PackageCommand : public QObject{
+class PackageCommand : public QObject
+{
     Q_OBJECT
-public:
+   public:
     explicit PackageCommand(QObject *parent = 0);
     virtual ~PackageCommand(void);
 
     DeviceSerialMessage *package_out;  //!< Пакет на отправку
     DeviceSerialMessage *package_in;
     void finishCommand(bool is_timed_out);
-signals:
+   signals:
     void complete(bool timeout, PackageCommand *c);
-public slots:
+   public slots:
 };
 
-#endif // PACKAGECOMMAND_H
+#endif  // PACKAGECOMMAND_H

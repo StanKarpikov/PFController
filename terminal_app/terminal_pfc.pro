@@ -39,4 +39,4 @@ FORMS += \
     settingsdialog.ui
 
 RESOURCES += \
-    terminal_KKM.qrc
+    terminal_pfc.qrc
