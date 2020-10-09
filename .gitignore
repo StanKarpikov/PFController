@@ -58,3 +58,4 @@ firmware/project/DebugConfig
 *.uvguix*
 firmware/project/PFC.uvoptx
 terminal_app/.qmake.stash
+firmware/docs/html
