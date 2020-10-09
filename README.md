@@ -69,6 +69,30 @@ Future improvements to make:
 - Add extra configuration from the panel (remove defines)
 - Add phase rotation check
 
+## Documentation
+
+The code contains documentation in Doxygen style. The folder `docs` contains `firmware/doxygen_cfg` file that can be used to generate the documentation: 
+
+```
+docs > doxygen doxygen_сfg
+```
+
+The documentation will be generated under the folder:
+
+```
+firmware/docs/html
+```
+
+To view the documentation open the following file in the browser:
+
+```
+firmware/docs/html/index.html
+```
+
+## Code format
+
+Clang-format was used to prettify the code. The configuration can be found in `.clang-format` file.
+
 ## Hardware
 
 The firmware was tested on the development board for STM32F765 (with modifications) and on a custom hardware.
