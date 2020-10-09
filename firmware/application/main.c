@@ -4,6 +4,10 @@
  * @brief Main file with initialisation and entry point
  */
 
+/** @addtogroup app_main
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -68,3 +72,5 @@ int main(void)
         events_check_temperature();
     }
 }
+
+/** @} */

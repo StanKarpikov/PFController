@@ -7,6 +7,10 @@
 #ifndef _ADC_LOGIC_H
 #define _ADC_LOGIC_H
 
+/** @addtogroup app_adc_logic
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -163,4 +167,5 @@ void algorithm_process(void);
  */
 void adc_clear_accumulators(void);
 
+/** @} */
 #endif /* _ADC_LOGIC_H */

@@ -7,6 +7,9 @@
 #ifndef __DEFINES_H__
 #define __DEFINES_H__
 
+/** @addtogroup app_defines
+ * @{
+ */
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -52,4 +55,5 @@
 #define USART_INTERFACE_BAUDRATE     (115200UL) /**< Interface baudrate, bods (115200 is default) */
 #define USART_INTERFACE_IRQ_PRIORITY (3U)       /**< The priority of the ADC IRQ. TODO: Check for overlapping with critical irqs */
 
+/** @} */
 #endif

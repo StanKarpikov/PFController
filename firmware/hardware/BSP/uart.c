@@ -4,6 +4,10 @@
  * @brief Board support package: UART
  */
 
+/** @addtogroup hdw_bsp_uart
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -308,3 +312,4 @@ void USART_INTERFACE_DMA_TX_IRQ(void)
 {
     HAL_DMA_IRQHandler(&hdma_usart_interface_tx);
 }
+/** @} */

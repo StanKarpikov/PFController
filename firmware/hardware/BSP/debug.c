@@ -4,6 +4,10 @@
  * @brief Board support package: Debug utils
  */
 
+/** @addtogroup hdw_bsp_debug
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -71,3 +75,5 @@ void assert_failed(uint8_t *file, uint32_t line)
     /* printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
 }
 #endif /* USE_FULL_ASSERT */
+
+/** @} */

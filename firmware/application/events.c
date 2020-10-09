@@ -4,6 +4,11 @@
  * @brief Events management (status, warnings, errors, faults)
  */
 
+/** @addtogroup app_events
+ * @{
+ */
+ 
+
 /*--------------------------------------------------------------
                        INCLUDE
 --------------------------------------------------------------*/
@@ -208,3 +213,4 @@ uint16_t events_get(uint64_t after_index, uint16_t num, struct event_record_s* b
     events_unlock();
     return count;
 }
+/** @} */

@@ -402,3 +402,4 @@ void packet_set_command(packet_t *packet, uint8_t command)
 {
     packet->fields.command = command;
 }
+/** @} */

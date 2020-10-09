@@ -4,6 +4,10 @@
  * @brief Board support package: system tools
  */
 
+/** @addtogroup hdw_bsp_system
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -164,3 +168,4 @@ void SysTick_Handler(void)
 
     HAL_IncTick();
 }
+/** @} */

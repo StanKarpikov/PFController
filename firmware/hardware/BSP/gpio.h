@@ -7,6 +7,10 @@
 #ifndef _GPIO_H
 #define _GPIO_H
 
+/** @addtogroup hdw_bsp_gpio
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -108,4 +112,5 @@ status_t gpio_ventilators_switch_on(void);
  */
 status_t gpio_ventilators_switch_off(void);
 
+/** @} */
 #endif /* _GPIO_H */

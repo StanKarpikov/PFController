@@ -7,6 +7,11 @@
 #ifndef _FW_VER_H
 #define _FW_VER_H
 
+/** @addtogroup drivers_fw_ver
+ * @{
+ */
+ 
+
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -52,4 +57,5 @@
                                : (BUILD_MONTH_IS_DEC)   ? 12 \
                                                         : /* error default */ 0)
 
+/** @} */
 #endif /* _FW_VER_H */

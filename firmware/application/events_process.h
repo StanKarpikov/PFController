@@ -7,6 +7,11 @@
 #ifndef __EVENTS_PROCESS_H__
 #define __EVENTS_PROCESS_H__
 
+/** @addtogroup app_events_process
+ * @{
+ */
+ 
+
 /*--------------------------------------------------------------
                        INCLUDE
 --------------------------------------------------------------*/
@@ -114,4 +119,5 @@ status_t events_check_preload_start(void);
  */
 status_t events_check_preload_stop(void);
 
+/** @} */
 #endif /*__EVENTS_PROCESS_H__ */

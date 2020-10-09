@@ -3,6 +3,9 @@
  * @author Stanislav Karpikov
  * @brief ADC support and control module
  */
+ /** @addtogroup app_adc_logic
+ * @{
+ */
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -646,3 +649,4 @@ void adc_clear_accumulators(void)
     Ib_It_1 = 0;
     Ic_It_1 = 0;
 }
+/** @} */

@@ -4,6 +4,11 @@
  * @brief Emulate EEPROM in flash memory
  */
 
+/** @addtogroup mdw_eeprom_emulation
+ * @{
+ */
+ 
+
 /** NOTE: See http://www.st.com/web/en/resource/technical/document/application_note/CD00165693.pdf */
 
 /*--------------------------------------------------------------
@@ -661,3 +666,4 @@ eeprom_status_t eeprom_update_variable(uint16_t address, uint16_t data)
     }
     return eeprom_write(address, data);
 }
+/** @} */

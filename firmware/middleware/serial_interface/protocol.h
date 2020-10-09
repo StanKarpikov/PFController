@@ -479,4 +479,5 @@ void packet_set_error(packet_t *packet, uint8_t error);
  */
 void packet_set_command(packet_t *packet, uint8_t command);
 
+/** @} */
 #endif /* _PROTOCOL_H */

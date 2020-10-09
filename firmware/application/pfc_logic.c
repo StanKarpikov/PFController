@@ -4,6 +4,10 @@
  * @brief State management and PFC control functions
  */
 
+/** @addtogroup app_pfc_logic
+ * @{
+ */
+
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -454,3 +458,4 @@ uint8_t pfc_is_pwm_on(void)
 {
     return pwm_on;
 }
+/** @} */

@@ -7,6 +7,10 @@
 #ifndef _BOARD_STM32F7_H
 #define _BOARD_STM32F7_H
 
+/** @addtogroup hdw_bsp_board
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        PUBLIC DEFINES
 --------------------------------------------------------------*/
@@ -157,4 +161,5 @@
 #define TIMER_COOLER_CLK_ENABLE  __HAL_RCC_TIM9_CLK_ENABLE
 #define TIMER_COOLER_CLK_DISABLE __HAL_RCC_TIM9_CLK_DISABLE
 
+/** @} */
 #endif /* _BOARD_STM32F7_H */

@@ -25,4 +25,6 @@
  */
 uint16_t crc16(uint8_t *datablock, uint32_t len);
 
+/** @} */
 #endif /* __CRC_H__ */
+

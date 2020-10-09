@@ -4,6 +4,10 @@
  * @brief Board support package: DMA
  */
 
+/** @addtogroup hdw_bsp_dma
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -54,3 +58,4 @@ status_t dma_init(void)
 
     return PFC_SUCCESS;
 }
+/** @} */

@@ -7,6 +7,10 @@
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
 
+/** @addtogroup app_settings
+ * @{
+ */ 
+
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -174,4 +178,5 @@ status_t settings_save(void);
  */
 status_t settings_read(void);
 
+/** @} */
 #endif /* _SETTINGS_H */

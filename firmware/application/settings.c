@@ -4,6 +4,11 @@
  * @brief PFC settings to store in NV memory
  */
 
+/** @addtogroup app_settings
+ * @{
+ */
+ 
+
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -312,3 +317,4 @@ settings_capacitors_t settings_get_capacitors(void)
     settings_unlock();
     return retval;
 }
+/** @} */

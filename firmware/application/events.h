@@ -7,6 +7,11 @@
 #ifndef EVENTS_H_
 #define EVENTS_H_
 
+/** @addtogroup app_events
+ * @{
+ */
+ 
+
 /*--------------------------------------------------------------
                        INCLUDE
 --------------------------------------------------------------*/
@@ -72,4 +77,5 @@ void events_clear(void);
  */
 uint16_t events_get(uint64_t after_index, uint16_t num, struct event_record_s* buf);
 
+/** @} */
 #endif /* EVENTS_H_ */

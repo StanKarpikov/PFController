@@ -4,6 +4,11 @@
  * @brief Analyse commands from the remote panel, handle the interface
  */
 
+/** @addtogroup app_command_processor
+ * @{
+ */
+ 
+
 /*--------------------------------------------------------------
                        INCLUDE
 --------------------------------------------------------------*/
@@ -651,3 +656,4 @@ status_t command_handlers_init(void)
 {
     return protocol_init(handlers_array, PFC_COMMAND_COUNT);
 }
+/** @} */

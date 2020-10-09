@@ -4,6 +4,10 @@
  * @brief Board support package: Timer
  */
 
+/** @addtogroup hdw_bsp_timer
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -643,3 +647,4 @@ void TIMER_EFMC_CH2_DMA_IRQ(void)
 {
     HAL_DMA_IRQHandler(&hdma_tim_efmc_ch3);
 }
+/** @} */

@@ -7,6 +7,10 @@
 #ifndef _DEBUG_H
 #define _DEBUG_H
 
+/** @addtogroup hdw_bsp_debug
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -75,4 +79,5 @@ typedef enum
     PFC_WARNING = 2,        /**< Execution ok, but requires attention */
 } status_t;
 
+/** @} */
 #endif /* _DEBUG_H */

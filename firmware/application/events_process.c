@@ -4,6 +4,11 @@
  * @brief Process events (status, warnings, errors, faults)
  */
 
+/** @addtogroup app_events_process
+ * @{
+ */
+ 
+
 /*--------------------------------------------------------------
                        INCLUDE
 --------------------------------------------------------------*/
@@ -372,3 +377,4 @@ status_t events_preload_stop(void)
     /* TODO: Implement the check */
     return PFC_SUCCESS;
 }
+/** @} */

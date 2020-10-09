@@ -4,6 +4,10 @@
  * @brief Board support package: GPIO
  */
 
+/** @addtogroup hdw_bsp_gpio
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -195,3 +199,4 @@ status_t gpio_init(void)
 
     return PFC_SUCCESS;
 }
+/** @} */

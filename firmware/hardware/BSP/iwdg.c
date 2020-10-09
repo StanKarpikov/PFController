@@ -4,6 +4,10 @@
  * @brief Board support package: Independent watchdog
  */
 
+/** @addtogroup hdw_bsp_iwdg
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -53,3 +57,4 @@ status_t iwdg_init(void)
 #endif
     return PFC_SUCCESS;
 }
+/** @} */

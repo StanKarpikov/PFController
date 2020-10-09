@@ -7,6 +7,10 @@
 #ifndef _UART_H
 #define _UART_H
 
+/** @addtogroup hdw_bsp_uart
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -63,4 +67,5 @@ status_t uart_interface_rx_init(void);
  */
 status_t uart_interface_get_byte(uint8_t* byte);
 
+/** @} */
 #endif /* _UART_H */

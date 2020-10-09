@@ -7,6 +7,10 @@
 #ifndef _SYSTEM_H
 #define _SYSTEM_H
 
+/** @addtogroup hdw_bsp_system
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -53,4 +57,5 @@ void system_increment_time(void);
  */
 void system_set_time(uint64_t time);
 
+/** @} */
 #endif /* _SYSTEM_H */

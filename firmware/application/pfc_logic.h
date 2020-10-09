@@ -7,6 +7,11 @@
 #ifndef _PFC_LOGIC_H
 #define _PFC_LOGIC_H
 
+/** @addtogroup app_pfc_logic
+ * @{
+ */
+ 
+
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -88,4 +93,5 @@ void pfc_faultblock(void);
  */
 uint8_t pfc_is_pwm_on(void);
 
+/** @} */
 #endif /* _PFC_LOGIC_H */

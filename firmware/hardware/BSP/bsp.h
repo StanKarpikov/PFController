@@ -7,6 +7,10 @@
 #ifndef _BSP_H
 #define _BSP_H
 
+/** @addtogroup hdw_bsp_bsp
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -21,4 +25,5 @@
 #error "Please define the board"
 #endif
 
+/** @} */
 #endif /* _BSP_H */

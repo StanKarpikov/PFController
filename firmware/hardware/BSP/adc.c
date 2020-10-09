@@ -4,6 +4,10 @@
  * @brief Board support package: ADC
  */
 
+/** @addtogroup hdw_bsp_adc
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -301,3 +305,4 @@ void ADC_DMA_IRQ(void)
 {
     HAL_DMA_IRQHandler(&hdma_adc);
 }
+/** @} */

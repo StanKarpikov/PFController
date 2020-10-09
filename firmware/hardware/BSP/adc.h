@@ -7,6 +7,10 @@
 #ifndef _ADC_H
 #define _ADC_H
 
+/** @addtogroup hdw_bsp_adc
+ * @{
+ */
+ 
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -61,4 +65,5 @@ status_t adc_start(uint32_t* buffer, uint32_t buffer_size);
  */
 status_t adc_stop(void);
 
+/** @} */
 #endif /* _ADC_H */

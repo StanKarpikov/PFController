@@ -4,6 +4,9 @@
  * @brief Interrupt management module
  */
 
+/** @addtogroup hdw_irq
+ * @{
+ */
 /*--------------------------------------------------------------
                        INCLUDES
 --------------------------------------------------------------*/
@@ -252,3 +255,4 @@ void DebugMon_Handler(void)
 void PendSV_Handler(void)
 {
 }
+/** @} */
