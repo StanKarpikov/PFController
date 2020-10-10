@@ -21,6 +21,7 @@
 #include <QGraphicsDropShadowEffect>
 #include <QListWidgetItem>
 #include "htmldelegate.h"
+#include "device_definition.h"
 
 /*--------------------------------------------------------------
                        DEFINES
@@ -230,6 +231,7 @@ void MainWindow::timerNetParams()
 void MainWindow::timerOscillog()
 {
     if(!connected)return;
+
     if(ui->checkBox_osc_I_a->isChecked())updateOscillog(OSC_I_A);
     if(ui->checkBox_osc_I_b->isChecked())updateOscillog(OSC_I_B);
     if(ui->checkBox_osc_I_c->isChecked())updateOscillog(OSC_I_C);
@@ -243,7 +245,7 @@ void MainWindow::timerOscillog()
     if(ui->checkBox_osc_Icomp_a->isChecked())updateOscillog(OSC_COMP_A);
     if(ui->checkBox_osc_Icomp_b->isChecked())updateOscillog(OSC_COMP_B);
     if(ui->checkBox_osc_Icomp_c->isChecked())updateOscillog(OSC_COMP_C);
-//-------------------
+
     ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_A))->setVisible(ui->checkBox_osc_I_a->isChecked());
     ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_B))->setVisible(ui->checkBox_osc_I_b->isChecked());
     ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_C))->setVisible(ui->checkBox_osc_I_c->isChecked());

@@ -22,6 +22,8 @@ SOURCES += \
     device.cpp
 
 HEADERS += \
+    device_definition.h \
+    device_interface_commands.h \
     mainwindow.h \
     settingsdialog.h \
     mainwindow.h \
@@ -32,7 +34,8 @@ HEADERS += \
     htmldelegate.h \
     serial/DeviceSerialInterface.h \
     serial/DeviceSerialMessage.h \
-    device.h
+    device.h \
+    types.h
 
 FORMS += \
     mainwindow.ui \
