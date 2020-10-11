@@ -16,21 +16,23 @@ using namespace PFCconfig::ADC;
 using namespace PFCconfig::Interface;
 using namespace PFCconfig::Events;
 
-void MainWindow::pageSettingsCalibrationsInit(){
-    for(int row=0;row<ui->tableWidget_settings_calibrations->rowCount();row++){
-        ui->tableWidget_settings_calibrations->setItem(row,0,new QTableWidgetItem());
+void MainWindow::pageSettingsCalibrationsInit()
+{
+    for (int row = 0; row < ui->tableWidget_settings_calibrations->rowCount(); row++)
+    {
+        ui->tableWidget_settings_calibrations->setItem(row, 0, new QTableWidgetItem());
         ui->tableWidget_settings_calibrations->item(row, 0)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
         ui->tableWidget_settings_calibrations->item(row, 0)->setBackground(editableCellBrush);
-        ui->tableWidget_settings_calibrations->setItem(row,1,new QTableWidgetItem());
-        ui->tableWidget_settings_calibrations->setItem(row,2,new QTableWidgetItem());
+        ui->tableWidget_settings_calibrations->setItem(row, 1, new QTableWidgetItem());
+        ui->tableWidget_settings_calibrations->setItem(row, 2, new QTableWidgetItem());
         Qt::ItemFlags eFlags;
         QPushButton *btn_edit;
-        btn_edit=new QPushButton();
+        btn_edit = new QPushButton();
         buttons_edit.push_back(btn_edit);
         //Ячейка для авто значения
-          eFlags = ui->tableWidget_settings_calibrations->item(row, 1)->flags();
-          eFlags &= ~Qt::ItemIsEditable;
-          ui->tableWidget_settings_calibrations->item(row, 1)->setFlags(eFlags);
+        eFlags = ui->tableWidget_settings_calibrations->item(row, 1)->flags();
+        eFlags &= ~Qt::ItemIsEditable;
+        ui->tableWidget_settings_calibrations->item(row, 1)->setFlags(eFlags);
         /*
             QWidget* pWidget;
             QHBoxLayout* pLayout;
@@ -48,8 +50,8 @@ void MainWindow::pageSettingsCalibrationsInit(){
                         this,SLOT(tableSettingsCalibrations_auto_clicked(bool)));
         }*/
     }
-    connect(ui->tableWidget_settings_calibrations, SIGNAL(cellChanged(int,int)),
-            this, SLOT(tableSettingsCalibrations_changed(int,int)));
+    connect(ui->tableWidget_settings_calibrations, SIGNAL(cellChanged(int, int)),
+            this, SLOT(tableSettingsCalibrations_changed(int, int)));
     pfc_settings.SETTINGS.CALIBRATIONS.calibration.resize(ADC_CHANNEL_NUMBER);
     pfc_settings.SETTINGS.CALIBRATIONS.offset.resize(ADC_CHANNEL_NUMBER);
 }
@@ -147,30 +149,33 @@ void MainWindow::tableSettingsCalibrations_auto_clicked(bool check)
 
 void MainWindow::tableSettingsCalibrations_changed(int row, int col)
 {
-    QTableWidgetItem *item=ui->tableWidget_settings_calibrations->item(row,col);
-    float val=item->text().toFloat();
-    if(row<ADC_CHANNEL_NUMBER){
-       pfc_settings.SETTINGS.CALIBRATIONS.offset[static_cast<uint>(row)]=val;
-    }else{
-       pfc_settings.SETTINGS.CALIBRATIONS.calibration[static_cast<uint>(row-ADC_CHANNEL_NUMBER)]=val;
+    QTableWidgetItem *item = ui->tableWidget_settings_calibrations->item(row, col);
+    float val = item->text().toFloat();
+    if (row < ADC_CHANNEL_NUMBER)
+    {
+        pfc_settings.SETTINGS.CALIBRATIONS.offset[static_cast<uint>(row)] = val;
+    }
+    else
+    {
+        pfc_settings.SETTINGS.CALIBRATIONS.calibration[static_cast<uint>(row - ADC_CHANNEL_NUMBER)] = val;
     }
     writeSettingsCalibrations(
-                pfc_settings.SETTINGS.CALIBRATIONS.calibration,
-                pfc_settings.SETTINGS.CALIBRATIONS.offset);
+        pfc_settings.SETTINGS.CALIBRATIONS.calibration,
+        pfc_settings.SETTINGS.CALIBRATIONS.offset);
 }
 
 void MainWindow::setSettingsCalibrations(
-        std::vector<float> calibration,
-        std::vector<float> offset
-        )
+    std::vector<float> calibration,
+    std::vector<float> offset)
 {
     ui->tableWidget_settings_calibrations->blockSignals(true);
-    for(int i=0;i<ADC_CHANNEL_NUMBER;i++){
-       ui->tableWidget_settings_calibrations->item(i+ADC_CHANNEL_NUMBER,0)->setText(QString().sprintf("%.5f",static_cast<double>(calibration[static_cast<uint>(i)])));
-       ui->tableWidget_settings_calibrations->item(i,0)->setText(QString().sprintf("%.2f",static_cast<double>(offset[static_cast<uint>(i)])));
+    for (int i = 0; i < ADC_CHANNEL_NUMBER; i++)
+    {
+        ui->tableWidget_settings_calibrations->item(i + ADC_CHANNEL_NUMBER, 0)->setText(QString().sprintf("%.5f", static_cast<double>(calibration[static_cast<uint>(i)])));
+        ui->tableWidget_settings_calibrations->item(i, 0)->setText(QString().sprintf("%.2f", static_cast<double>(offset[static_cast<uint>(i)])));
     }
     ui->tableWidget_settings_calibrations->blockSignals(false);
-    pfc_settings.SETTINGS.CALIBRATIONS.calibration=calibration;
-    pfc_settings.SETTINGS.CALIBRATIONS.offset=offset;
+    pfc_settings.SETTINGS.CALIBRATIONS.calibration = calibration;
+    pfc_settings.SETTINGS.CALIBRATIONS.offset = offset;
     //tableSettingsCalibrations_SetAutoSettings();
 }

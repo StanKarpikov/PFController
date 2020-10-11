@@ -7,72 +7,79 @@
 #include <QGraphicsDropShadowEffect>
 #include <QListWidgetItem>
 
-void MainWindow::page_SettingsHarmonicsOnOff_Init(){
-
+void MainWindow::page_SettingsHarmonicsOnOff_Init()
+{
 }
 //-----------------------------------------------------------------------
 void MainWindow::on_check_H246_stateChanged(int arg1)
 {
-    for(int i=2;i<HARMONICS_NUM;i+=2){
-        KKM_var.HARMONICS.fft_suppression[i]=(arg1==1);
+    for (int i = 2; i < HARMONICS_NUM; i += 2)
+    {
+        KKM_var.HARMONICS.fft_suppression[i] = (arg1 == 1);
     }
     writeSettingsHarmonicsSuppression(KKM_var.HARMONICS.fft_suppression);
 }
 //-----------------------------------------------------------------------
 void MainWindow::on_check_H1_50_stateChanged(int arg1)
 {
-    for(int i=1;i<HARMONICS_NUM;i++){
-        KKM_var.HARMONICS.fft_suppression[i]=(arg1==1);
+    for (int i = 1; i < HARMONICS_NUM; i++)
+    {
+        KKM_var.HARMONICS.fft_suppression[i] = (arg1 == 1);
     }
     writeSettingsHarmonicsSuppression(KKM_var.HARMONICS.fft_suppression);
 }
 //-----------------------------------------------------------------------
 void MainWindow::on_check_H1_10_stateChanged(int arg1)
 {
-    for(int i=1;i<=10;i++){
-        KKM_var.HARMONICS.fft_suppression[i]=(arg1==1);
+    for (int i = 1; i <= 10; i++)
+    {
+        KKM_var.HARMONICS.fft_suppression[i] = (arg1 == 1);
     }
     writeSettingsHarmonicsSuppression(KKM_var.HARMONICS.fft_suppression);
 }
 
 void MainWindow::on_check_H11_20_stateChanged(int arg1)
 {
-    for(int i=11;i<=20;i++){
-        KKM_var.HARMONICS.fft_suppression[i]=(arg1==1);
+    for (int i = 11; i <= 20; i++)
+    {
+        KKM_var.HARMONICS.fft_suppression[i] = (arg1 == 1);
     }
     writeSettingsHarmonicsSuppression(KKM_var.HARMONICS.fft_suppression);
 }
 
 void MainWindow::on_check_H21_30_stateChanged(int arg1)
 {
-    for(int i=21;i<=30;i++){
-        KKM_var.HARMONICS.fft_suppression[i]=(arg1==1);
+    for (int i = 21; i <= 30; i++)
+    {
+        KKM_var.HARMONICS.fft_suppression[i] = (arg1 == 1);
     }
     writeSettingsHarmonicsSuppression(KKM_var.HARMONICS.fft_suppression);
 }
 
 void MainWindow::on_check_H31_40_stateChanged(int arg1)
 {
-    for(int i=31;i<=40;i++){
-        KKM_var.HARMONICS.fft_suppression[i]=(arg1==1);
+    for (int i = 31; i <= 40; i++)
+    {
+        KKM_var.HARMONICS.fft_suppression[i] = (arg1 == 1);
     }
     writeSettingsHarmonicsSuppression(KKM_var.HARMONICS.fft_suppression);
 }
 
 void MainWindow::on_check_H41_50_stateChanged(int arg1)
 {
-    for(int i=41;i<=50;i++){
-        KKM_var.HARMONICS.fft_suppression[i]=(arg1==1);
+    for (int i = 41; i <= 50; i++)
+    {
+        KKM_var.HARMONICS.fft_suppression[i] = (arg1 == 1);
     }
     writeSettingsHarmonicsSuppression(KKM_var.HARMONICS.fft_suppression);
 }
 //-----------------------------------------------------------------------
 //-----------------------------------------------------------------------
-#define TOGGLE_HANDLER(NUM) \
-    void MainWindow::on_check_H##NUM##_toggled(bool checked)\
-    {\
-        ADF_var.HARMONICS.fft_suppression[NUM]=checked;\
-        writeSettingsHarmonicsSuppression(ADF_var.HARMONICS.fft_suppression);\
+#define TOGGLE_HANDLER(NUM)                                                   \
+    void MainWindow::on_check_H##NUM##_toggled(bool checked)                  \
+    {                                                                         \
+        ADF_var.HARMONICS.fft_suppression[NUM] = checked;                     \
+        writeSettingsHarmonicsSuppression(ADF_var.HARMONICS.fft_suppression); \
     }
 
 TOGGLE_HANDLER(1)

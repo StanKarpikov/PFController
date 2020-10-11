@@ -74,7 +74,7 @@ private:
              PUBLIC FUNCTIONS
     --------------------------------------------------------------*/
 signals:
-    void Message(quint8 type, quint8 level, quint8 target, QString message);
+    void Message(quint8 type, quint8 level, quint8 target, std::string message);
 
     void setOscillog(PFCconfig::Interface::PFCOscillogCnannel channel, std::vector<double> data);
     void setNetVoltage(	float ADC_UD,
@@ -170,7 +170,7 @@ signals:
 
 public slots:
     void ConnectionChanged(bool connected){
-        setConnection(connected);
+        emit setConnection(connected);
     }
 
     /*--------------------------------------------------------------
