@@ -215,64 +215,64 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::timerupdateNetVoltage()
 {
-    if(_connected)updateNetVoltage();
+    if(_connected)emit updateNetVoltage();
 }
 void MainWindow::timerupdateNetVoltageRaw()
 {
-    if(_connected)updateNetVoltageRAW();
+    if(_connected)emit updateNetVoltageRAW();
 }
 void MainWindow::timerSettingsCapacitors()
 {
-    if(_connected)updateSettingsCapacitors();
+    if(_connected)emit updateSettingsCapacitors();
 }
 void MainWindow::timerSettingsProtection()
 {
-    if(_connected)updateSettingsProtection();
+    if(_connected)emit updateSettingsProtection();
 }
 void MainWindow::timerSettingsFilters()
 {
-    if(_connected)updateSettingsFilters();
+    if(_connected)emit updateSettingsFilters();
 }
 void MainWindow::timerSettingsCalibrations()
 {
-    if(_connected)updateSettingsCalibrations();
+    if(_connected)emit updateSettingsCalibrations();
 }
 
 void MainWindow::timerEvents()
 {
-    if(_connected)updateEvents(last_index_events);
+    if(_connected)emit updateEvents(last_index_events);
 }
 
 void MainWindow::timerWorkState()
 {
-    if(_connected)updateWorkState(static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch()));
+    if(_connected)emit updateWorkState(static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch()));
 }
 void MainWindow::timerVersion()
 {
-    updateVersionInfo();
+    emit updateVersionInfo();
 }
 void MainWindow::timerNetParams()
 {
-    if(_connected)updateNetParams();
+    if(_connected)emit updateNetParams();
 }
 
 void MainWindow::timerOscillog()
 {
     if(!_connected)return;
 
-    if(ui->checkBox_osc_I_a->isChecked())updateOscillog(PFCOscillogCnannel::OSC_I_A);
-    if(ui->checkBox_osc_I_b->isChecked())updateOscillog(PFCOscillogCnannel::OSC_I_B);
-    if(ui->checkBox_osc_I_c->isChecked())updateOscillog(PFCOscillogCnannel::OSC_I_C);
+    if(ui->checkBox_osc_I_a->isChecked())emit updateOscillog(PFCOscillogCnannel::OSC_I_A);
+    if(ui->checkBox_osc_I_b->isChecked())emit updateOscillog(PFCOscillogCnannel::OSC_I_B);
+    if(ui->checkBox_osc_I_c->isChecked())emit updateOscillog(PFCOscillogCnannel::OSC_I_C);
 
-    if(ui->checkBox_osc_Ua->isChecked())updateOscillog(PFCOscillogCnannel::OSC_U_A);
-    if(ui->checkBox_osc_Ub->isChecked())updateOscillog(PFCOscillogCnannel::OSC_U_B);
-    if(ui->checkBox_osc_Uc->isChecked())updateOscillog(PFCOscillogCnannel::OSC_U_C);
+    if(ui->checkBox_osc_Ua->isChecked())emit updateOscillog(PFCOscillogCnannel::OSC_U_A);
+    if(ui->checkBox_osc_Ub->isChecked())emit updateOscillog(PFCOscillogCnannel::OSC_U_B);
+    if(ui->checkBox_osc_Uc->isChecked())emit updateOscillog(PFCOscillogCnannel::OSC_U_C);
 
-    if(ui->checkBox_osc_Ud->isChecked())updateOscillog(PFCOscillogCnannel::OSC_UD);
+    if(ui->checkBox_osc_Ud->isChecked())emit updateOscillog(PFCOscillogCnannel::OSC_UD);
 
-    if(ui->checkBox_osc_Icomp_a->isChecked())updateOscillog(PFCOscillogCnannel::OSC_COMP_A);
-    if(ui->checkBox_osc_Icomp_b->isChecked())updateOscillog(PFCOscillogCnannel::OSC_COMP_B);
-    if(ui->checkBox_osc_Icomp_c->isChecked())updateOscillog(PFCOscillogCnannel::OSC_COMP_C);
+    if(ui->checkBox_osc_Icomp_a->isChecked())emit updateOscillog(PFCOscillogCnannel::OSC_COMP_A);
+    if(ui->checkBox_osc_Icomp_b->isChecked())emit updateOscillog(PFCOscillogCnannel::OSC_COMP_B);
+    if(ui->checkBox_osc_Icomp_c->isChecked())emit updateOscillog(PFCOscillogCnannel::OSC_COMP_C);
 
     ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_A))->setVisible(ui->checkBox_osc_I_a->isChecked());
     ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_B))->setVisible(ui->checkBox_osc_I_b->isChecked());
@@ -533,8 +533,9 @@ void MainWindow::Message(quint8 type, quint8 level, quint8 target, std::string m
             s.append(QDateTime::currentDateTime ().toString("dd.MM.yyyy hh:mm:ss:").toStdString());
             s.append("</font>");
             s+=prefix;
+            /*
             QListWidgetItem *i=new QListWidgetItem(QString::fromStdString(s), ui->listWidget);
-            Q_UNUSED(i)
+            */
         }
 }
 MainWindow::~MainWindow(){
@@ -726,10 +727,10 @@ void MainWindow::ansSettingsFilters(bool writed)
 
 
 void MainWindow::on_pushButton_STOP_clicked(){
-    writeSwitchOnOff(pfc_commands_t::COMMAND_WORK_OFF,0);
+    emit writeSwitchOnOff(pfc_commands_t::COMMAND_WORK_OFF,0);
 }
 void MainWindow::on_pushButton_Start_clicked(){
-    writeSwitchOnOff(pfc_commands_t::COMMAND_WORK_ON,0);
+    emit writeSwitchOnOff(pfc_commands_t::COMMAND_WORK_ON,0);
 }
 void MainWindow::setSwitchOnOff(uint32_t result){
     Q_UNUSED(result)
@@ -746,27 +747,27 @@ void MainWindow::on_pushButton_2_clicked(){
 }
 void MainWindow::on_checkBox_channelA_toggled(bool checked)
 {
- writeSwitchOnOff(pfc_commands_t::COMMAND_CHANNEL0_DATA,checked);
+ emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHANNEL0_DATA,checked);
 }
 
 void MainWindow::on_checkBox_channelB_toggled(bool checked)
 {
- writeSwitchOnOff(pfc_commands_t::COMMAND_CHANNEL1_DATA,checked);
+ emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHANNEL1_DATA,checked);
 }
 
 void MainWindow::on_checkBox_channelC_toggled(bool checked)
 {
- writeSwitchOnOff(pfc_commands_t::COMMAND_CHANNEL2_DATA,checked);
+ emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHANNEL2_DATA,checked);
 }
 
 void MainWindow::on_pushButton_CHARGE_ON_clicked()
 {
-        writeSwitchOnOff(pfc_commands_t::COMMAND_CHARGE_ON,0);
+        emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHARGE_ON,0);
 }
 
 void MainWindow::on_pushButton_CHARGE_OFF_clicked()
 {
-        writeSwitchOnOff(pfc_commands_t::COMMAND_CHARGE_OFF,0);
+        emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHARGE_OFF,0);
 }
 
 /** @} */

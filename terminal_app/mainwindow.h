@@ -389,16 +389,16 @@ private slots:
     void on_doubleSpinBox_capacitors_Kd_valueChanged(double arg1);
     void on_doubleSpinBox_cap_nominal_valueChanged(double arg1);
     void on_doubleSpinBox_cap_precharge_valueChanged(double arg1);
-    void on_pushButton_STOP_clicked();
-    void on_pushButton_Start_clicked();    
-    void on_pushButton_Save_clicked();   
-    void on_actionClear_triggered();
-    void on_pushButton_2_clicked();
+    void on_pushButton_STOP_clicked(void);
+    void on_pushButton_Start_clicked(void);
+    void on_pushButton_Save_clicked(void);
+    void on_actionClear_triggered(void);
+    void on_pushButton_2_clicked(void);
     void on_checkBox_channelA_toggled(bool checked);
     void on_checkBox_channelB_toggled(bool checked);
     void on_checkBox_channelC_toggled(bool checked);
-    void on_pushButton_CHARGE_ON_clicked();
-    void on_pushButton_CHARGE_OFF_clicked();
+    void on_pushButton_CHARGE_ON_clicked(void);
+    void on_pushButton_CHARGE_OFF_clicked(void);
 
 private:
     void initInterfaceConnections();
