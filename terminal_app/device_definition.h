@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <type_traits>
+#include <QSerialPort>
 
 template <typename E>
 constexpr auto enum_uint(E e) noexcept
@@ -31,6 +32,17 @@ namespace PFCconfig {
     auto const PFC_ACHAN = 0U;   /**< Channel A */
     auto const PFC_BCHAN = 1U;   /**< Channel B */
     auto const PFC_CCHAN = 2U;   /**< Channel C */
+
+    namespace Serial {
+        const static auto PORT_BADRATE = QSerialPort::Baud115200;
+        const static auto PORT_DATA_BITS = QSerialPort::Data8;
+        const static auto PORT_PARITY = QSerialPort::NoParity;
+        const static auto PORT_STOP_BITS = QSerialPort::OneStop;
+        const static auto PORT_FLOW_CONTROL = QSerialPort::NoFlowControl;
+        const static auto PORT_ECHO_ENABLED = 0;
+        const static auto PORT_TIMEOUT = 1000;
+        const static auto PORT_NUMBER_OF_RETRIES = 3;
+    }
 
     namespace ADC {
         enum {

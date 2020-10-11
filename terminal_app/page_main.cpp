@@ -16,95 +16,95 @@ using namespace PFCconfig::ADC;
 using namespace PFCconfig::Interface;
 using namespace PFCconfig::Events;
 
-void MainWindow::UPDATE_CHECKBOX(QCheckBox* CHECK, bool VAL)
+void MainWindow::updateCheckboxVal(QCheckBox* checkbox, bool value)
 {
-    CHECK->blockSignals(true);
-    CHECK->setChecked(VAL);
-    CHECK->blockSignals(false);
+    checkbox->blockSignals(true);
+    checkbox->setChecked(value);
+    checkbox->blockSignals(false);
 }
 
 void MainWindow::pageMainInit()
 {
-    ui->radioButton_Connection->setDisabled(true);
+    _ui->radioButton_Connection->setDisabled(true);
 }
 void MainWindow::setConnection(bool connected)
 {
-    ui->radioButton_Connection->setChecked(connected);
-    ui->groupBox_State->setDisabled(!connected);
-    ui->groupBox_net->setDisabled(!connected);
-    ui->tabWidget->setDisabled(!connected);
+    _ui->radioButton_Connection->setChecked(connected);
+    _ui->groupBox_State->setDisabled(!connected);
+    _ui->groupBox_net->setDisabled(!connected);
+    _ui->tabWidget->setDisabled(!connected);
 
     _connected = connected;
     if (connected)
     {
-        ui->radioButton_Connection->setText("Есть связь");
+        _ui->radioButton_Connection->setText("Есть связь");
     }
     else
     {
-        last_index_events = 0;
-        ui->radioButton_Connection->setText("Нет связи");
+        _last_index_events = 0;
+        _ui->radioButton_Connection->setText("Нет связи");
     }
 }
-void MainWindow::setWorkState(uint32_t state, uint32_t chA, uint32_t chB, uint32_t chC)
+void MainWindow::setWorkState(uint32_t state, uint32_t ch_a, uint32_t ch_b, uint32_t ch_c)
 {
-    pfc_settings.status = state;
-    pfc_settings.activeChannels[PFC_ACHAN] = chA;
-    pfc_settings.activeChannels[PFC_BCHAN] = chB;
-    pfc_settings.activeChannels[PFC_CCHAN] = chC;
+    _pfc_settings.status = state;
+    _pfc_settings.activeChannels[PFC_ACHAN] = ch_a;
+    _pfc_settings.activeChannels[PFC_BCHAN] = ch_b;
+    _pfc_settings.activeChannels[PFC_CCHAN] = ch_c;
 
-    if (static_cast<PFCstate>(pfc_settings.status) != PFCstate::PFC_STATE_STOP)
+    if (static_cast<PFCstate>(_pfc_settings.status) != PFCstate::PFC_STATE_STOP)
     {
-        ui->pushButton_Save->setDisabled(true);
+        _ui->pushButton_Save->setDisabled(true);
     }
     else
     {
-        ui->pushButton_Save->setDisabled(false);
+        _ui->pushButton_Save->setDisabled(false);
     }
 
-    UPDATE_CHECKBOX(ui->checkBox_channelA, chA);
-    UPDATE_CHECKBOX(ui->checkBox_channelB, chB);
-    UPDATE_CHECKBOX(ui->checkBox_channelC, chC);
+    updateCheckboxVal(_ui->checkBox_channelA, ch_a);
+    updateCheckboxVal(_ui->checkBox_channelB, ch_b);
+    updateCheckboxVal(_ui->checkBox_channelC, ch_c);
 
-    switch (static_cast<PFCstate>(pfc_settings.status))
+    switch (static_cast<PFCstate>(_pfc_settings.status))
     {
         case PFCstate::PFC_STATE_INIT:  //предзаряд
-            ui->label_WorkState->setText("Инициализация");
+            _ui->label_WorkState->setText("Инициализация");
             break;
         case PFCstate::PFC_STATE_STOP:  //не работает
-            ui->label_WorkState->setText("Остановлен");
+            _ui->label_WorkState->setText("Остановлен");
             break;
         case PFCstate::PFC_STATE_SYNC:  //синхронизация с сетью
-            ui->label_WorkState->setText("Синхронизация");
+            _ui->label_WorkState->setText("Синхронизация");
             break;
         case PFCstate::PFC_STATE_PRECHARGE_PREPARE:
-            ui->label_WorkState->setText("Подг.предзаряда");
+            _ui->label_WorkState->setText("Подг.предзаряда");
             break;
         case PFCstate::PFC_STATE_PRECHARGE:  //предзаряд
-            ui->label_WorkState->setText("Предзаряд");
+            _ui->label_WorkState->setText("Предзаряд");
             break;
         case PFCstate::PFC_STATE_MAIN:
-            ui->label_WorkState->setText("Контактор");
+            _ui->label_WorkState->setText("Контактор");
             break;
         case PFCstate::PFC_STATE_PRECHARGE_DISABLE:  //работает, но без компенсации
-            ui->label_WorkState->setText("Выкл.предзаряд");
+            _ui->label_WorkState->setText("Выкл.предзаряд");
             break;
         case PFCstate::PFC_STATE_WORK:  //работает, но без компенсации
-            ui->label_WorkState->setText("Работа");
+            _ui->label_WorkState->setText("Работа");
             break;
         case PFCstate::PFC_STATE_CHARGE:  //работает, но без компенсации
-            ui->label_WorkState->setText("Заряд");
+            _ui->label_WorkState->setText("Заряд");
             break;
         case PFCstate::PFC_STATE_TEST:  //тестирование сети
-            ui->label_WorkState->setText("Тест");
+            _ui->label_WorkState->setText("Тест");
             break;
         case PFCstate::PFC_STATE_STOPPING:  //ошибка
-            ui->label_WorkState->setText("Остановка..");
+            _ui->label_WorkState->setText("Остановка..");
             break;
         case PFCstate::PFC_STATE_FAULTBLOCK:  //ошибка
-            ui->label_WorkState->setText("Авария");
+            _ui->label_WorkState->setText("Авария");
             break;
         default:
-            ui->label_WorkState->setText("Unknown");
+            _ui->label_WorkState->setText("Unknown");
             break;
     }
 }
@@ -120,7 +120,7 @@ void MainWindow::setVersionInfo(
     uint32_t minute,
     uint32_t second)
 {
-    ui->label_ver->setText(QString().sprintf("ККМ: %d.%d.%d.%d \n Build %02d.%02d.%04d %02d:%02d:%02d",
+    _ui->label_ver->setText(QString().sprintf("ККМ: %d.%d.%d.%d \n Build %02d.%02d.%04d %02d:%02d:%02d",
                                              major, minor, micro, build,
                                              day, month, year, hour, minute, second));
 }

@@ -25,63 +25,74 @@ using namespace PFCconfig::Events;
 
 PFC::PFC()
     : _interface(new ADFSerialInterface(Q_NULLPTR)),
-      handlers(enum_int(pfc_interface_commands_t::PFC_COMMAND_COUNT)),
-      thread(new QThread())
+      _handlers(enum_int(pfc_interface_commands_t::PFC_COMMAND_COUNT)),
+      _thread(new QThread())
 {
-    _interface->moveToThread(thread);
-    connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-    connect(thread, SIGNAL(started()), _interface, SLOT(run()));
-    connect(_interface, SIGNAL(informConnectionChanged(bool)), this, SLOT(ConnectionChanged(bool)));
-    thread->start();
+    /* Translate interface link signals to the upper level */
+    connect(_interface, &ADFSerialInterface::connected, this, &PFC::interfaceConnected);
+    connect(_interface, &ADFSerialInterface::disconnected, this, &PFC::interfaceDisconnected);
 
+    /* Run the interface in a separate thread */
+    _interface->moveToThread(_thread);
+    connect(_thread, SIGNAL(finished()), _thread, SLOT(deleteLater()));
+    connect(_thread, SIGNAL(started()), _interface, SLOT(run()));
+    connect(_interface, SIGNAL(informConnectionChanged(bool)), this, SLOT(connectionChanged(bool)));
+    _thread->start();
+
+    /* Initialize protocol handlers */
     for (uint i = 0; i < enum_int(pfc_interface_commands_t::PFC_COMMAND_COUNT); i++)
-        handlers[i] = std::bind(&PFC::protocol_unknow_command_handle, this, std::placeholders::_1);
+        _handlers[i] = std::bind(&PFC::protocolUnknownCommand, this, std::placeholders::_1);
 
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE)] =
-        std::bind(&PFC::protocol_GET_ADC_ACTIVE, this, std::placeholders::_1);
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_SWITCH_ON_OFF)] =
-        std::bind(&PFC::protocol_SWITCH_ON_OFF, this, std::placeholders::_1);
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE_RAW)] =
-        std::bind(&PFC::protocol_GET_ADC_ACTIVE_RAW, this, std::placeholders::_1);
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_OSCILLOG)] =
-        std::bind(&PFC::protocol_GET_OSCILOG, this, std::placeholders::_1);
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_NET_PARAMS)] =
-        std::bind(&PFC::protocol_GET_NET_PARAMS, this, std::placeholders::_1);
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_WORK_STATE)] =
-        std::bind(&PFC::protocol_GET_WORK_STATE, this, std::placeholders::_1);
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_VERSION_INFO)] =
-        std::bind(&PFC::protocol_GET_VERSION_INFO, this, std::placeholders::_1);
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_EVENTS)] =
-        std::bind(&PFC::protocol_GET_EVENTS, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE)] =
+        std::bind(&PFC::protocolGetADCActive, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_SWITCH_ON_OFF)] =
+        std::bind(&PFC::protocolSwitchOnOff, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE_RAW)] =
+        std::bind(&PFC::protocolGetADCActiveRAW, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_OSCILLOG)] =
+        std::bind(&PFC::protocolGetOscillog, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_NET_PARAMS)] =
+        std::bind(&PFC::protocolGetNetParams, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_WORK_STATE)] =
+        std::bind(&PFC::protocolGetWorkState, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_VERSION_INFO)] =
+        std::bind(&PFC::protocolGetVersionInfo, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_EVENTS)] =
+        std::bind(&PFC::protocolGetEvents, this, std::placeholders::_1);
 
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CALIBRATIONS)] =
-        std::bind(&PFC::protocol_GET_SETTINGS_CALIBRATIONS, this, std::placeholders::_1);
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_PROTECTION)] =
-        std::bind(&PFC::protocol_GET_SETTINGS_PROTECTION, this, std::placeholders::_1);
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CAPACITORS)] =
-        std::bind(&PFC::protocol_GET_SETTINGS_CAPACITORS, this, std::placeholders::_1);
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_FILTERS)] =
-        std::bind(&PFC::protocol_GET_SETTINGS_FILTERS, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CALIBRATIONS)] =
+        std::bind(&PFC::protocolGetSettingsCalibrations, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_PROTECTION)] =
+        std::bind(&PFC::protocolGetSettingsProtection, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CAPACITORS)] =
+        std::bind(&PFC::protocolGetSettingsCapacitors, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_FILTERS)] =
+        std::bind(&PFC::protocolGetSettingsFilters, this, std::placeholders::_1);
 
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_CALIBRATIONS)] =
-        std::bind(&PFC::protocol_SET_SETTINGS_CALIBRATIONS, this, std::placeholders::_1);
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_PROTECTION)] =
-        std::bind(&PFC::protocol_SET_SETTINGS_PROTECTION, this, std::placeholders::_1);
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_CAPACITORS)] =
-        std::bind(&PFC::protocol_SET_SETTINGS_CAPACITORS, this, std::placeholders::_1);
-    handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_FILTERS)] =
-        std::bind(&PFC::protocol_SET_SETTINGS_FILTERS, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_CALIBRATIONS)] =
+        std::bind(&PFC::protocolSetSettingsCalibrations, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_PROTECTION)] =
+        std::bind(&PFC::protocolSetSettingsProtection, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_CAPACITORS)] =
+        std::bind(&PFC::protocolSetSettingsCapacitors, this, std::placeholders::_1);
+    _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_FILTERS)] =
+        std::bind(&PFC::protocolSetSettingsFilters, this, std::placeholders::_1);
 
-    connect(_interface, SIGNAL(Message(quint8, quint8, quint8, QString)),
-            this, SIGNAL(Message(quint8, quint8, quint8, QString)));
+    connect(_interface, SIGNAL(message(quint8, quint8, quint8, QString)),
+            this, SIGNAL(message(quint8, quint8, quint8, QString)));
 
-    Message(MESSAGE_TYPE_GENERAL, MESSAGE_NORMAL, MESSAGE_TARGET_DEBUG, "Поток АДФ запущен");
+    message(MESSAGE_TYPE_GENERAL, MESSAGE_NORMAL, MESSAGE_TARGET_DEBUG, "Поток АДФ запущен");
 }
 
-void PFC::protocol_unknow_command_handle(package_general* answer)
+PFC::~PFC(void)
+{
+    /* TODO: Clear resources */
+}
+
+void PFC::protocolUnknownCommand(package_general* answer)
 {
     Q_UNUSED(answer)
-    Message(MESSAGE_TYPE_GENERAL, MESSAGE_NORMAL, MESSAGE_TARGET_DEBUG,
+    message(MESSAGE_TYPE_GENERAL, MESSAGE_NORMAL, MESSAGE_TARGET_DEBUG,
             "Неизвестная команда");
 }
 
@@ -89,7 +100,7 @@ void PFC::protocol_unknow_command_handle(package_general* answer)
          PUBLIC CLASS FUNCTIONS::REQUESTS
 --------------------------------------------------------------*/
 
-void PFC::EndRequest(package_general& req, pfc_interface_commands_t command, ADFMessagePriority priority)
+void PFC::endRequest(package_general& req, pfc_interface_commands_t command, ADFMessagePriority priority)
 {
     std::vector<uint8_t> datareq;
     /* TODO: Verify sizeof */
@@ -110,60 +121,60 @@ void PFC::EndRequest(package_general& req, pfc_interface_commands_t command, ADF
 void PFC::updateNetVoltage()
 {
     command_get_adc_active req;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE);
 }
 void PFC::updateWorkState(uint64_t currentTime)
 {
     command_get_work_state req;
     req.currentTime = currentTime;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_WORK_STATE);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_WORK_STATE);
 }
 void PFC::updateEvents(uint64_t afterIndex)
 {
     command_get_events req;
     req.after_index = afterIndex;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_EVENTS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_EVENTS);
 }
 void PFC::updateVersionInfo()
 {
     command_get_version_info req;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_VERSION_INFO);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_VERSION_INFO);
 }
 void PFC::updateNetVoltageRAW()
 {
     command_get_adc_active_raw req;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE_RAW);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE_RAW);
 }
 void PFC::updateOscillog(PFCOscillogCnannel channel)
 {
     command_get_oscillog req;
     req.num = static_cast<decltype(req.num)>(enum_int(channel));
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_OSCILLOG);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_OSCILLOG);
 }
 void PFC::updateNetParams()
 {
     command_get_net_params req;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_NET_PARAMS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_NET_PARAMS);
 }
 void PFC::updateSettingsCalibrations()
 {
     command_get_settings_calibrations req;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CALIBRATIONS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CALIBRATIONS);
 }
 void PFC::updateSettingsProtection()
 {
     command_get_settings_protection req;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_PROTECTION);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_PROTECTION);
 }
 void PFC::updateSettingsCapacitors()
 {
     command_get_settings_capacitors req;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CAPACITORS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CAPACITORS);
 }
 void PFC::updateSettingsFilters()
 {
     command_get_settings_filters req;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_FILTERS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_FILTERS);
 }
 
 /*--------------------------------------------------------------
@@ -177,7 +188,7 @@ void PFC::writeSettingsCalibrations(
     command_set_settings_calibrations req;
     for (uint i = 0; i < calibration.size(); i++) req.calibration[i] = calibration[i];
     for (uint i = 0; i < offset.size(); i++) req.offset[i] = offset[i];
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_CALIBRATIONS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_CALIBRATIONS);
 }
 
 void PFC::writeSettingsProtection(
@@ -201,7 +212,7 @@ void PFC::writeSettingsProtection(
     req.F_max = Fnet_max;
     req.I_max_rms = I_max_rms;
     req.I_max_peak = I_max_peak;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_PROTECTION);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_PROTECTION);
 }
 
 void PFC::writeSettingsCapacitors(
@@ -217,7 +228,7 @@ void PFC::writeSettingsCapacitors(
     req.ctrl_Ucap_Kd = ctrlUd_Kd;
     req.Ucap_nominal = Ud_nominal;
     req.Ucap_precharge = Ud_precharge;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_CAPACITORS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_CAPACITORS);
 }
 
 void PFC::writeSettingsFilters(
@@ -229,7 +240,7 @@ void PFC::writeSettingsFilters(
     req.K_I = K_I;
     req.K_U = K_U;
     req.K_Ucap = K_UD;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_FILTERS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_FILTERS);
 }
 
 void PFC::writeSwitchOnOff(pfc_commands_t command, uint32_t data)
@@ -237,7 +248,7 @@ void PFC::writeSwitchOnOff(pfc_commands_t command, uint32_t data)
     command_switch_on_off req;
     req.command = static_cast<decltype(req.command)>(command);
     req.data = data;
-    EndRequest(req, pfc_interface_commands_t::PFC_COMMAND_SWITCH_ON_OFF, ADFMessagePriority::HIGH);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SWITCH_ON_OFF, ADFMessagePriority::HIGH);
 }
 
 /*--------------------------------------------------------------
@@ -253,13 +264,13 @@ void PFC::getAnswer(bool is_timeout, PackageCommand* pc)
 
     if (command >= pfc_interface_commands_t::PFC_COMMAND_COUNT)
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_DEBUG, "Неизвестный ответ");
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_DEBUG, "Неизвестный ответ");
         return;
     }
     //qDebug() << pc->package_in->command();
     if (pc->package_in->error())
     {
-        Message(MESSAGE_TYPE_GLOBALWARNING, MESSAGE_NORMAL, MESSAGE_TARGET_DEBUG, "Ошибка выполнения команды");
+        message(MESSAGE_TYPE_GLOBALWARNING, MESSAGE_NORMAL, MESSAGE_TARGET_DEBUG, "Ошибка выполнения команды");
         return;
     }
     uint8_t* command_data = pc->package_in->data().data();
@@ -267,7 +278,7 @@ void PFC::getAnswer(bool is_timeout, PackageCommand* pc)
     package_general* package = reinterpret_cast<package_general*>(command_data);
 
     //Add try catch
-    handlers[static_cast<uint>(command)](package);
+    _handlers[static_cast<uint>(command)](package);
     //QTimer::singleShot(100, [this,apc]() { handlers[pc->package_in->command()](&apc); } );
 }
 
@@ -275,13 +286,13 @@ void PFC::getAnswer(bool is_timeout, PackageCommand* pc)
          PRIVATE CLASS FUNCTIONS::HANDLERS
 --------------------------------------------------------------*/
 
-void PFC::protocol_SWITCH_ON_OFF(package_general* package)
+void PFC::protocolSwitchOnOff(package_general* package)
 {
     auto answer = static_cast<answer_switch_on_off*>(package);
     emit setSwitchOnOff(answer->result);
 }
 
-void PFC::protocol_GET_ADC_ACTIVE(package_general* package)
+void PFC::protocolGetADCActive(package_general* package)
 {
     auto answer = static_cast<answer_get_adc_active*>(package);
     emit setNetVoltage(answer->ADC_UCAP,
@@ -303,7 +314,7 @@ void PFC::protocol_GET_ADC_ACTIVE(package_general* package)
                        answer->ADC_MATH_C);
 }
 
-void PFC::protocol_GET_ADC_ACTIVE_RAW(package_general* package)
+void PFC::protocolGetADCActiveRAW(package_general* package)
 {
     auto answer = static_cast<answer_get_adc_active_raw*>(package);
     emit setNetVoltageRAW(answer->ADC_UCAP,
@@ -322,7 +333,7 @@ void PFC::protocol_GET_ADC_ACTIVE_RAW(package_general* package)
                           answer->ADC_EDC_I);
 }
 
-void PFC::protocol_GET_WORK_STATE(package_general* package)
+void PFC::protocolGetWorkState(package_general* package)
 {
     auto answer = static_cast<answer_get_work_state*>(package);
     emit setWorkState(answer->state,
@@ -331,7 +342,7 @@ void PFC::protocol_GET_WORK_STATE(package_general* package)
                       answer->active_channels[PFC_CCHAN]);
 }
 
-void PFC::protocol_GET_EVENTS(package_general* package)
+void PFC::protocolGetEvents(package_general* package)
 {
     auto answer = static_cast<answer_get_events*>(package);
     if (answer->num == 0) return;
@@ -343,7 +354,7 @@ void PFC::protocol_GET_EVENTS(package_general* package)
     emit setEvents(ev);
 }
 
-void PFC::protocol_GET_VERSION_INFO(package_general* package)
+void PFC::protocolGetVersionInfo(package_general* package)
 {
     auto answer = static_cast<answer_get_version_info*>(package);
     emit setVersionInfo(
@@ -359,14 +370,14 @@ void PFC::protocol_GET_VERSION_INFO(package_general* package)
         answer->second);
 }
 
-inline float PFC::line_float(float x, float x1, float y1, float x2, float y2)
+inline float PFC::lineFloat(float x, float x1, float y1, float x2, float y2)
 {
     float a;
     a = (y2 - y1) / (x2 - x1);
     return y1 + a * (x - x1);
 }
 
-void PFC::interpolate_shift_resize_float(std::vector<float>& in,
+void PFC::interpolateShiftResizeFloat(std::vector<float>& in,
                                          uint32_t in_size,
                                          float offset,
                                          std::vector<float>& out)
@@ -390,10 +401,10 @@ void PFC::interpolate_shift_resize_float(std::vector<float>& in,
 
         x = diff + x1;
 
-        out[i] = line_float(x, x1, y1, x2, y2);
+        out[i] = lineFloat(x, x1, y1, x2, y2);
     }
 }
-void PFC::protocol_GET_OSCILOG(package_general* package)
+void PFC::protocolGetOscillog(package_general* package)
 {
     auto answer = static_cast<answer_get_oscillog*>(package);
     float astep = (answer->max - answer->min) / 255.0f;
@@ -416,7 +427,7 @@ void PFC::protocol_GET_OSCILOG(package_general* package)
     setOscillog(static_cast<PFCOscillogCnannel>(answer->ch), yval);
 }
 
-void PFC::protocol_GET_NET_PARAMS(package_general* package)
+void PFC::protocolGetNetParams(package_general* package)
 {
     auto answer = static_cast<answer_get_net_params*>(package);
     emit setNetParams(answer->period_fact,
@@ -434,7 +445,7 @@ void PFC::protocol_GET_NET_PARAMS(package_general* package)
                       answer->U_phase_C);
 }
 
-void PFC::protocol_GET_SETTINGS_CALIBRATIONS(package_general* package)
+void PFC::protocolGetSettingsCalibrations(package_general* package)
 {
     auto answer = static_cast<answer_get_settings_calibrations*>(package);
     std::vector<float> calibration(ADC_CHANNEL_NUMBER);
@@ -446,7 +457,7 @@ void PFC::protocol_GET_SETTINGS_CALIBRATIONS(package_general* package)
         offset);
 }
 
-void PFC::protocol_GET_SETTINGS_PROTECTION(package_general* package)
+void PFC::protocolGetSettingsProtection(package_general* package)
 {
     auto answer = static_cast<answer_get_settings_protection*>(package);
     setSettingsProtection(
@@ -461,7 +472,7 @@ void PFC::protocol_GET_SETTINGS_PROTECTION(package_general* package)
         answer->I_max_peak);
 }
 
-void PFC::protocol_GET_SETTINGS_CAPACITORS(package_general* package)
+void PFC::protocolGetSettingsCapacitors(package_general* package)
 {
     auto answer = static_cast<answer_get_settings_capacitors*>(package);
     setSettingsCapacitors(
@@ -472,7 +483,7 @@ void PFC::protocol_GET_SETTINGS_CAPACITORS(package_general* package)
         answer->Ucap_precharge);
 }
 
-void PFC::protocol_GET_SETTINGS_FILTERS(package_general* package)
+void PFC::protocolGetSettingsFilters(package_general* package)
 {
     auto answer = static_cast<answer_get_settings_filters*>(package);
     setSettingsFilters(
@@ -481,30 +492,64 @@ void PFC::protocol_GET_SETTINGS_FILTERS(package_general* package)
         answer->K_Ucap);
 }
 
-void PFC::protocol_SET_SETTINGS_CALIBRATIONS(package_general* package)
+void PFC::protocolSetSettingsCalibrations(package_general* package)
 {
     auto answer = static_cast<answer_set_settings_calibrations*>(package);
     Q_UNUSED(answer)
     ansSettingsCalibrations(true);
 }
 
-void PFC::protocol_SET_SETTINGS_PROTECTION(package_general* package)
+void PFC::protocolSetSettingsProtection(package_general* package)
 {
     auto answer = static_cast<answer_set_settings_protection*>(package);
     Q_UNUSED(answer)
     ansSettingsProtection(true);
 }
 
-void PFC::protocol_SET_SETTINGS_FILTERS(package_general* package)
+void PFC::protocolSetSettingsFilters(package_general* package)
 {
     auto answer = static_cast<answer_set_settings_filters*>(package);
     Q_UNUSED(answer)
     ansSettingsFilters(true);
 }
 
-void PFC::protocol_SET_SETTINGS_CAPACITORS(package_general* package)
+void PFC::protocolSetSettingsCapacitors(package_general* package)
 {
     auto answer = static_cast<answer_set_settings_capacitors*>(package);
     Q_UNUSED(answer)
     ansSettingsCapacitors(true);
+}
+
+void PFC::connectionChanged(bool connected)
+{
+    emit setConnection(connected);
+}
+
+void PFC::interfaceConnectTo(
+    QString name,
+    qint32 baudRate,
+    QSerialPort::DataBits dataBits,
+    QSerialPort::Parity parity,
+    QSerialPort::StopBits stopBits,
+    QSerialPort::FlowControl flowControl,
+    bool localEchoEnabled,
+    quint32 timeout,
+    quint32 numberOfRetries)
+{
+    QMetaObject::invokeMethod(_interface, "ConnectTo",
+                              Qt::QueuedConnection,
+                              Q_ARG(QString, name),
+                              Q_ARG(qint32, baudRate),
+                              Q_ARG(QSerialPort::DataBits, dataBits),
+                              Q_ARG(QSerialPort::Parity, parity),
+                              Q_ARG(QSerialPort::StopBits, stopBits),
+                              Q_ARG(QSerialPort::FlowControl, flowControl),
+                              Q_ARG(bool, localEchoEnabled),
+                              Q_ARG(quint32, timeout),
+                              Q_ARG(quint32, numberOfRetries));
+}
+
+void PFC::interfaceDisconnect(void)
+{
+    QMetaObject::invokeMethod(_interface, "Disconnect");
 }

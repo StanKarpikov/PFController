@@ -19,22 +19,14 @@
 #include <QtCore/QtGlobal>
 #include <QDebug>
 #include <QMainWindow>
-//#include <windows.h>
 #include <QtSerialPort/QSerialPort>
-#include <QModbusRtuSerialMaster>
 #include <QTimer>
 #include <device.h>
 #include <QThread>
-#include <QCustomPlot.h>
 #include <QSignalSpy>
 
+#include "qcustomplot.h"
 #include "device_definition.h"
-
-/*--------------------------------------------------------------
-                       DEFINES
---------------------------------------------------------------*/
-
-#define NOMINAL_VOLTAGE 220
 
 /*--------------------------------------------------------------
                        PUBLIC TYPES
@@ -48,44 +40,50 @@ namespace Ui {
 
 QT_END_NAMESPACE
 
-const QBrush editableCellBrush(QColor(240, 255, 240));
+class SettingsDialog;
+class PFC;
 
+/*--------------------------------------------------------------
+                       CLASSES
+--------------------------------------------------------------*/
 
-struct PFCsettings{
+class PFCsettings{
+    /* TODO: is not thread safe */
+public:
     struct {
-        float ADC_UD=0;
-        float ADC_U_A=0;
-        float ADC_U_B=0;
-        float ADC_U_C=0;
-        float ADC_I_A=0;
-        float ADC_I_B=0;
-        float ADC_I_C=0;
-        float ADC_I_ET=0;
-        float ADC_I_TEMP1=0;
-        float ADC_I_TEMP2=0;
-        float ADC_EMS_A=0;
-        float ADC_EMS_B=0;
-        float ADC_EMS_C=0;
-        float ADC_EMS_I=0;
-        float ADC_MATH_A=0;
-        float ADC_MATH_B=0;
-        float ADC_MATH_C=0;
+        float ADC_UD;
+        float ADC_U_A;
+        float ADC_U_B;
+        float ADC_U_C;
+        float ADC_I_A;
+        float ADC_I_B;
+        float ADC_I_C;
+        float ADC_I_ET;
+        float ADC_I_TEMP1;
+        float ADC_I_TEMP2;
+        float ADC_EMS_A;
+        float ADC_EMS_B;
+        float ADC_EMS_C;
+        float ADC_EMS_I;
+        float ADC_MATH_A;
+        float ADC_MATH_B;
+        float ADC_MATH_C;
     }ADC;
     struct {
-        float ADC_UD=0;
-        float ADC_U_A=0;
-        float ADC_U_B=0;
-        float ADC_U_C=0;
-        float ADC_I_A=0;
-        float ADC_I_B=0;
-        float ADC_I_C=0;
-        float ADC_I_ET=0;
-        float ADC_I_TEMP1=0;
-        float ADC_I_TEMP2=0;
-        float ADC_EMS_A=0;
-        float ADC_EMS_B=0;
-        float ADC_EMS_C=0;
-        float ADC_EMS_I=0;
+        float ADC_UD;
+        float ADC_U_A;
+        float ADC_U_B;
+        float ADC_U_C;
+        float ADC_I_A;
+        float ADC_I_B;
+        float ADC_I_C;
+        float ADC_I_ET;
+        float ADC_I_TEMP1;
+        float ADC_I_TEMP2;
+        float ADC_EMS_A;
+        float ADC_EMS_B;
+        float ADC_EMS_C;
+        float ADC_EMS_I;
     }ADC_RAW;
     struct {
         float period_fact;
@@ -133,22 +131,41 @@ struct PFCsettings{
     }SETTINGS;
     uint32_t status;
     uint32_t activeChannels[PFCconfig::PFC_NCHAN];
-};
 
-class SettingsDialog;
-class PFC;
+    PFCsettings(void)
+    {
+        memset(&ADC, 0, sizeof(ADC));
+        memset(&ADC_RAW, 0, sizeof(ADC_RAW));
+        memset(&NET_PARAMS, 0, sizeof(NET_PARAMS));
+        memset(&SETTINGS.PROTECTION, 0, sizeof(SETTINGS.PROTECTION));
+        memset(&SETTINGS.CAPACITORS, 0, sizeof(SETTINGS.CAPACITORS));
+        memset(&SETTINGS.FILTERS, 0, sizeof(SETTINGS.FILTERS));
+        status = 0;
+        memset(&activeChannels, 0, sizeof(activeChannels));
+    }
+};
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
+    explicit MainWindow(QWidget *parent = Q_NULLPTR);
+    ~MainWindow();
 
+    /*--------------------------------------------------------------
+                           PRIVATE DATA
+    --------------------------------------------------------------*/
+private:
     /* Constants */
     inline static const std::string DARK_GREY = "#808080";
     inline static const std::string DARK_RED = "#800000";
     inline static const std::string LIGHT_GREY = "#c0c0c0";
     inline static const std::string DARK_GREEN = "#008000";
+
+    static const QBrush editableCellBrush;
+
+    static constexpr auto FCOEFF = 0.9f;
 
     static constexpr auto TIMEOUT_UPDATE_MAIN_PARAMS = static_cast<std::chrono::milliseconds>(300);
     static constexpr auto TIMEOUT_UPDATE_VOLTAGES = static_cast<std::chrono::milliseconds>(300);
@@ -183,23 +200,54 @@ public:
         OSCILLOG_SIZE
     };
 
-    enum class table_rows
+    enum class TableProtectionRows
     {
-        table_protection_row_Ud_min,
-        table_protection_row_Ud_max,
-        table_protection_row_temperature,
-        table_protection_row_U_min,
-        table_protection_row_U_max,
-        table_protection_row_Fnet_min,
-        table_protection_row_Fnet_max,
-        table_protection_row_I_max_rms,
-        table_protection_row_I_max_peak
+        ROW_UD_MIN,
+        ROW_UD_MAX,
+        ROW_TEMPERATURE,
+        ROW_U_MIN,
+        ROW_U_MAX,
+        ROW_F_MIN,
+        ROW_F_MAX,
+        ROW_I_MAX_RMS,
+        ROW_I_MAX_PEAK
     };
 
-    /* Functions */
-    explicit MainWindow(QWidget *parent = Q_NULLPTR);
-    ~MainWindow();
+    enum class TableFiltersRows
+    {
+        table_filters_row_K_I,
+        table_filters_row_K_U,
+        table_filters_row_K_Ud
+    };
 
+    /* Data */
+    Ui::MainWindow *_ui;
+    PFC *_pfc;
+    PFCsettings _pfc_settings;
+    std::vector<double> _oscillog_xval, _harmonics_xval;
+    std::vector<std::vector<double>> _oscillog_data;
+    std::list<QPushButton*> _buttons_edit;
+    uint64_t _last_index_events;
+    QMap<PFCconfig::Interface::PFCOscillogCnannel,OscillogChannels> _oscillog_array;
+    SettingsDialog *_port_settings;
+    QTimer _timer_main_params;
+    QTimer _timer_raw;
+    QTimer _timer_state;
+    QTimer _timer_voltage;
+    QTimer _timer_version;
+    QTimer _timer_oscillog;
+    QTimer _timer_events;
+    QTimer _timer_settings_calibrations;
+    QTimer _timer_settings_capacitors;
+    QTimer _timer_settings_protection;
+    QTimer _timer_settings_filters;
+    bool _connected;
+    QSharedPointer<QCPAxisTickerFixed> _fixed_ticker;
+
+    /*--------------------------------------------------------------
+                           PRIVATE FUNCTIONS
+    --------------------------------------------------------------*/
+private:
     bool eventFilter(QObject *object, QEvent *event);
     void pageMainInit(void);
     void pageOscillogInit(void);
@@ -207,28 +255,39 @@ public:
     void pageSettingsCapacitorsInit(void);
     void pageSettingsProtectionInit(void);
     void pageSettingsFiltersInit(void);
-    void SET_TABLE_PROT(table_rows row, float VAL);
-    void UPDATE_SPINBOX(QDoubleSpinBox *SPIN,float VAL);
-    void UPDATE_CHECKBOX(QCheckBox* CHECK,bool VAL);
+    void setTableProtectionsVal(TableProtectionRows row, float value);
+    void updateSpinVal(QDoubleSpinBox *spinbox, float value);
+    void updateCheckboxVal(QCheckBox* checkbox, bool value);
+    void initInterfaceConnections(void);
+    void FILTERADD(float &A, float B);
 
-    /* Data */
-    Ui::MainWindow *ui;
-    PFC *pfc;
-    std::vector<double> oscillog_xval,harmonics_xval;
-    std::vector<std::vector<double>> oscillog_data;
-    std::list<QPushButton*> buttons_edit;
-    uint64_t last_index_events;
-    PFCsettings pfc_settings;
-    QMap<PFCconfig::Interface::PFCOscillogCnannel,OscillogChannels> OSCILLOG_ARR;
-
+private slots:
+    void onPushButtonClicked();
+    void capacitorsKpValueChanged(double arg);
+    void capacitorsKiValueChanged(double arg);
+    void capacitorsKdValueChanged(double arg);
+    void capacitorsNominalValueChanged(double arg);
+    void capacitorsPrechargeValueChanged(double arg);
+    void stopClicked(void);
+    void startClicked(void);
+    void saveClicked(void);
+    void actionClearTriggered(void);
+    void buttonClicked(void);
+    void channelACheckToggled(bool checked);
+    void channelBCheckToggled(bool checked);
+    void channelCCheckToggled(bool checked);
+    void chargeOnClicked(void);
+    void chargeOffClicked(void);
+    /*--------------------------------------------------------------
+                           PUBLIC FUNCTIONS
+    --------------------------------------------------------------*/
 public slots:
-
-    void openSerialPort();
-    void closeSerialPort();
-    void about();
-    void Message(quint8 type, quint8 level, quint8 target, std::string message);
-    void deviceConnected();
-    void deviceDisconnected();
+    void openSerialPort(void);
+    void closeSerialPort(void);
+    void about(void);
+    void message(uint8_t type, uint8_t level, uint8_t target, std::string message);
+    void deviceConnected(void);
+    void deviceDisconnected(void);
 
     /* Interface commands */
     void setOscillog(PFCconfig::Interface::PFCOscillogCnannel channel, std::vector<double> data);
@@ -263,7 +322,7 @@ public slots:
                            float ADC_EMS_B,
                            float ADC_EMS_C,
                            float ADC_EMS_I);
-    void setWorkState(uint32_t state, uint32_t chA, uint32_t chB, uint32_t chC);
+    void setWorkState(uint32_t state, uint32_t ch_a, uint32_t ch_b, uint32_t ch_c);
     void setSwitchOnOff(uint32_t result);
     void setEvents(std::list<PFCconfig::Events::EventRecord> ev);
     void setVersionInfo(
@@ -338,9 +397,9 @@ public slots:
     void xAxisRangeChanged( QCPRange newRange ,QCPRange oldRange);
     void mouseWheel(QWheelEvent *event);
 
-    void tableSettingsCalibrations_changed(int row, int col);
-    void tableSettingsProtection_changed(int row, int col);
-    void tableSettingsFilters_changed(int row, int col);
+    void tableSettingsCalibrationsChanged(int row, int col);
+    void tableSettingsProtectionChanged(int row, int col);
+    void tableSettingsFiltersChanged(int row, int col);
 
 signals:
     void updateNetVoltage();
@@ -357,8 +416,7 @@ signals:
 
     void writeSettingsCalibrations(
             std::vector<float> calibration,
-            std::vector<float> offset
-            );
+            std::vector<float> offset);
     void writeSettingsProtection(
             float Ud_min,
             float Ud_max,
@@ -368,8 +426,7 @@ signals:
             float Fnet_min,
             float Fnet_max,
             float I_max_rms,
-            float I_max_peak
-            );
+            float I_max_peak);
     void writeSettingsCapacitors(
             float ctrlUd_Kp,
             float ctrlUd_Ki,
@@ -381,43 +438,6 @@ signals:
             float K_U,
             float K_Ud);
     void writeSwitchOnOff(PFCconfig::Interface::pfc_commands_t command,uint32_t data);
-
-private slots:
-    void onPushButtonClicked();
-    void on_doubleSpinBox_capacitors_Kp_valueChanged(double arg1);
-    void on_doubleSpinBox_capacitors_Ki_valueChanged(double arg1);
-    void on_doubleSpinBox_capacitors_Kd_valueChanged(double arg1);
-    void on_doubleSpinBox_cap_nominal_valueChanged(double arg1);
-    void on_doubleSpinBox_cap_precharge_valueChanged(double arg1);
-    void on_pushButton_STOP_clicked(void);
-    void on_pushButton_Start_clicked(void);
-    void on_pushButton_Save_clicked(void);
-    void on_actionClear_triggered(void);
-    void on_pushButton_2_clicked(void);
-    void on_checkBox_channelA_toggled(bool checked);
-    void on_checkBox_channelB_toggled(bool checked);
-    void on_checkBox_channelC_toggled(bool checked);
-    void on_pushButton_CHARGE_ON_clicked(void);
-    void on_pushButton_CHARGE_OFF_clicked(void);
-
-private:
-    void initInterfaceConnections();
-
-private:
-    SettingsDialog *port_settings;
-    QTimer timer_MainParams;
-    QTimer timer_Raw;
-    QTimer timer_State;
-    QTimer timer_Vol;
-    QTimer timer_Version;
-    QTimer timer_Oscillog;    
-    QTimer timer_events;
-    QTimer timer_SettingsCalibrations;
-    QTimer timer_SettingsCapacitors;
-    QTimer timer_SettingsProtection;
-    QTimer timer_SettingsFilters;
-    bool _connected=false;
-    QSharedPointer<QCPAxisTickerFixed> fixed_ticker;
 };
 
 /** @} */

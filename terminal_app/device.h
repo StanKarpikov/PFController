@@ -1,5 +1,10 @@
 #ifndef ADF_H
 #define ADF_H
+
+/*--------------------------------------------------------------
+                       INCLUDES
+--------------------------------------------------------------*/
+
 #include <QModbusRtuSerialMaster>
 #include <QWidget>
 #include <QTimer>
@@ -12,69 +17,37 @@
 #include "device_definition.h"
 #include "device_interface_commands.h"
 
-#define shifted(x, offset) ((float)(x) + (float)(offset))
-#define unshifted(x, offset) ((float)(x) - (float)(offset))
+/*--------------------------------------------------------------
+                       CLASSES
+--------------------------------------------------------------*/
 
-class PFC : public QObject{
+class PFC : public QObject
+{
     Q_OBJECT
 
-public:
-
     /*--------------------------------------------------------------
-                           PUBLIC TYPES
+                           PRIVATE DATA
     --------------------------------------------------------------*/
-
-    typedef std::function<void(package_general*)> fp;
-
-    /*--------------------------------------------------------------
-                           PUBLIC DATA
-    --------------------------------------------------------------*/
-
-    ADFSerialInterface *_interface;
-    std::vector<fp> handlers;
-    QThread* thread;
-
-    PFC();
-
-    /*--------------------------------------------------------------
-                            PRIVATE FUNCTIONS
-    --------------------------------------------------------------*/
-
-private slots:
-    void protocol_SWITCH_ON_OFF(package_general* package);
-    void protocol_GET_ADC_ACTIVE(package_general* package);
-    void protocol_GET_ADC_ACTIVE_RAW(package_general* package);
-    void protocol_GET_WORK_STATE(package_general* package);
-    void protocol_GET_EVENTS(package_general* package);
-    void protocol_GET_VERSION_INFO(package_general* package);
-    void protocol_GET_OSCILOG(package_general* package);
-    void protocol_GET_NET_PARAMS(package_general* package);
-    void protocol_GET_SETTINGS_CALIBRATIONS(package_general* package);
-    void protocol_GET_SETTINGS_PROTECTION(package_general* package);
-    void protocol_GET_SETTINGS_CAPACITORS(package_general* package);
-    void protocol_GET_SETTINGS_FILTERS(package_general* package);
-    void protocol_SET_SETTINGS_CALIBRATIONS(package_general* package);
-    void protocol_SET_SETTINGS_PROTECTION(package_general* package);
-    void protocol_SET_SETTINGS_FILTERS(package_general* package);
-    void protocol_SET_SETTINGS_CAPACITORS(package_general* package);
+private:
+    typedef std::function<void(package_general*)> package_handler;
 
 private:
-    void getAnswer(bool is_timeout, PackageCommand *pc);
-
-    inline float line_float(float x, float x1, float y1, float x2, float y2);
-    void interpolate_shift_resize_float(
-            std::vector<float> &in,
-            uint32_t in_size,
-            float offset,
-            std::vector<float> &out);
-    void protocol_unknow_command_handle(package_general* answer);
-    void EndRequest(package_general &req, PFCconfig::Interface::pfc_interface_commands_t command, ADFMessagePriority priority = ADFMessagePriority::NORMAL);
+    ADFSerialInterface* _interface;
+    std::vector<package_handler> _handlers;
+    QThread* _thread;
 
     /*--------------------------------------------------------------
-             PUBLIC FUNCTIONS
+                           PUBLIC FUNCTIONS
     --------------------------------------------------------------*/
+public:
+    PFC(void);
+    ~PFC(void);
+
 signals:
-    void Message(quint8 type, quint8 level, quint8 target, std::string message);
+    void message(uint8_t type, uint8_t level, uint8_t target, std::string message);
+
+    void interfaceConnected(void);
+    void interfaceDisconnected(void);
 
     void setOscillog(PFCconfig::Interface::PFCOscillogCnannel channel, std::vector<double> data);
     void setNetVoltage(	float ADC_UD,
@@ -108,7 +81,7 @@ signals:
                           float ADC_EMS_B,
                           float ADC_EMS_C,
                           float ADC_EMS_I);
-    void setWorkState(uint32_t state, uint32_t chA, uint32_t chB, uint32_t chC);
+    void setWorkState(uint32_t state, uint32_t ch_a, uint32_t ch_b, uint32_t ch_c);
     void setEvents(std::list<PFCconfig::Events::EventRecord> ev);
     void setSwitchOnOff(uint32_t result);
     void setVersionInfo(
@@ -169,9 +142,19 @@ signals:
     void ansSettingsCapacitors(bool writed);
 
 public slots:
-    void ConnectionChanged(bool connected){
-        emit setConnection(connected);
-    }
+    void connectionChanged(bool connected);
+
+    void interfaceConnectTo(
+        QString name,
+        qint32 baudRate = PFCconfig::Serial::PORT_BADRATE,
+        QSerialPort::DataBits dataBits = PFCconfig::Serial::PORT_DATA_BITS,
+        QSerialPort::Parity parity = PFCconfig::Serial::PORT_PARITY,
+        QSerialPort::StopBits stopBits = PFCconfig::Serial::PORT_STOP_BITS,
+        QSerialPort::FlowControl flowControl = PFCconfig::Serial::PORT_FLOW_CONTROL,
+        bool localEchoEnabled = PFCconfig::Serial::PORT_ECHO_ENABLED,
+        quint32 timeout = PFCconfig::Serial::PORT_TIMEOUT,
+        quint32 numberOfRetries = PFCconfig::Serial::PORT_NUMBER_OF_RETRIES);
+    void interfaceDisconnect(void);
 
     /*--------------------------------------------------------------
              PUBLIC CLASS FUNCTIONS::REQUESTS
@@ -219,6 +202,41 @@ public slots:
             float K_U,
             float K_UD);
     void writeSwitchOnOff(PFCconfig::Interface::pfc_commands_t command,uint32_t data);
+
+    /*--------------------------------------------------------------
+                            PRIVATE FUNCTIONS
+    --------------------------------------------------------------*/
+private slots:
+    /* Protocol handlers */
+    void protocolSwitchOnOff(package_general* package);
+    void protocolGetADCActive(package_general* package);
+    void protocolGetADCActiveRAW(package_general* package);
+    void protocolGetWorkState(package_general* package);
+    void protocolGetEvents(package_general* package);
+    void protocolGetVersionInfo(package_general* package);
+    void protocolGetOscillog(package_general* package);
+    void protocolGetNetParams(package_general* package);
+    void protocolGetSettingsCalibrations(package_general* package);
+    void protocolGetSettingsProtection(package_general* package);
+    void protocolGetSettingsCapacitors(package_general* package);
+    void protocolGetSettingsFilters(package_general* package);
+    void protocolSetSettingsCalibrations(package_general* package);
+    void protocolSetSettingsProtection(package_general* package);
+    void protocolSetSettingsFilters(package_general* package);
+    void protocolSetSettingsCapacitors(package_general* package);
+
+private:
+    void getAnswer(bool is_timeout, PackageCommand *pc);
+
+    inline float lineFloat(float x, float x1, float y1, float x2, float y2);
+    void interpolateShiftResizeFloat(
+            std::vector<float> &in,
+            uint32_t in_size,
+            float offset,
+            std::vector<float> &out);
+    void protocolUnknownCommand(package_general* answer);
+    void endRequest(package_general &req, PFCconfig::Interface::pfc_interface_commands_t command, ADFMessagePriority priority = ADFMessagePriority::NORMAL);
+
 };
 
 #endif // ADF_H

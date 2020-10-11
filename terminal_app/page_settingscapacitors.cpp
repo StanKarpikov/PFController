@@ -11,13 +11,13 @@ void MainWindow::pageSettingsCapacitorsInit()
 {
 }
 
-void MainWindow::UPDATE_SPINBOX(QDoubleSpinBox *SPIN, float VAL)
+void MainWindow::updateSpinVal(QDoubleSpinBox *spinbox, float value)
 {
-    if (!SPIN->hasFocus())
+    if (!spinbox->hasFocus())
     {
-        SPIN->blockSignals(true);
-        SPIN->setValue(static_cast<double>(VAL));
-        SPIN->blockSignals(false);
+        spinbox->blockSignals(true);
+        spinbox->setValue(static_cast<double>(value));
+        spinbox->blockSignals(false);
     }
 }
 
@@ -28,93 +28,93 @@ void MainWindow::setSettingsCapacitors(
     float Ud_nominal,
     float Ud_precharge)
 {
-    pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp = ctrlUd_Kp;
-    pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki = ctrlUd_Ki;
-    pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd = ctrlUd_Kd;
-    pfc_settings.SETTINGS.CAPACITORS.Ud_nominal = Ud_nominal;
-    pfc_settings.SETTINGS.CAPACITORS.Ud_precharge = Ud_precharge;
+    _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp = ctrlUd_Kp;
+    _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki = ctrlUd_Ki;
+    _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd = ctrlUd_Kd;
+    _pfc_settings.SETTINGS.CAPACITORS.Ud_nominal = Ud_nominal;
+    _pfc_settings.SETTINGS.CAPACITORS.Ud_precharge = Ud_precharge;
 
-    uint16_t val = 0;
-    if (pfc_settings.ADC.ADC_UD < 0)
+    uint16_t value = 0;
+    if (_pfc_settings.ADC.ADC_UD < 0)
     {  //< precharge
-        val = 0;
+        value = 0;
     }
-    else if (pfc_settings.ADC.ADC_UD < (Ud_precharge))
+    else if (_pfc_settings.ADC.ADC_UD < (Ud_precharge))
     {  //< precharge
-        val = static_cast<uint16_t>(pfc_settings.ADC.ADC_UD / Ud_precharge * (1000.0f / 4.0f));
+        value = static_cast<uint16_t>(_pfc_settings.ADC.ADC_UD / Ud_precharge * (1000.0f / 4.0f));
     }
-    else if (pfc_settings.ADC.ADC_UD < (Ud_nominal))
+    else if (_pfc_settings.ADC.ADC_UD < (Ud_nominal))
     {  //precharge < x < nominal
-        val = static_cast<uint16_t>((pfc_settings.ADC.ADC_UD - Ud_precharge) / (Ud_nominal - Ud_precharge) * (1000.0f / 2.0f) + (1000.0f / 4.0f));
+        value = static_cast<uint16_t>((_pfc_settings.ADC.ADC_UD - Ud_precharge) / (Ud_nominal - Ud_precharge) * (1000.0f / 2.0f) + (1000.0f / 4.0f));
     }
     else
     {  //> nominal
-        val = static_cast<uint16_t>((pfc_settings.ADC.ADC_UD - Ud_nominal) / (UD_MAX_VALUE - Ud_nominal) * (1000.0f / 4.0f) + (3.0f * 1000.0f / 4.0f));
+        value = static_cast<uint16_t>((_pfc_settings.ADC.ADC_UD - Ud_nominal) / (UD_MAX_VALUE - Ud_nominal) * (1000.0f / 4.0f) + (3.0f * 1000.0f / 4.0f));
     }
 
-    ui->progressBar_Ud1->setValue(val);
+    _ui->progressBar_Ud1->setValue(value);
 
-    UPDATE_SPINBOX(ui->doubleSpinBox_cap_nominal, Ud_nominal);
-    UPDATE_SPINBOX(ui->doubleSpinBox_cap_precharge, Ud_precharge);
-    UPDATE_SPINBOX(ui->doubleSpinBox_capacitors_Kp, ctrlUd_Kp);
-    UPDATE_SPINBOX(ui->doubleSpinBox_capacitors_Ki, ctrlUd_Ki);
-    UPDATE_SPINBOX(ui->doubleSpinBox_capacitors_Kd, ctrlUd_Kd);
+    updateSpinVal(_ui->doubleSpinBox_cap_nominal, Ud_nominal);
+    updateSpinVal(_ui->doubleSpinBox_cap_precharge, Ud_precharge);
+    updateSpinVal(_ui->doubleSpinBox_capacitors_Kp, ctrlUd_Kp);
+    updateSpinVal(_ui->doubleSpinBox_capacitors_Ki, ctrlUd_Ki);
+    updateSpinVal(_ui->doubleSpinBox_capacitors_Kd, ctrlUd_Kd);
 
-    ui->label_Ud1->setText(QString().sprintf("%.0f В", static_cast<double>(pfc_settings.ADC.ADC_UD)));
+    _ui->label_Ud1->setText(QString().sprintf("%.0f В", static_cast<double>(_pfc_settings.ADC.ADC_UD)));
 }
 
-void MainWindow::on_doubleSpinBox_capacitors_Kp_valueChanged(double arg1)
+void MainWindow::capacitorsKpValueChanged(double arg)
 {
-    pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp = static_cast<float>(arg1);
+    _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp = static_cast<float>(arg);
 
     writeSettingsCapacitors(
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp,
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki,
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd,
-        pfc_settings.SETTINGS.CAPACITORS.Ud_nominal,
-        pfc_settings.SETTINGS.CAPACITORS.Ud_precharge);
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp,
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki,
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd,
+        _pfc_settings.SETTINGS.CAPACITORS.Ud_nominal,
+        _pfc_settings.SETTINGS.CAPACITORS.Ud_precharge);
 }
-void MainWindow::on_doubleSpinBox_capacitors_Ki_valueChanged(double arg1)
+void MainWindow::capacitorsKiValueChanged(double arg)
 {
-    pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki = static_cast<float>(arg1);
+    _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki = static_cast<float>(arg);
 
     writeSettingsCapacitors(
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp,
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki,
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd,
-        pfc_settings.SETTINGS.CAPACITORS.Ud_nominal,
-        pfc_settings.SETTINGS.CAPACITORS.Ud_precharge);
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp,
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki,
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd,
+        _pfc_settings.SETTINGS.CAPACITORS.Ud_nominal,
+        _pfc_settings.SETTINGS.CAPACITORS.Ud_precharge);
 }
-void MainWindow::on_doubleSpinBox_capacitors_Kd_valueChanged(double arg1)
+void MainWindow::capacitorsKdValueChanged(double arg)
 {
-    pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd = static_cast<float>(arg1);
+    _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd = static_cast<float>(arg);
 
     writeSettingsCapacitors(
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp,
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki,
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd,
-        pfc_settings.SETTINGS.CAPACITORS.Ud_nominal,
-        pfc_settings.SETTINGS.CAPACITORS.Ud_precharge);
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp,
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki,
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd,
+        _pfc_settings.SETTINGS.CAPACITORS.Ud_nominal,
+        _pfc_settings.SETTINGS.CAPACITORS.Ud_precharge);
 }
-void MainWindow::on_doubleSpinBox_cap_nominal_valueChanged(double arg1)
+void MainWindow::capacitorsNominalValueChanged(double arg)
 {
-    pfc_settings.SETTINGS.CAPACITORS.Ud_nominal = static_cast<float>(arg1);
+    _pfc_settings.SETTINGS.CAPACITORS.Ud_nominal = static_cast<float>(arg);
 
     writeSettingsCapacitors(
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp,
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki,
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd,
-        pfc_settings.SETTINGS.CAPACITORS.Ud_nominal,
-        pfc_settings.SETTINGS.CAPACITORS.Ud_precharge);
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp,
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki,
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd,
+        _pfc_settings.SETTINGS.CAPACITORS.Ud_nominal,
+        _pfc_settings.SETTINGS.CAPACITORS.Ud_precharge);
 }
-void MainWindow::on_doubleSpinBox_cap_precharge_valueChanged(double arg1)
+void MainWindow::capacitorsPrechargeValueChanged(double arg)
 {
-    pfc_settings.SETTINGS.CAPACITORS.Ud_precharge = static_cast<float>(arg1);
+    _pfc_settings.SETTINGS.CAPACITORS.Ud_precharge = static_cast<float>(arg);
 
     writeSettingsCapacitors(
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp,
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki,
-        pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd,
-        pfc_settings.SETTINGS.CAPACITORS.Ud_nominal,
-        pfc_settings.SETTINGS.CAPACITORS.Ud_precharge);
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kp,
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Ki,
+        _pfc_settings.SETTINGS.CAPACITORS.ctrlUd_Kd,
+        _pfc_settings.SETTINGS.CAPACITORS.Ud_nominal,
+        _pfc_settings.SETTINGS.CAPACITORS.Ud_precharge);
 }

@@ -16,61 +16,51 @@ using namespace PFCconfig::ADC;
 using namespace PFCconfig::Interface;
 using namespace PFCconfig::Events;
 
-enum
-{
-    table_filters_row_K_I,
-    table_filters_row_K_U,
-    table_filters_row_K_Ud
-};
-
 void MainWindow::pageSettingsFiltersInit()
 {
-    for (int i = 0; i < ui->tableWidget_settings_filters->rowCount(); i++)
+    for (int i = 0; i < _ui->tableWidget_settings_filters->rowCount(); i++)
     {
-        ui->tableWidget_settings_filters->item(i, 0)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
-        ui->tableWidget_settings_filters->item(i, 1)->setFlags(0);
-        ui->tableWidget_settings_filters->item(i, 2)->setFlags(0);
-        ui->tableWidget_settings_filters->item(i, 0)->setBackground(editableCellBrush);
+        _ui->tableWidget_settings_filters->item(i, 0)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
+        _ui->tableWidget_settings_filters->item(i, 1)->setFlags(Q_NULLPTR);
+        _ui->tableWidget_settings_filters->item(i, 2)->setFlags(Q_NULLPTR);
+        _ui->tableWidget_settings_filters->item(i, 0)->setBackground(editableCellBrush);
     }
-    connect(ui->tableWidget_settings_filters, SIGNAL(cellChanged(int, int)),
-            this, SLOT(tableSettingsFilters_changed(int, int)));
+    connect(_ui->tableWidget_settings_filters, SIGNAL(cellChanged(int, int)),
+            this, SLOT(tableSettingsFiltersChanged(int, int)));
 }
 
-void MainWindow::tableSettingsFilters_changed(int row, int col)
+void MainWindow::tableSettingsFiltersChanged(int row, int col)
 {
-    QTableWidgetItem *item = ui->tableWidget_settings_filters->item(row, col);
-    float val = item->text().toFloat();
-    switch (row)
+    QTableWidgetItem *item = _ui->tableWidget_settings_filters->item(row, col);
+    float value = item->text().toFloat();
+    switch (static_cast<TableFiltersRows>(row))
     {
-        case table_filters_row_K_I:
-            pfc_settings.SETTINGS.FILTERS.K_I = val;
+        case TableFiltersRows::table_filters_row_K_I:
+            _pfc_settings.SETTINGS.FILTERS.K_I = value;
             break;
-        case table_filters_row_K_U:
-            pfc_settings.SETTINGS.FILTERS.K_U = val;
+        case TableFiltersRows::table_filters_row_K_U:
+            _pfc_settings.SETTINGS.FILTERS.K_U = value;
             break;
-        case table_filters_row_K_Ud:
-            pfc_settings.SETTINGS.FILTERS.K_Ud = val;
+        case TableFiltersRows::table_filters_row_K_Ud:
+            _pfc_settings.SETTINGS.FILTERS.K_Ud = value;
             break;
     }
     writeSettingsFilters(
-        pfc_settings.SETTINGS.FILTERS.K_I,
-        pfc_settings.SETTINGS.FILTERS.K_U,
-        pfc_settings.SETTINGS.FILTERS.K_Ud);
+        _pfc_settings.SETTINGS.FILTERS.K_I,
+        _pfc_settings.SETTINGS.FILTERS.K_U,
+        _pfc_settings.SETTINGS.FILTERS.K_Ud);
 }
-//========================================================================
+
 void MainWindow::setSettingsFilters(
     float K_I,
     float K_U,
     float K_Ud)
 {
-    pfc_settings.SETTINGS.FILTERS.K_I = K_I;
-    pfc_settings.SETTINGS.FILTERS.K_U = K_U;
-    pfc_settings.SETTINGS.FILTERS.K_Ud = K_Ud;
+    _pfc_settings.SETTINGS.FILTERS.K_I = K_I;
+    _pfc_settings.SETTINGS.FILTERS.K_U = K_U;
+    _pfc_settings.SETTINGS.FILTERS.K_Ud = K_Ud;
 
-#define SET_TABLE_FILTERS(VAL) \
-    ui->tableWidget_settings_filters->item(table_filters_row_##VAL, 0)->setText(QString().sprintf("%.3f", VAL));
-
-    SET_TABLE_FILTERS(K_I);
-    SET_TABLE_FILTERS(K_U);
-    SET_TABLE_FILTERS(K_Ud);
+    _ui->tableWidget_settings_filters->item(enum_int(TableFiltersRows::table_filters_row_K_I), 0)->setText(QString().sprintf("%.3f", static_cast<double>(K_I)));
+    _ui->tableWidget_settings_filters->item(enum_int(TableFiltersRows::table_filters_row_K_U), 0)->setText(QString().sprintf("%.3f", static_cast<double>(K_U)));
+    _ui->tableWidget_settings_filters->item(enum_int(TableFiltersRows::table_filters_row_K_Ud), 0)->setText(QString().sprintf("%.3f", static_cast<double>(K_Ud)));
 }

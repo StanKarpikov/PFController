@@ -36,8 +36,157 @@ using namespace PFCconfig::Interface;
 using namespace PFCconfig::Events;
 
 /*--------------------------------------------------------------
-                       DEFINES
+                       PRIVATE DATA
 --------------------------------------------------------------*/
+
+const QBrush MainWindow::editableCellBrush = QBrush(QColor(240, 255, 240));
+
+/*--------------------------------------------------------------
+                       CLASS FUNCTIONS
+--------------------------------------------------------------*/
+
+MainWindow::MainWindow(QWidget* parent)
+    : QMainWindow(parent),
+      _ui(new Ui::MainWindow),
+      _pfc(new PFC),
+      _oscillog_data(static_cast<int>(OscillogChannels::OSCILLOG_SIZE)),
+      _last_index_events(0),
+      _port_settings(new SettingsDialog),
+      _connected(false)
+{
+    /* Init the UI */
+    _ui->setupUi(this);
+
+    _ui->actionConnect->setEnabled(true);
+    _ui->actionDisconnect->setEnabled(false);
+    _ui->actionQuit->setEnabled(true);
+    _ui->actionConfigure->setEnabled(true);
+
+    initInterfaceConnections();
+
+    qRegisterMetaType<QSerialPort::DataBits>("QSerialPort::DataBits");
+    qRegisterMetaType<QSerialPort::Parity>("QSerialPort::Parity");
+    qRegisterMetaType<QSerialPort::StopBits>("QSerialPort::StopBits");
+    qRegisterMetaType<QSerialPort::FlowControl>("QSerialPort::FlowControl");
+    qRegisterMetaType<std::vector<uint8_t>>("std::vector<uint8_t>");
+    qRegisterMetaType<PackageCommand*>("PackageCommand*");
+
+    _ui->groupBox_State->installEventFilter(this);
+    _ui->groupBox_net->installEventFilter(this);
+    _ui->OscillogPlot->installEventFilter(this);
+    _ui->pageCalibrations->installEventFilter(this);
+    _ui->pageCapacitors->installEventFilter(this);
+    _ui->pageProtection->installEventFilter(this);
+    _ui->pageFilters->installEventFilter(this);
+
+    /* Init settings window and show it */
+    QMetaObject::invokeMethod(_port_settings, "show", Qt::QueuedConnection);
+
+    /* Init PFC device subsystem */
+    connect(_pfc, &PFC::interfaceConnected, this, &MainWindow::deviceConnected);
+    connect(_pfc, &PFC::interfaceDisconnected, this, &MainWindow::deviceDisconnected);
+
+    connect(_pfc, &PFC::setConnection, this, &MainWindow::setConnection);
+    connect(_pfc, &PFC::setOscillog, this, &MainWindow::setOscillog);
+    connect(_pfc, &PFC::setNetVoltage, this, &MainWindow::setNetVoltage);
+    connect(_pfc, &PFC::setSwitchOnOff, this, &MainWindow::setSwitchOnOff);
+    connect(_pfc, &PFC::setNetVoltageRAW, this, &MainWindow::setNetVoltageRAW);
+    connect(_pfc, &PFC::setNetParams, this, &MainWindow::setNetParams);
+    connect(_pfc, &PFC::setVersionInfo, this, &MainWindow::setVersionInfo);
+    connect(_pfc, &PFC::setWorkState, this, &MainWindow::setWorkState);
+    connect(_pfc, &PFC::setEvents, this, &MainWindow::setEvents);
+
+    connect(_pfc, &PFC::message, this, &MainWindow::message);
+
+    connect(_pfc, &PFC::setSettingsCalibrations,
+            this, &MainWindow::setSettingsCalibrations);
+    connect(_pfc, &PFC::setSettingsProtection,
+            this, &MainWindow::setSettingsProtection);
+    connect(_pfc, &PFC::setSettingsCapacitors,
+            this, &MainWindow::setSettingsCapacitors);
+    connect(_pfc, &PFC::setSettingsFilters,
+            this, &MainWindow::setSettingsFilters);
+
+    connect(_pfc, &PFC::ansSettingsCalibrations,
+            this, &MainWindow::ansSettingsCalibrations);
+    connect(_pfc, &PFC::ansSettingsProtection,
+            this, &MainWindow::ansSettingsProtection);
+    connect(_pfc, &PFC::ansSettingsCapacitors,
+            this, &MainWindow::ansSettingsCapacitors);
+    connect(_pfc, &PFC::ansSettingsFilters,
+            this, &MainWindow::ansSettingsFilters);
+
+    connect(this, &MainWindow::updateNetVoltage,
+            _pfc, &PFC::updateNetVoltage);
+    connect(this, &MainWindow::updateNetVoltageRAW,
+            _pfc, &PFC::updateNetVoltageRAW);
+    connect(this, &MainWindow::updateNetParams,
+            _pfc, &PFC::updateNetParams);
+    connect(this, &MainWindow::updateOscillog,
+            _pfc, &PFC::updateOscillog);
+    connect(this, &MainWindow::updateWorkState,
+            _pfc, &PFC::updateWorkState);
+    connect(this, &MainWindow::updateVersionInfo,
+            _pfc, &PFC::updateVersionInfo);
+    connect(this, &MainWindow::updateEvents,
+            _pfc, &PFC::updateEvents);
+
+    connect(this, &MainWindow::updateSettingsCalibrations,
+            _pfc, &PFC::updateSettingsCalibrations);
+    connect(this, &MainWindow::updateSettingsProtection,
+            _pfc, &PFC::updateSettingsProtection);
+    connect(this, &MainWindow::updateSettingsCapacitors,
+            _pfc, &PFC::updateSettingsCapacitors);
+    connect(this, &MainWindow::updateSettingsFilters,
+            _pfc, &PFC::updateSettingsFilters);
+
+    connect(this, &MainWindow::writeSettingsCalibrations,
+            _pfc, &PFC::writeSettingsCalibrations);
+    connect(this, &MainWindow::writeSettingsProtection,
+            _pfc, &PFC::writeSettingsProtection);
+    connect(this, &MainWindow::writeSettingsCapacitors,
+            _pfc, &PFC::writeSettingsCapacitors);
+    connect(this, &MainWindow::writeSettingsFilters,
+            _pfc, &PFC::writeSettingsFilters);
+
+    connect(this, &MainWindow::writeSwitchOnOff,
+            _pfc, &PFC::writeSwitchOnOff);
+
+    connect(&_timer_voltage, &QTimer::timeout,
+            this, &MainWindow::timerupdateNetVoltage);
+    connect(&_timer_raw, &QTimer::timeout,
+            this, &MainWindow::timerupdateNetVoltageRaw);
+    connect(&_timer_oscillog, &QTimer::timeout,
+            this, &MainWindow::timerOscillog);
+    connect(&_timer_settings_calibrations, &QTimer::timeout,
+            this, &MainWindow::timerSettingsCalibrations);
+    connect(&_timer_settings_capacitors, &QTimer::timeout,
+            this, &MainWindow::timerSettingsCapacitors);
+    connect(&_timer_settings_protection, &QTimer::timeout,
+            this, &MainWindow::timerSettingsProtection);
+    connect(&_timer_settings_filters, &QTimer::timeout,
+            this, &MainWindow::timerSettingsFilters);
+    connect(&_timer_main_params, &QTimer::timeout,
+            this, &MainWindow::timerNetParams);
+    connect(&_timer_state, &QTimer::timeout,
+            this, &MainWindow::timerWorkState);
+    connect(&_timer_version, &QTimer::timeout,
+            this, &MainWindow::timerVersion);
+    connect(&_timer_events, &QTimer::timeout,
+            this, &MainWindow::timerEvents);
+
+    /* Init window pages */
+    pageMainInit();
+    pageOscillogInit();
+    pageSettingsCalibrationsInit();
+    pageSettingsCapacitorsInit();
+    pageSettingsProtectionInit();
+    pageSettingsFiltersInit();
+
+    _timer_events.start(EVENTS_TIMER_TIMEOUT);
+
+    _ui->listWidget->setItemDelegate(new HtmlDelegate);
+}
 
 void SETFILTER(QEvent* event, QObject* object, QWidget* UI, QTimer* OBJ, std::chrono::milliseconds TIMER)
 {
@@ -64,155 +213,9 @@ std::string SCOL(std::string STR, std::string COL)
     return str;
 }
 
-#define FCOEFF          0.9f
-#define FILTERADD(A, B) A = A * FCOEFF + B * (1 - FCOEFF)
-
-/*--------------------------------------------------------------
-                       CLASS FUNCTIONS
---------------------------------------------------------------*/
-
-MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent),
-      ui(new Ui::MainWindow),
-      pfc(new PFC),
-      oscillog_xval(),
-      harmonics_xval(),
-      oscillog_data(static_cast<int>(OscillogChannels::OSCILLOG_SIZE)),
-      buttons_edit(),
-      last_index_events(0),
-      pfc_settings(),
-      OSCILLOG_ARR(),
-      port_settings(new SettingsDialog)
+void MainWindow::FILTERADD(float &A, float B)
 {
-    ui->setupUi(this);
-
-    ui->actionConnect->setEnabled(true);
-    ui->actionDisconnect->setEnabled(false);
-    ui->actionQuit->setEnabled(true);
-    ui->actionConfigure->setEnabled(true);
-
-    initInterfaceConnections();
-
-    QMetaObject::invokeMethod(port_settings, "show", Qt::QueuedConnection);
-
-    connect(pfc->_interface, &ADFSerialInterface::connected, this, &MainWindow::deviceConnected);
-    connect(pfc->_interface, &ADFSerialInterface::disconnected, this, &MainWindow::deviceDisconnected);
-
-    qRegisterMetaType<QSerialPort::DataBits>("QSerialPort::DataBits");
-    qRegisterMetaType<QSerialPort::Parity>("QSerialPort::Parity");
-    qRegisterMetaType<QSerialPort::StopBits>("QSerialPort::StopBits");
-    qRegisterMetaType<QSerialPort::FlowControl>("QSerialPort::FlowControl");
-    qRegisterMetaType<std::vector<uint8_t>>("std::vector<uint8_t>");
-    qRegisterMetaType<PackageCommand*>("PackageCommand*");
-
-    ui->groupBox_State->installEventFilter(this);
-    ui->groupBox_net->installEventFilter(this);
-    ui->OscillogPlot->installEventFilter(this);
-    ui->pageCalibrations->installEventFilter(this);
-    ui->pageCapacitors->installEventFilter(this);
-    ui->pageProtection->installEventFilter(this);
-    ui->pageFilters->installEventFilter(this);
-
-    connect(pfc, &PFC::setConnection, this, &MainWindow::setConnection);
-    connect(pfc, &PFC::setOscillog, this, &MainWindow::setOscillog);
-    connect(pfc, &PFC::setNetVoltage, this, &MainWindow::setNetVoltage);
-    connect(pfc, &PFC::setSwitchOnOff, this, &MainWindow::setSwitchOnOff);
-    connect(pfc, &PFC::setNetVoltageRAW, this, &MainWindow::setNetVoltageRAW);
-    connect(pfc, &PFC::setNetParams, this, &MainWindow::setNetParams);
-    connect(pfc, &PFC::setVersionInfo, this, &MainWindow::setVersionInfo);
-    connect(pfc, &PFC::setWorkState, this, &MainWindow::setWorkState);
-    connect(pfc, &PFC::setEvents, this, &MainWindow::setEvents);
-
-    connect(pfc, &PFC::Message, this, &MainWindow::Message);
-
-    connect(pfc, &PFC::setSettingsCalibrations,
-            this, &MainWindow::setSettingsCalibrations);
-    connect(pfc, &PFC::setSettingsProtection,
-            this, &MainWindow::setSettingsProtection);
-    connect(pfc, &PFC::setSettingsCapacitors,
-            this, &MainWindow::setSettingsCapacitors);
-    connect(pfc, &PFC::setSettingsFilters,
-            this, &MainWindow::setSettingsFilters);
-
-    connect(pfc, &PFC::ansSettingsCalibrations,
-            this, &MainWindow::ansSettingsCalibrations);
-    connect(pfc, &PFC::ansSettingsProtection,
-            this, &MainWindow::ansSettingsProtection);
-    connect(pfc, &PFC::ansSettingsCapacitors,
-            this, &MainWindow::ansSettingsCapacitors);
-    connect(pfc, &PFC::ansSettingsFilters,
-            this, &MainWindow::ansSettingsFilters);
-
-    connect(this, SIGNAL(updateNetVoltage()),
-            pfc, SLOT(updateNetVoltage()));
-    connect(this, SIGNAL(updateNetVoltageRAW()),
-            pfc, SLOT(updateNetVoltageRAW()));
-    connect(this, SIGNAL(updateNetParams()),
-            pfc, SLOT(updateNetParams()));
-    connect(this, SIGNAL(updateOscillog(PFCOscillogCnannel)),
-            pfc, SLOT(updateOscillog(PFCOscillogCnannel)));
-    connect(this, &MainWindow::updateWorkState,
-            pfc, &PFC::updateWorkState);
-    connect(this, SIGNAL(updateVersionInfo()),
-            pfc, SLOT(updateVersionInfo()));
-    connect(this, &MainWindow::updateEvents,
-            pfc, &PFC::updateEvents);
-
-    connect(this, &MainWindow::updateSettingsCalibrations,
-            pfc, &PFC::updateSettingsCalibrations);
-    connect(this, &MainWindow::updateSettingsProtection,
-            pfc, &PFC::updateSettingsProtection);
-    connect(this, &MainWindow::updateSettingsCapacitors,
-            pfc, &PFC::updateSettingsCapacitors);
-    connect(this, &MainWindow::updateSettingsFilters,
-            pfc, &PFC::updateSettingsFilters);
-
-    connect(this, &MainWindow::writeSettingsCalibrations,
-            pfc, &PFC::writeSettingsCalibrations);
-    connect(this, &MainWindow::writeSettingsProtection,
-            pfc, &PFC::writeSettingsProtection);
-    connect(this, &MainWindow::writeSettingsCapacitors,
-            pfc, &PFC::writeSettingsCapacitors);
-    connect(this, &MainWindow::writeSettingsFilters,
-            pfc, &PFC::writeSettingsFilters);
-
-    connect(this, &MainWindow::writeSwitchOnOff,
-            pfc, &PFC::writeSwitchOnOff);
-
-    connect(&timer_Vol, SIGNAL(timeout()),
-            this, SLOT(timerupdateNetVoltage()));
-    connect(&timer_Raw, SIGNAL(timeout()),
-            this, SLOT(timerupdateNetVoltageRaw()));
-    connect(&timer_Oscillog, SIGNAL(timeout()),
-            this, SLOT(timerOscillog()));
-    connect(&timer_SettingsCalibrations, SIGNAL(timeout()),
-            this, SLOT(timerSettingsCalibrations()));
-    connect(&timer_SettingsCapacitors, SIGNAL(timeout()),
-            this, SLOT(timerSettingsCapacitors()));
-    connect(&timer_SettingsProtection, SIGNAL(timeout()),
-            this, SLOT(timerSettingsProtection()));
-    connect(&timer_SettingsFilters, SIGNAL(timeout()),
-            this, SLOT(timerSettingsFilters()));
-    connect(&timer_MainParams, SIGNAL(timeout()),
-            this, SLOT(timerNetParams()));
-    connect(&timer_State, SIGNAL(timeout()),
-            this, SLOT(timerWorkState()));
-    connect(&timer_Version, SIGNAL(timeout()),
-            this, SLOT(timerVersion()));
-    connect(&timer_events, SIGNAL(timeout()),
-            this, SLOT(timerEvents()));
-
-    /* Init window pages */
-    pageMainInit();
-    pageOscillogInit();
-    pageSettingsCalibrationsInit();
-    pageSettingsCapacitorsInit();
-    pageSettingsProtectionInit();
-    pageSettingsFiltersInit();
-
-    timer_events.start(EVENTS_TIMER_TIMEOUT);
-
-    ui->listWidget->setItemDelegate(new HtmlDelegate);
+    A = A * FCOEFF + B * (1 - FCOEFF);
 }
 
 void MainWindow::timerupdateNetVoltage()
@@ -242,7 +245,7 @@ void MainWindow::timerSettingsCalibrations()
 
 void MainWindow::timerEvents()
 {
-    if (_connected) emit updateEvents(last_index_events);
+    if (_connected) emit updateEvents(_last_index_events);
 }
 
 void MainWindow::timerWorkState()
@@ -262,75 +265,75 @@ void MainWindow::timerOscillog()
 {
     if (!_connected) return;
 
-    if (ui->checkBox_osc_I_a->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_I_A);
-    if (ui->checkBox_osc_I_b->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_I_B);
-    if (ui->checkBox_osc_I_c->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_I_C);
+    if (_ui->checkBox_osc_I_a->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_I_A);
+    if (_ui->checkBox_osc_I_b->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_I_B);
+    if (_ui->checkBox_osc_I_c->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_I_C);
 
-    if (ui->checkBox_osc_Ua->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_U_A);
-    if (ui->checkBox_osc_Ub->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_U_B);
-    if (ui->checkBox_osc_Uc->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_U_C);
+    if (_ui->checkBox_osc_Ua->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_U_A);
+    if (_ui->checkBox_osc_Ub->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_U_B);
+    if (_ui->checkBox_osc_Uc->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_U_C);
 
-    if (ui->checkBox_osc_Ud->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_UD);
+    if (_ui->checkBox_osc_Ud->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_UD);
 
-    if (ui->checkBox_osc_Icomp_a->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_COMP_A);
-    if (ui->checkBox_osc_Icomp_b->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_COMP_B);
-    if (ui->checkBox_osc_Icomp_c->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_COMP_C);
+    if (_ui->checkBox_osc_Icomp_a->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_COMP_A);
+    if (_ui->checkBox_osc_Icomp_b->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_COMP_B);
+    if (_ui->checkBox_osc_Icomp_c->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_COMP_C);
 
-    ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_A))->setVisible(ui->checkBox_osc_I_a->isChecked());
-    ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_B))->setVisible(ui->checkBox_osc_I_b->isChecked());
-    ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_C))->setVisible(ui->checkBox_osc_I_c->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_A))->setVisible(_ui->checkBox_osc_I_a->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_B))->setVisible(_ui->checkBox_osc_I_b->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_C))->setVisible(_ui->checkBox_osc_I_c->isChecked());
 
-    ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_U_A))->setVisible(ui->checkBox_osc_Ua->isChecked());
-    ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_U_B))->setVisible(ui->checkBox_osc_Ub->isChecked());
-    ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_U_C))->setVisible(ui->checkBox_osc_Uc->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_U_A))->setVisible(_ui->checkBox_osc_Ua->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_U_B))->setVisible(_ui->checkBox_osc_Ub->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_U_C))->setVisible(_ui->checkBox_osc_Uc->isChecked());
 
-    ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_UD))->setVisible(ui->checkBox_osc_Ud->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_UD))->setVisible(_ui->checkBox_osc_Ud->isChecked());
 
-    ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_COMP_A))->setVisible(ui->checkBox_osc_Icomp_a->isChecked());
-    ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_COMP_B))->setVisible(ui->checkBox_osc_Icomp_b->isChecked());
-    ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_COMP_C))->setVisible(ui->checkBox_osc_Icomp_c->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_COMP_A))->setVisible(_ui->checkBox_osc_Icomp_a->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_COMP_B))->setVisible(_ui->checkBox_osc_Icomp_b->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_COMP_C))->setVisible(_ui->checkBox_osc_Icomp_c->isChecked());
 }
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event)
 {
-    SETFILTER(event, object, ui->groupBox_net, &timer_MainParams, TIMEOUT_UPDATE_MAIN_PARAMS);
-    SETFILTER(event, object, ui->groupBox_net, &timer_Vol, TIMEOUT_UPDATE_VOLTAGES);
-    SETFILTER(event, object, ui->groupBox_net, &timer_Raw, TIMEOUT_UPDATE_ADC_RAW);
-    SETFILTER(event, object, ui->groupBox_net, &timer_State, TIMEOUT_UPDATE_STATE);
-    SETFILTER(event, object, ui->groupBox_State, &timer_Version, TIMEOUT_UPDATE_VERSION);
-    SETFILTER(event, object, ui->OscillogPlot, &timer_Oscillog, TIMEOUT_UPDATE_OSCILLOG);
-    SETFILTER(event, object, ui->pageCalibrations, &timer_SettingsCalibrations, TIMEOUT_UPDATE_SETTINGS_CALIBRATIONS);
-    SETFILTER(event, object, ui->pageCapacitors, &timer_SettingsCapacitors, TIMEOUT_UPDATE_SETTINGS_CAPACITORS);
-    SETFILTER(event, object, ui->pageProtection, &timer_SettingsProtection, TIMEOUT_UPDATE_SETTINGS_PROTECTION);
-    SETFILTER(event, object, ui->pageFilters, &timer_SettingsFilters, TIMEOUT_UPDATE_SETTINGS_FILTERS);
+    SETFILTER(event, object, _ui->groupBox_net, &_timer_main_params, TIMEOUT_UPDATE_MAIN_PARAMS);
+    SETFILTER(event, object, _ui->groupBox_net, &_timer_voltage, TIMEOUT_UPDATE_VOLTAGES);
+    SETFILTER(event, object, _ui->groupBox_net, &_timer_raw, TIMEOUT_UPDATE_ADC_RAW);
+    SETFILTER(event, object, _ui->groupBox_net, &_timer_state, TIMEOUT_UPDATE_STATE);
+    SETFILTER(event, object, _ui->groupBox_State, &_timer_version, TIMEOUT_UPDATE_VERSION);
+    SETFILTER(event, object, _ui->OscillogPlot, &_timer_oscillog, TIMEOUT_UPDATE_OSCILLOG);
+    SETFILTER(event, object, _ui->pageCalibrations, &_timer_settings_calibrations, TIMEOUT_UPDATE_SETTINGS_CALIBRATIONS);
+    SETFILTER(event, object, _ui->pageCapacitors, &_timer_settings_capacitors, TIMEOUT_UPDATE_SETTINGS_CAPACITORS);
+    SETFILTER(event, object, _ui->pageProtection, &_timer_settings_protection, TIMEOUT_UPDATE_SETTINGS_PROTECTION);
+    SETFILTER(event, object, _ui->pageFilters, &_timer_settings_filters, TIMEOUT_UPDATE_SETTINGS_FILTERS);
     return QMainWindow::eventFilter(object, event);
 }
 
 void MainWindow::deviceConnected()
 {
-    ui->actionConnect->setEnabled(false);
-    ui->actionDisconnect->setEnabled(true);
-    ui->actionConfigure->setEnabled(false);
+    _ui->actionConnect->setEnabled(false);
+    _ui->actionDisconnect->setEnabled(true);
+    _ui->actionConfigure->setEnabled(false);
 }
 
 void MainWindow::deviceDisconnected()
 {
-    ui->actionConnect->setEnabled(true);
-    ui->actionDisconnect->setEnabled(false);
-    ui->actionConfigure->setEnabled(true);
+    _ui->actionConnect->setEnabled(true);
+    _ui->actionDisconnect->setEnabled(false);
+    _ui->actionConfigure->setEnabled(true);
 }
 
 void MainWindow::setEvents(std::list<EventRecord> ev)
 {
     foreach (EventRecord event, ev)
     {
-        if (event.unix_time_s_ms >= last_index_events)
+        if (event.unix_time_s_ms >= _last_index_events)
         {
-            last_index_events = event.unix_time_s_ms + 1;
+            _last_index_events = event.unix_time_s_ms + 1;
         }
-        if (last_index_events > TIME_MAX_VALUE)
+        if (_last_index_events > TIME_MAX_VALUE)
         {
-            last_index_events = 0;
+            _last_index_events = 0;
         }
         char Phases[3] = {'A', 'B', 'C'};
         std::string ADCchannels[] = {
@@ -487,12 +490,12 @@ void MainWindow::setEvents(std::list<EventRecord> ev)
                 break;
         }
 
-        Message(MESSAGE_TYPE_STATE, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
+        message(MESSAGE_TYPE_STATE, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
                 message_stream.str());
     }
 }
 
-void MainWindow::Message(quint8 type, quint8 level, quint8 target, std::string message)
+void MainWindow::message(uint8_t type, uint8_t level, uint8_t target, std::string message)
 {
     std::string prefix;
     QColor color = Qt::black;
@@ -543,7 +546,7 @@ void MainWindow::Message(quint8 type, quint8 level, quint8 target, std::string m
     }
     if (target & MESSAGE_TARGET_STATUS)
     {
-        ui->statusBar->showMessage(ss, 5000);
+        _ui->statusBar->showMessage(ss, 5000);
     }
     if (target & MESSAGE_TARGET_HISTORY)
     {
@@ -558,29 +561,21 @@ void MainWindow::Message(quint8 type, quint8 level, quint8 target, std::string m
 }
 MainWindow::~MainWindow()
 {
-    delete port_settings;
-    delete ui;
+    delete _port_settings;
+    delete _ui;
 }
 void MainWindow::openSerialPort()
 {
-    SettingsDialog::Settings p = port_settings->settings();
+    SettingsDialog::Settings p = _port_settings->settings();
 
     /* Connect to the default port */
-    QMetaObject::invokeMethod(pfc->_interface, "ConnectTo",
-                              Qt::QueuedConnection,
-                              Q_ARG(QString, p.name),
-                              Q_ARG(qint32, p.baudRate),
-                              Q_ARG(QSerialPort::DataBits, p.dataBits),
-                              Q_ARG(QSerialPort::Parity, p.parity),
-                              Q_ARG(QSerialPort::StopBits, p.stopBits),
-                              Q_ARG(QSerialPort::FlowControl, p.flowControl),
-                              Q_ARG(bool, p.localEchoEnabled),
-                              Q_ARG(quint32, 1000),
-                              Q_ARG(quint32, 3));
+    _pfc->interfaceConnectTo(p.name, p.baudRate, p.dataBits, p.parity,
+                            p.stopBits, p.flowControl, p.localEchoEnabled);
 }
+
 void MainWindow::closeSerialPort()
 {
-    QMetaObject::invokeMethod(pfc->_interface, "Disconnect");
+    _pfc->interfaceDisconnect();
 }
 void MainWindow::about()
 {
@@ -592,13 +587,13 @@ void MainWindow::about()
 
 void MainWindow::initInterfaceConnections()
 {
-    connect(ui->actionConnect, SIGNAL(triggered()), this, SLOT(openSerialPort()));
-    connect(ui->actionDisconnect, SIGNAL(triggered()), this, SLOT(closeSerialPort()));
-    connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
-    connect(ui->actionConfigure, SIGNAL(triggered()), port_settings, SLOT(show()));
-    connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(about()));
-    connect(ui->actionAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
-    connect(port_settings, SIGNAL(Appl()), this, SLOT(openSerialPort()));
+    connect(_ui->actionConnect, SIGNAL(triggered()), this, SLOT(openSerialPort()));
+    connect(_ui->actionDisconnect, SIGNAL(triggered()), this, SLOT(closeSerialPort()));
+    connect(_ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
+    connect(_ui->actionConfigure, SIGNAL(triggered()), _port_settings, SLOT(show()));
+    connect(_ui->actionAbout, SIGNAL(triggered()), this, SLOT(about()));
+    connect(_ui->actionAboutQt, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
+    connect(_port_settings, SIGNAL(Appl()), this, SLOT(openSerialPort()));
 }
 
 void MainWindow::setNetVoltage(float ADC_UD,
@@ -624,33 +619,33 @@ void MainWindow::setNetVoltage(float ADC_UD,
     Q_UNUSED(ADC_EMS_B)
     Q_UNUSED(ADC_EMS_C)
     Q_UNUSED(ADC_EMS_I)
-    FILTERADD(pfc_settings.ADC.ADC_U_A, ADC_U_A);
-    FILTERADD(pfc_settings.ADC.ADC_U_B, ADC_U_B);
-    FILTERADD(pfc_settings.ADC.ADC_U_C, ADC_U_C);
+    FILTERADD(_pfc_settings.ADC.ADC_U_A, ADC_U_A);
+    FILTERADD(_pfc_settings.ADC.ADC_U_B, ADC_U_B);
+    FILTERADD(_pfc_settings.ADC.ADC_U_C, ADC_U_C);
 
-    FILTERADD(pfc_settings.ADC.ADC_I_A, ADC_I_A);
-    FILTERADD(pfc_settings.ADC.ADC_I_B, ADC_I_B);
-    FILTERADD(pfc_settings.ADC.ADC_I_C, ADC_I_C);
+    FILTERADD(_pfc_settings.ADC.ADC_I_A, ADC_I_A);
+    FILTERADD(_pfc_settings.ADC.ADC_I_B, ADC_I_B);
+    FILTERADD(_pfc_settings.ADC.ADC_I_C, ADC_I_C);
 
-    FILTERADD(pfc_settings.ADC.ADC_MATH_A, ADC_MATH_A);
-    FILTERADD(pfc_settings.ADC.ADC_MATH_B, ADC_MATH_B);
-    FILTERADD(pfc_settings.ADC.ADC_MATH_C, ADC_MATH_C);
+    FILTERADD(_pfc_settings.ADC.ADC_MATH_A, ADC_MATH_A);
+    FILTERADD(_pfc_settings.ADC.ADC_MATH_B, ADC_MATH_B);
+    FILTERADD(_pfc_settings.ADC.ADC_MATH_C, ADC_MATH_C);
 
-    pfc_settings.ADC.ADC_UD = ADC_UD;
+    _pfc_settings.ADC.ADC_UD = ADC_UD;
 
-    FILTERADD(pfc_settings.ADC.ADC_I_TEMP1, ADC_I_TEMP1);
-    FILTERADD(pfc_settings.ADC.ADC_I_TEMP2, ADC_I_TEMP2);
+    FILTERADD(_pfc_settings.ADC.ADC_I_TEMP1, ADC_I_TEMP1);
+    FILTERADD(_pfc_settings.ADC.ADC_I_TEMP2, ADC_I_TEMP2);
 
-    ui->label_Ua->setText(QString().sprintf("% 5.0f В", static_cast<double>(pfc_settings.ADC.ADC_MATH_A)));
-    ui->label_Ub->setText(QString().sprintf("% 5.0f В", static_cast<double>(pfc_settings.ADC.ADC_MATH_B)));
-    ui->label_Uc->setText(QString().sprintf("% 5.0f В", static_cast<double>(pfc_settings.ADC.ADC_MATH_C)));
+    _ui->label_Ua->setText(QString().sprintf("% 5.0f В", static_cast<double>(_pfc_settings.ADC.ADC_MATH_A)));
+    _ui->label_Ub->setText(QString().sprintf("% 5.0f В", static_cast<double>(_pfc_settings.ADC.ADC_MATH_B)));
+    _ui->label_Uc->setText(QString().sprintf("% 5.0f В", static_cast<double>(_pfc_settings.ADC.ADC_MATH_C)));
 
-    ui->label_I_A->setText(QString().sprintf("% 5.1f А", static_cast<double>(pfc_settings.ADC.ADC_I_A)));
-    ui->label_I_B->setText(QString().sprintf("% 5.1f А", static_cast<double>(pfc_settings.ADC.ADC_I_B)));
-    ui->label_I_C->setText(QString().sprintf("% 5.1f А", static_cast<double>(pfc_settings.ADC.ADC_I_C)));
+    _ui->label_I_A->setText(QString().sprintf("% 5.1f А", static_cast<double>(_pfc_settings.ADC.ADC_I_A)));
+    _ui->label_I_B->setText(QString().sprintf("% 5.1f А", static_cast<double>(_pfc_settings.ADC.ADC_I_B)));
+    _ui->label_I_C->setText(QString().sprintf("% 5.1f А", static_cast<double>(_pfc_settings.ADC.ADC_I_C)));
 
-    ui->label_temperature1->setText(QString().sprintf("% 3.0f °C", static_cast<double>(pfc_settings.ADC.ADC_I_TEMP1)));
-    ui->label_temperature2->setText(QString().sprintf("% 3.0f °C", static_cast<double>(pfc_settings.ADC.ADC_I_TEMP2)));
+    _ui->label_temperature1->setText(QString().sprintf("% 3.0f °C", static_cast<double>(_pfc_settings.ADC.ADC_I_TEMP1)));
+    _ui->label_temperature2->setText(QString().sprintf("% 3.0f °C", static_cast<double>(_pfc_settings.ADC.ADC_I_TEMP2)));
 }
 
 void MainWindow::setNetVoltageRAW(float ADC_UD,
@@ -673,18 +668,18 @@ void MainWindow::setNetVoltageRAW(float ADC_UD,
     Q_UNUSED(ADC_EMS_B)
     Q_UNUSED(ADC_EMS_C)
     Q_UNUSED(ADC_EMS_I)
-    FILTERADD(pfc_settings.ADC_RAW.ADC_U_A, ADC_U_A);
-    FILTERADD(pfc_settings.ADC_RAW.ADC_U_B, ADC_U_B);
-    FILTERADD(pfc_settings.ADC_RAW.ADC_U_C, ADC_U_C);
+    FILTERADD(_pfc_settings.ADC_RAW.ADC_U_A, ADC_U_A);
+    FILTERADD(_pfc_settings.ADC_RAW.ADC_U_B, ADC_U_B);
+    FILTERADD(_pfc_settings.ADC_RAW.ADC_U_C, ADC_U_C);
 
-    FILTERADD(pfc_settings.ADC_RAW.ADC_I_A, ADC_I_A);
-    FILTERADD(pfc_settings.ADC_RAW.ADC_I_B, ADC_I_B);
-    FILTERADD(pfc_settings.ADC_RAW.ADC_I_C, ADC_I_C);
+    FILTERADD(_pfc_settings.ADC_RAW.ADC_I_A, ADC_I_A);
+    FILTERADD(_pfc_settings.ADC_RAW.ADC_I_B, ADC_I_B);
+    FILTERADD(_pfc_settings.ADC_RAW.ADC_I_C, ADC_I_C);
 
-    FILTERADD(pfc_settings.ADC_RAW.ADC_UD, ADC_UD);
+    FILTERADD(_pfc_settings.ADC_RAW.ADC_UD, ADC_UD);
 
-    FILTERADD(pfc_settings.ADC_RAW.ADC_I_TEMP1, ADC_I_TEMP1);
-    FILTERADD(pfc_settings.ADC_RAW.ADC_I_TEMP2, ADC_I_TEMP2);
+    FILTERADD(_pfc_settings.ADC_RAW.ADC_I_TEMP1, ADC_I_TEMP1);
+    FILTERADD(_pfc_settings.ADC_RAW.ADC_I_TEMP2, ADC_I_TEMP2);
 }
 
 void MainWindow::setNetParams(
@@ -702,31 +697,31 @@ void MainWindow::setNetParams(
     float U_phase_B,
     float U_phase_C)
 {
-    pfc_settings.NET_PARAMS.period_fact = period_fact;
+    _pfc_settings.NET_PARAMS.period_fact = period_fact;
 
-    pfc_settings.NET_PARAMS.U0Hz_A = U0Hz_A;
-    pfc_settings.NET_PARAMS.U0Hz_B = U0Hz_B;
-    pfc_settings.NET_PARAMS.U0Hz_C = U0Hz_C;
-    pfc_settings.NET_PARAMS.I0Hz_A = I0Hz_A;
-    pfc_settings.NET_PARAMS.I0Hz_B = I0Hz_B;
-    pfc_settings.NET_PARAMS.I0Hz_C = I0Hz_C;
+    _pfc_settings.NET_PARAMS.U0Hz_A = U0Hz_A;
+    _pfc_settings.NET_PARAMS.U0Hz_B = U0Hz_B;
+    _pfc_settings.NET_PARAMS.U0Hz_C = U0Hz_C;
+    _pfc_settings.NET_PARAMS.I0Hz_A = I0Hz_A;
+    _pfc_settings.NET_PARAMS.I0Hz_B = I0Hz_B;
+    _pfc_settings.NET_PARAMS.I0Hz_C = I0Hz_C;
 
-    pfc_settings.NET_PARAMS.thdu_A = thdu_A;
-    pfc_settings.NET_PARAMS.thdu_B = thdu_B;
-    pfc_settings.NET_PARAMS.thdu_C = thdu_C;
+    _pfc_settings.NET_PARAMS.thdu_A = thdu_A;
+    _pfc_settings.NET_PARAMS.thdu_B = thdu_B;
+    _pfc_settings.NET_PARAMS.thdu_C = thdu_C;
 
-    pfc_settings.NET_PARAMS.U_phase_A = U_phase_A * 360.0f / 3.1416f;
-    pfc_settings.NET_PARAMS.U_phase_B = U_phase_B * 360.0f / 3.1416f;
-    pfc_settings.NET_PARAMS.U_phase_C = U_phase_C * 360.0f / 3.1416f;
+    _pfc_settings.NET_PARAMS.U_phase_A = U_phase_A * 360.0f / 3.1416f;
+    _pfc_settings.NET_PARAMS.U_phase_B = U_phase_B * 360.0f / 3.1416f;
+    _pfc_settings.NET_PARAMS.U_phase_C = U_phase_C * 360.0f / 3.1416f;
 
-    ui->label_U_phase_B->setText(QString().sprintf("% 5.1f°", static_cast<double>(pfc_settings.NET_PARAMS.U_phase_B)));
-    ui->label_U_phase_C->setText(QString().sprintf("% 5.1f°", static_cast<double>(pfc_settings.NET_PARAMS.U_phase_C)));
+    _ui->label_U_phase_B->setText(QString().sprintf("% 5.1f°", static_cast<double>(_pfc_settings.NET_PARAMS.U_phase_B)));
+    _ui->label_U_phase_C->setText(QString().sprintf("% 5.1f°", static_cast<double>(_pfc_settings.NET_PARAMS.U_phase_C)));
 
-    ui->label_thdu_A->setText(QString().sprintf("% 5.2f°", static_cast<double>(pfc_settings.NET_PARAMS.thdu_A)));
-    ui->label_thdu_B->setText(QString().sprintf("% 5.2f°", static_cast<double>(pfc_settings.NET_PARAMS.thdu_B)));
-    ui->label_thdu_C->setText(QString().sprintf("% 5.2f°", static_cast<double>(pfc_settings.NET_PARAMS.thdu_C)));
+    _ui->label_thdu_A->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.NET_PARAMS.thdu_A)));
+    _ui->label_thdu_B->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.NET_PARAMS.thdu_B)));
+    _ui->label_thdu_C->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.NET_PARAMS.thdu_C)));
 
-    ui->label_freq->setText(QString().sprintf("% 6.3f Гц", static_cast<double>(1.0f / (pfc_settings.NET_PARAMS.period_fact / 1000000.0f))));
+    _ui->label_freq->setText(QString().sprintf("% 6.3f Гц", static_cast<double>(1.0f / (_pfc_settings.NET_PARAMS.period_fact / 1000000.0f))));
 }
 
 void MainWindow::ansSettingsCalibrations(bool writed)
@@ -749,11 +744,11 @@ void MainWindow::ansSettingsFilters(bool writed)
     Q_UNUSED(writed)
 }
 
-void MainWindow::on_pushButton_STOP_clicked()
+void MainWindow::stopClicked()
 {
     emit writeSwitchOnOff(pfc_commands_t::COMMAND_WORK_OFF, 0);
 }
-void MainWindow::on_pushButton_Start_clicked()
+void MainWindow::startClicked()
 {
     emit writeSwitchOnOff(pfc_commands_t::COMMAND_WORK_ON, 0);
 }
@@ -761,39 +756,39 @@ void MainWindow::setSwitchOnOff(uint32_t result)
 {
     Q_UNUSED(result)
 }
-void MainWindow::on_pushButton_Save_clicked()
+void MainWindow::saveClicked()
 {
     writeSwitchOnOff(pfc_commands_t::COMMAND_SETTINGS_SAVE, 0);
 }
-void MainWindow::on_actionClear_triggered()
+void MainWindow::actionClearTriggered()
 {
-    ui->listWidget->clear();
+    _ui->listWidget->clear();
 }
-void MainWindow::on_pushButton_2_clicked()
+void MainWindow::buttonClicked()
 {
-    ui->listWidget->clear();
+    _ui->listWidget->clear();
 }
-void MainWindow::on_checkBox_channelA_toggled(bool checked)
+void MainWindow::channelACheckToggled(bool checked)
 {
     emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHANNEL0_DATA, checked);
 }
 
-void MainWindow::on_checkBox_channelB_toggled(bool checked)
+void MainWindow::channelBCheckToggled(bool checked)
 {
     emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHANNEL1_DATA, checked);
 }
 
-void MainWindow::on_checkBox_channelC_toggled(bool checked)
+void MainWindow::channelCCheckToggled(bool checked)
 {
     emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHANNEL2_DATA, checked);
 }
 
-void MainWindow::on_pushButton_CHARGE_ON_clicked()
+void MainWindow::chargeOnClicked()
 {
     emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHARGE_ON, 0);
 }
 
-void MainWindow::on_pushButton_CHARGE_OFF_clicked()
+void MainWindow::chargeOffClicked()
 {
     emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHARGE_OFF, 0);
 }
