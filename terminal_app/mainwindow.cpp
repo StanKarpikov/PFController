@@ -188,32 +188,32 @@ MainWindow::MainWindow(QWidget* parent)
     _ui->listWidget->setItemDelegate(new HtmlDelegate);
 }
 
-void SETFILTER(QEvent* event, QObject* object, QWidget* UI, QTimer* OBJ, std::chrono::milliseconds TIMER)
+void MainWindow::setFilter(QEvent* event, QObject* object, QWidget* ui_obj, QTimer* obj, std::chrono::milliseconds timeout)
 {
-    if (object == UI)
+    if (object == ui_obj)
     {
         if (event->type() == QEvent::Show)
         {
-            std::chrono::milliseconds timeout = TIMER +
-                                                ((static_cast<std::chrono::milliseconds>(qrand()) % (TIMER / 4)) - (TIMER / 4));
+            std::chrono::milliseconds timeout_apply = timeout +
+                                                ((static_cast<std::chrono::milliseconds>(qrand()) % (timeout / 4)) - (timeout / 4));
 
-            OBJ->start(timeout);
+            obj->start(timeout_apply);
         }
         if (event->type() == QEvent::Hide)
         {
-            OBJ->stop();
+            obj->stop();
         }
     }
 }
 
-std::string SCOL(std::string STR, std::string COL)
+std::string MainWindow::stringWithColor(std::string str, std::string color)
 {
-    std::string str;
-    str = "<font color=" + COL + ">" + STR + "</font>";
-    return str;
+    std::string ret_str;
+    ret_str = "<font color=" + color + ">" + str + "</font>";
+    return ret_str;
 }
 
-void MainWindow::FILTERADD(float &A, float B)
+void MainWindow::filterApply(float &A, float B)
 {
     A = A * FCOEFF + B * (1 - FCOEFF);
 }
@@ -296,16 +296,16 @@ void MainWindow::timerOscillog()
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event)
 {
-    SETFILTER(event, object, _ui->groupBox_net, &_timer_main_params, TIMEOUT_UPDATE_MAIN_PARAMS);
-    SETFILTER(event, object, _ui->groupBox_net, &_timer_voltage, TIMEOUT_UPDATE_VOLTAGES);
-    SETFILTER(event, object, _ui->groupBox_net, &_timer_raw, TIMEOUT_UPDATE_ADC_RAW);
-    SETFILTER(event, object, _ui->groupBox_net, &_timer_state, TIMEOUT_UPDATE_STATE);
-    SETFILTER(event, object, _ui->groupBox_State, &_timer_version, TIMEOUT_UPDATE_VERSION);
-    SETFILTER(event, object, _ui->OscillogPlot, &_timer_oscillog, TIMEOUT_UPDATE_OSCILLOG);
-    SETFILTER(event, object, _ui->pageCalibrations, &_timer_settings_calibrations, TIMEOUT_UPDATE_SETTINGS_CALIBRATIONS);
-    SETFILTER(event, object, _ui->pageCapacitors, &_timer_settings_capacitors, TIMEOUT_UPDATE_SETTINGS_CAPACITORS);
-    SETFILTER(event, object, _ui->pageProtection, &_timer_settings_protection, TIMEOUT_UPDATE_SETTINGS_PROTECTION);
-    SETFILTER(event, object, _ui->pageFilters, &_timer_settings_filters, TIMEOUT_UPDATE_SETTINGS_FILTERS);
+    setFilter(event, object, _ui->groupBox_net, &_timer_main_params, TIMEOUT_UPDATE_MAIN_PARAMS);
+    setFilter(event, object, _ui->groupBox_net, &_timer_voltage, TIMEOUT_UPDATE_VOLTAGES);
+    setFilter(event, object, _ui->groupBox_net, &_timer_raw, TIMEOUT_UPDATE_ADC_RAW);
+    setFilter(event, object, _ui->groupBox_net, &_timer_state, TIMEOUT_UPDATE_STATE);
+    setFilter(event, object, _ui->groupBox_State, &_timer_version, TIMEOUT_UPDATE_VERSION);
+    setFilter(event, object, _ui->OscillogPlot, &_timer_oscillog, TIMEOUT_UPDATE_OSCILLOG);
+    setFilter(event, object, _ui->pageCalibrations, &_timer_settings_calibrations, TIMEOUT_UPDATE_SETTINGS_CALIBRATIONS);
+    setFilter(event, object, _ui->pageCapacitors, &_timer_settings_capacitors, TIMEOUT_UPDATE_SETTINGS_CAPACITORS);
+    setFilter(event, object, _ui->pageProtection, &_timer_settings_protection, TIMEOUT_UPDATE_SETTINGS_PROTECTION);
+    setFilter(event, object, _ui->pageFilters, &_timer_settings_filters, TIMEOUT_UPDATE_SETTINGS_FILTERS);
     return QMainWindow::eventFilter(object, event);
 }
 
@@ -365,24 +365,24 @@ void MainWindow::setEvents(std::list<EventRecord> ev)
         date_stream << std::setfill('0') << std::setw(4);
         date_stream << event.unix_time_s_ms % 1000;
 
-        message_stream << SCOL(date_stream.str(), LIGHT_GREY);
+        message_stream << stringWithColor(date_stream.str(), LIGHT_GREY);
 
         switch (static_cast<event_type_t>(event.type & 0xFFFF))
         {
             case event_type_t::EVENT_TYPE_POWER:
-                message_stream << SCOL(" - Питание - ", DARK_GREEN);
+                message_stream << stringWithColor(" - Питание - ", DARK_GREEN);
                 switch (subtype)
                 {
                     case SUB_EVENT_TYPE_POWER_ON:
                         message_stream << "Включен";
                         break;
                     default:
-                        message_stream << SCOL(" - Неизвестное событие! ", DARK_RED);
+                        message_stream << stringWithColor(" - Неизвестное событие! ", DARK_RED);
                         break;
                 }
                 break;
             case event_type_t::EVENT_TYPE_CHANGESTATE:
-                message_stream << SCOL(" - Состояние - ", DARK_GREEN);
+                message_stream << stringWithColor(" - Состояние - ", DARK_GREEN);
                 switch (static_cast<PFCstate>(subtype))
                 {
                     case PFCstate::PFC_STATE_INIT:
@@ -419,7 +419,7 @@ void MainWindow::setEvents(std::list<EventRecord> ev)
                         message_stream << "Остановка..";
                         break;
                     case PFCstate::PFC_STATE_FAULTBLOCK:
-                        message_stream << SCOL(" Авария ", DARK_RED);
+                        message_stream << stringWithColor(" Авария ", DARK_RED);
                         break;
                     default:
                         message_stream << "Unknown state";
@@ -427,7 +427,7 @@ void MainWindow::setEvents(std::list<EventRecord> ev)
                 }
                 break;
             case event_type_t::EVENT_TYPE_PROTECTION:
-                message_stream << SCOL(" - Защиты ", DARK_RED);
+                message_stream << stringWithColor(" - Защиты ", DARK_RED);
                 switch (subtype)
                 {
                     case SUB_EVENT_TYPE_PROTECTION_UCAP_MIN:
@@ -481,7 +481,7 @@ void MainWindow::setEvents(std::list<EventRecord> ev)
                         message_stream << event.info;
                         break;
                     default:
-                        message_stream << SCOL(" - Неизвестное событие! ", DARK_RED);
+                        message_stream << stringWithColor(" - Неизвестное событие! ", DARK_RED);
                         break;
                 }
                 break;
@@ -502,25 +502,25 @@ void MainWindow::message(uint8_t type, uint8_t level, uint8_t target, std::strin
     switch (type)
     {
         case MESSAGE_TYPE_GENERAL:
-            prefix = SCOL("[GENERAL] ", DARK_GREY);
+            prefix = stringWithColor("[GENERAL] ", DARK_GREY);
             break;
         case MESSAGE_TYPE_CONNECTION:
-            prefix = SCOL("[CONNECTION] ", "#999966");
+            prefix = stringWithColor("[CONNECTION] ", "#999966");
             break;
         case MESSAGE_TYPE_GLOBALFAULT:
-            prefix = SCOL("[FAULT] ", DARK_RED);
+            prefix = stringWithColor("[FAULT] ", DARK_RED);
             break;
         case MESSAGE_TYPE_GLOBALWARNING:
-            prefix = SCOL("[WARNING] ", DARK_RED);
+            prefix = stringWithColor("[WARNING] ", DARK_RED);
             break;
         case MESSAGE_TYPE_STATE:
-            prefix = SCOL("[STATE] ", DARK_GREEN);
+            prefix = stringWithColor("[STATE] ", DARK_GREEN);
             break;
         case MESSAGE_TYPE_CAPACITORS:
-            prefix = SCOL("[CAPACITORS] ", DARK_GREEN);
+            prefix = stringWithColor("[CAPACITORS] ", DARK_GREEN);
             break;
         case MESSAGE_TYPE_NETWORK:
-            prefix = SCOL("[NETWORK] ", DARK_GREEN);
+            prefix = stringWithColor("[NETWORK] ", DARK_GREEN);
             break;
         default:
             break;
@@ -619,33 +619,33 @@ void MainWindow::setNetVoltage(float ADC_UD,
     Q_UNUSED(ADC_EMS_B)
     Q_UNUSED(ADC_EMS_C)
     Q_UNUSED(ADC_EMS_I)
-    FILTERADD(_pfc_settings.ADC.ADC_U_A, ADC_U_A);
-    FILTERADD(_pfc_settings.ADC.ADC_U_B, ADC_U_B);
-    FILTERADD(_pfc_settings.ADC.ADC_U_C, ADC_U_C);
+    filterApply(_pfc_settings.adc.ADC_U_A, ADC_U_A);
+    filterApply(_pfc_settings.adc.ADC_U_B, ADC_U_B);
+    filterApply(_pfc_settings.adc.ADC_U_C, ADC_U_C);
 
-    FILTERADD(_pfc_settings.ADC.ADC_I_A, ADC_I_A);
-    FILTERADD(_pfc_settings.ADC.ADC_I_B, ADC_I_B);
-    FILTERADD(_pfc_settings.ADC.ADC_I_C, ADC_I_C);
+    filterApply(_pfc_settings.adc.ADC_I_A, ADC_I_A);
+    filterApply(_pfc_settings.adc.ADC_I_B, ADC_I_B);
+    filterApply(_pfc_settings.adc.ADC_I_C, ADC_I_C);
 
-    FILTERADD(_pfc_settings.ADC.ADC_MATH_A, ADC_MATH_A);
-    FILTERADD(_pfc_settings.ADC.ADC_MATH_B, ADC_MATH_B);
-    FILTERADD(_pfc_settings.ADC.ADC_MATH_C, ADC_MATH_C);
+    filterApply(_pfc_settings.adc.ADC_MATH_A, ADC_MATH_A);
+    filterApply(_pfc_settings.adc.ADC_MATH_B, ADC_MATH_B);
+    filterApply(_pfc_settings.adc.ADC_MATH_C, ADC_MATH_C);
 
-    _pfc_settings.ADC.ADC_UD = ADC_UD;
+    _pfc_settings.adc.ADC_UD = ADC_UD;
 
-    FILTERADD(_pfc_settings.ADC.ADC_I_TEMP1, ADC_I_TEMP1);
-    FILTERADD(_pfc_settings.ADC.ADC_I_TEMP2, ADC_I_TEMP2);
+    filterApply(_pfc_settings.adc.ADC_I_TEMP1, ADC_I_TEMP1);
+    filterApply(_pfc_settings.adc.ADC_I_TEMP2, ADC_I_TEMP2);
 
-    _ui->label_Ua->setText(QString().sprintf("% 5.0f В", static_cast<double>(_pfc_settings.ADC.ADC_MATH_A)));
-    _ui->label_Ub->setText(QString().sprintf("% 5.0f В", static_cast<double>(_pfc_settings.ADC.ADC_MATH_B)));
-    _ui->label_Uc->setText(QString().sprintf("% 5.0f В", static_cast<double>(_pfc_settings.ADC.ADC_MATH_C)));
+    _ui->label_Ua->setText(QString().sprintf("% 5.0f В", static_cast<double>(_pfc_settings.adc.ADC_MATH_A)));
+    _ui->label_Ub->setText(QString().sprintf("% 5.0f В", static_cast<double>(_pfc_settings.adc.ADC_MATH_B)));
+    _ui->label_Uc->setText(QString().sprintf("% 5.0f В", static_cast<double>(_pfc_settings.adc.ADC_MATH_C)));
 
-    _ui->label_I_A->setText(QString().sprintf("% 5.1f А", static_cast<double>(_pfc_settings.ADC.ADC_I_A)));
-    _ui->label_I_B->setText(QString().sprintf("% 5.1f А", static_cast<double>(_pfc_settings.ADC.ADC_I_B)));
-    _ui->label_I_C->setText(QString().sprintf("% 5.1f А", static_cast<double>(_pfc_settings.ADC.ADC_I_C)));
+    _ui->label_I_A->setText(QString().sprintf("% 5.1f А", static_cast<double>(_pfc_settings.adc.ADC_I_A)));
+    _ui->label_I_B->setText(QString().sprintf("% 5.1f А", static_cast<double>(_pfc_settings.adc.ADC_I_B)));
+    _ui->label_I_C->setText(QString().sprintf("% 5.1f А", static_cast<double>(_pfc_settings.adc.ADC_I_C)));
 
-    _ui->label_temperature1->setText(QString().sprintf("% 3.0f °C", static_cast<double>(_pfc_settings.ADC.ADC_I_TEMP1)));
-    _ui->label_temperature2->setText(QString().sprintf("% 3.0f °C", static_cast<double>(_pfc_settings.ADC.ADC_I_TEMP2)));
+    _ui->label_temperature1->setText(QString().sprintf("% 3.0f °C", static_cast<double>(_pfc_settings.adc.ADC_I_TEMP1)));
+    _ui->label_temperature2->setText(QString().sprintf("% 3.0f °C", static_cast<double>(_pfc_settings.adc.ADC_I_TEMP2)));
 }
 
 void MainWindow::setNetVoltageRAW(float ADC_UD,
@@ -668,18 +668,18 @@ void MainWindow::setNetVoltageRAW(float ADC_UD,
     Q_UNUSED(ADC_EMS_B)
     Q_UNUSED(ADC_EMS_C)
     Q_UNUSED(ADC_EMS_I)
-    FILTERADD(_pfc_settings.ADC_RAW.ADC_U_A, ADC_U_A);
-    FILTERADD(_pfc_settings.ADC_RAW.ADC_U_B, ADC_U_B);
-    FILTERADD(_pfc_settings.ADC_RAW.ADC_U_C, ADC_U_C);
+    filterApply(_pfc_settings.adc_raw.ADC_U_A, ADC_U_A);
+    filterApply(_pfc_settings.adc_raw.ADC_U_B, ADC_U_B);
+    filterApply(_pfc_settings.adc_raw.ADC_U_C, ADC_U_C);
 
-    FILTERADD(_pfc_settings.ADC_RAW.ADC_I_A, ADC_I_A);
-    FILTERADD(_pfc_settings.ADC_RAW.ADC_I_B, ADC_I_B);
-    FILTERADD(_pfc_settings.ADC_RAW.ADC_I_C, ADC_I_C);
+    filterApply(_pfc_settings.adc_raw.ADC_I_A, ADC_I_A);
+    filterApply(_pfc_settings.adc_raw.ADC_I_B, ADC_I_B);
+    filterApply(_pfc_settings.adc_raw.ADC_I_C, ADC_I_C);
 
-    FILTERADD(_pfc_settings.ADC_RAW.ADC_UD, ADC_UD);
+    filterApply(_pfc_settings.adc_raw.ADC_UD, ADC_UD);
 
-    FILTERADD(_pfc_settings.ADC_RAW.ADC_I_TEMP1, ADC_I_TEMP1);
-    FILTERADD(_pfc_settings.ADC_RAW.ADC_I_TEMP2, ADC_I_TEMP2);
+    filterApply(_pfc_settings.adc_raw.ADC_I_TEMP1, ADC_I_TEMP1);
+    filterApply(_pfc_settings.adc_raw.ADC_I_TEMP2, ADC_I_TEMP2);
 }
 
 void MainWindow::setNetParams(
@@ -697,31 +697,31 @@ void MainWindow::setNetParams(
     float U_phase_B,
     float U_phase_C)
 {
-    _pfc_settings.NET_PARAMS.period_fact = period_fact;
+    _pfc_settings.net_params.period_fact = period_fact;
 
-    _pfc_settings.NET_PARAMS.U0Hz_A = U0Hz_A;
-    _pfc_settings.NET_PARAMS.U0Hz_B = U0Hz_B;
-    _pfc_settings.NET_PARAMS.U0Hz_C = U0Hz_C;
-    _pfc_settings.NET_PARAMS.I0Hz_A = I0Hz_A;
-    _pfc_settings.NET_PARAMS.I0Hz_B = I0Hz_B;
-    _pfc_settings.NET_PARAMS.I0Hz_C = I0Hz_C;
+    _pfc_settings.net_params.U0Hz_A = U0Hz_A;
+    _pfc_settings.net_params.U0Hz_B = U0Hz_B;
+    _pfc_settings.net_params.U0Hz_C = U0Hz_C;
+    _pfc_settings.net_params.I0Hz_A = I0Hz_A;
+    _pfc_settings.net_params.I0Hz_B = I0Hz_B;
+    _pfc_settings.net_params.I0Hz_C = I0Hz_C;
 
-    _pfc_settings.NET_PARAMS.thdu_A = thdu_A;
-    _pfc_settings.NET_PARAMS.thdu_B = thdu_B;
-    _pfc_settings.NET_PARAMS.thdu_C = thdu_C;
+    _pfc_settings.net_params.thdu_A = thdu_A;
+    _pfc_settings.net_params.thdu_B = thdu_B;
+    _pfc_settings.net_params.thdu_C = thdu_C;
 
-    _pfc_settings.NET_PARAMS.U_phase_A = U_phase_A * 360.0f / 3.1416f;
-    _pfc_settings.NET_PARAMS.U_phase_B = U_phase_B * 360.0f / 3.1416f;
-    _pfc_settings.NET_PARAMS.U_phase_C = U_phase_C * 360.0f / 3.1416f;
+    _pfc_settings.net_params.U_phase_A = U_phase_A * 360.0f / 3.1416f;
+    _pfc_settings.net_params.U_phase_B = U_phase_B * 360.0f / 3.1416f;
+    _pfc_settings.net_params.U_phase_C = U_phase_C * 360.0f / 3.1416f;
 
-    _ui->label_U_phase_B->setText(QString().sprintf("% 5.1f°", static_cast<double>(_pfc_settings.NET_PARAMS.U_phase_B)));
-    _ui->label_U_phase_C->setText(QString().sprintf("% 5.1f°", static_cast<double>(_pfc_settings.NET_PARAMS.U_phase_C)));
+    _ui->label_U_phase_B->setText(QString().sprintf("% 5.1f°", static_cast<double>(_pfc_settings.net_params.U_phase_B)));
+    _ui->label_U_phase_C->setText(QString().sprintf("% 5.1f°", static_cast<double>(_pfc_settings.net_params.U_phase_C)));
 
-    _ui->label_thdu_A->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.NET_PARAMS.thdu_A)));
-    _ui->label_thdu_B->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.NET_PARAMS.thdu_B)));
-    _ui->label_thdu_C->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.NET_PARAMS.thdu_C)));
+    _ui->label_thdu_A->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.net_params.thdu_A)));
+    _ui->label_thdu_B->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.net_params.thdu_B)));
+    _ui->label_thdu_C->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.net_params.thdu_C)));
 
-    _ui->label_freq->setText(QString().sprintf("% 6.3f Гц", static_cast<double>(1.0f / (_pfc_settings.NET_PARAMS.period_fact / 1000000.0f))));
+    _ui->label_freq->setText(QString().sprintf("% 6.3f Гц", static_cast<double>(1.0f / (_pfc_settings.net_params.period_fact / 1000000.0f))));
 }
 
 void MainWindow::ansSettingsCalibrations(bool writed)

@@ -16,6 +16,10 @@ using namespace PFCconfig::ADC;
 using namespace PFCconfig::Interface;
 using namespace PFCconfig::Events;
 
+/*--------------------------------------------------------------
+                       PRIVATE FUNCTIONS
+--------------------------------------------------------------*/
+
 void MainWindow::pageSettingsCalibrationsInit()
 {
     for (int row = 0; row < _ui->tableWidget_settings_calibrations->rowCount(); row++)
@@ -52,8 +56,8 @@ void MainWindow::pageSettingsCalibrationsInit()
     }
     connect(_ui->tableWidget_settings_calibrations, SIGNAL(cellChanged(int, int)),
             this, SLOT(tableSettingsCalibrationsChanged(int, int)));
-    _pfc_settings.SETTINGS.CALIBRATIONS.calibration.resize(ADC_CHANNEL_NUMBER);
-    _pfc_settings.SETTINGS.CALIBRATIONS.offset.resize(ADC_CHANNEL_NUMBER);
+    _pfc_settings.settings.calibrations.calibration.resize(ADC_CHANNEL_NUMBER);
+    _pfc_settings.settings.calibrations.offset.resize(ADC_CHANNEL_NUMBER);
 }
 
 /*void MainWindow::tableSettingsCalibrations_SetAutoSettings()
@@ -153,15 +157,15 @@ void MainWindow::tableSettingsCalibrationsChanged(int row, int col)
     float value = item->text().toFloat();
     if (row < ADC_CHANNEL_NUMBER)
     {
-        _pfc_settings.SETTINGS.CALIBRATIONS.offset[static_cast<uint>(row)] = value;
+        _pfc_settings.settings.calibrations.offset[static_cast<uint>(row)] = value;
     }
     else
     {
-        _pfc_settings.SETTINGS.CALIBRATIONS.calibration[static_cast<uint>(row - ADC_CHANNEL_NUMBER)] = value;
+        _pfc_settings.settings.calibrations.calibration[static_cast<uint>(row - ADC_CHANNEL_NUMBER)] = value;
     }
     writeSettingsCalibrations(
-        _pfc_settings.SETTINGS.CALIBRATIONS.calibration,
-        _pfc_settings.SETTINGS.CALIBRATIONS.offset);
+        _pfc_settings.settings.calibrations.calibration,
+        _pfc_settings.settings.calibrations.offset);
 }
 
 void MainWindow::setSettingsCalibrations(
@@ -175,7 +179,7 @@ void MainWindow::setSettingsCalibrations(
         _ui->tableWidget_settings_calibrations->item(i, 0)->setText(QString().sprintf("%.2f", static_cast<double>(offset[static_cast<uint>(i)])));
     }
     _ui->tableWidget_settings_calibrations->blockSignals(false);
-    _pfc_settings.SETTINGS.CALIBRATIONS.calibration = calibration;
-    _pfc_settings.SETTINGS.CALIBRATIONS.offset = offset;
+    _pfc_settings.settings.calibrations.calibration = calibration;
+    _pfc_settings.settings.calibrations.offset = offset;
     //tableSettingsCalibrations_SetAutoSettings();
 }

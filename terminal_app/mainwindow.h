@@ -68,7 +68,7 @@ public:
         float ADC_MATH_A;
         float ADC_MATH_B;
         float ADC_MATH_C;
-    }ADC;
+    }adc;
     struct {
         float ADC_UD;
         float ADC_U_A;
@@ -84,7 +84,7 @@ public:
         float ADC_EMS_B;
         float ADC_EMS_C;
         float ADC_EMS_I;
-    }ADC_RAW;
+    }adc_raw;
     struct {
         float period_fact;
         float U0Hz_A;
@@ -99,12 +99,12 @@ public:
         float U_phase_A;
         float U_phase_B;
         float U_phase_C;
-    }NET_PARAMS;
+    }net_params;
     struct {
         struct {
             std::vector<float> calibration;
             std::vector<float> offset;
-        }CALIBRATIONS;
+        }calibrations;
         struct {
             float Ud_min;
             float Ud_max;
@@ -115,33 +115,33 @@ public:
             float Fnet_max;
             float I_max_rms;
             float I_max_peak;
-        }PROTECTION;
+        }protection;
         struct {
             float ctrlUd_Kp;
             float ctrlUd_Ki;
             float ctrlUd_Kd;
             float Ud_nominal;
             float Ud_precharge;
-        }CAPACITORS;
+        }capacitors;
         struct{
             float K_I;
             float K_U;
             float K_Ud;
-        }FILTERS;
-    }SETTINGS;
+        }filters;
+    }settings;
     uint32_t status;
-    uint32_t activeChannels[PFCconfig::PFC_NCHAN];
+    uint32_t active_channels[PFCconfig::PFC_NCHAN];
 
     PFCsettings(void)
     {
-        memset(&ADC, 0, sizeof(ADC));
-        memset(&ADC_RAW, 0, sizeof(ADC_RAW));
-        memset(&NET_PARAMS, 0, sizeof(NET_PARAMS));
-        memset(&SETTINGS.PROTECTION, 0, sizeof(SETTINGS.PROTECTION));
-        memset(&SETTINGS.CAPACITORS, 0, sizeof(SETTINGS.CAPACITORS));
-        memset(&SETTINGS.FILTERS, 0, sizeof(SETTINGS.FILTERS));
+        memset(&adc, 0, sizeof(adc));
+        memset(&adc_raw, 0, sizeof(adc_raw));
+        memset(&net_params, 0, sizeof(net_params));
+        memset(&settings.protection, 0, sizeof(settings.protection));
+        memset(&settings.capacitors, 0, sizeof(settings.capacitors));
+        memset(&settings.filters, 0, sizeof(settings.filters));
         status = 0;
-        memset(&activeChannels, 0, sizeof(activeChannels));
+        memset(&active_channels, 0, sizeof(active_channels));
     }
 };
 
@@ -259,10 +259,12 @@ private:
     void updateSpinVal(QDoubleSpinBox *spinbox, float value);
     void updateCheckboxVal(QCheckBox* checkbox, bool value);
     void initInterfaceConnections(void);
-    void FILTERADD(float &A, float B);
+    void filterApply(float &A, float B);
+    void setFilter(QEvent* event, QObject* object, QWidget* ui_obj, QTimer* obj, std::chrono::milliseconds timeout);
+    std::string stringWithColor(std::string str, std::string color);
 
 private slots:
-    void onPushButtonClicked();
+    void onPushButtonClicked(void);
     void capacitorsKpValueChanged(double arg);
     void capacitorsKiValueChanged(double arg);
     void capacitorsKdValueChanged(double arg);

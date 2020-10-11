@@ -16,6 +16,10 @@ using namespace PFCconfig::ADC;
 using namespace PFCconfig::Interface;
 using namespace PFCconfig::Events;
 
+/*--------------------------------------------------------------
+                       PRIVATE FUNCTIONS
+--------------------------------------------------------------*/
+
 void MainWindow::updateCheckboxVal(QCheckBox* checkbox, bool value)
 {
     checkbox->blockSignals(true);
@@ -48,9 +52,9 @@ void MainWindow::setConnection(bool connected)
 void MainWindow::setWorkState(uint32_t state, uint32_t ch_a, uint32_t ch_b, uint32_t ch_c)
 {
     _pfc_settings.status = state;
-    _pfc_settings.activeChannels[PFC_ACHAN] = ch_a;
-    _pfc_settings.activeChannels[PFC_BCHAN] = ch_b;
-    _pfc_settings.activeChannels[PFC_CCHAN] = ch_c;
+    _pfc_settings.active_channels[PFC_ACHAN] = ch_a;
+    _pfc_settings.active_channels[PFC_BCHAN] = ch_b;
+    _pfc_settings.active_channels[PFC_CCHAN] = ch_c;
 
     if (static_cast<PFCstate>(_pfc_settings.status) != PFCstate::PFC_STATE_STOP)
     {

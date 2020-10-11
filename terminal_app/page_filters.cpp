@@ -16,6 +16,10 @@ using namespace PFCconfig::ADC;
 using namespace PFCconfig::Interface;
 using namespace PFCconfig::Events;
 
+/*--------------------------------------------------------------
+                       PRIVATE FUNCTIONS
+--------------------------------------------------------------*/
+
 void MainWindow::pageSettingsFiltersInit()
 {
     for (int i = 0; i < _ui->tableWidget_settings_filters->rowCount(); i++)
@@ -36,19 +40,19 @@ void MainWindow::tableSettingsFiltersChanged(int row, int col)
     switch (static_cast<TableFiltersRows>(row))
     {
         case TableFiltersRows::table_filters_row_K_I:
-            _pfc_settings.SETTINGS.FILTERS.K_I = value;
+            _pfc_settings.settings.filters.K_I = value;
             break;
         case TableFiltersRows::table_filters_row_K_U:
-            _pfc_settings.SETTINGS.FILTERS.K_U = value;
+            _pfc_settings.settings.filters.K_U = value;
             break;
         case TableFiltersRows::table_filters_row_K_Ud:
-            _pfc_settings.SETTINGS.FILTERS.K_Ud = value;
+            _pfc_settings.settings.filters.K_Ud = value;
             break;
     }
     writeSettingsFilters(
-        _pfc_settings.SETTINGS.FILTERS.K_I,
-        _pfc_settings.SETTINGS.FILTERS.K_U,
-        _pfc_settings.SETTINGS.FILTERS.K_Ud);
+        _pfc_settings.settings.filters.K_I,
+        _pfc_settings.settings.filters.K_U,
+        _pfc_settings.settings.filters.K_Ud);
 }
 
 void MainWindow::setSettingsFilters(
@@ -56,9 +60,9 @@ void MainWindow::setSettingsFilters(
     float K_U,
     float K_Ud)
 {
-    _pfc_settings.SETTINGS.FILTERS.K_I = K_I;
-    _pfc_settings.SETTINGS.FILTERS.K_U = K_U;
-    _pfc_settings.SETTINGS.FILTERS.K_Ud = K_Ud;
+    _pfc_settings.settings.filters.K_I = K_I;
+    _pfc_settings.settings.filters.K_U = K_U;
+    _pfc_settings.settings.filters.K_Ud = K_Ud;
 
     _ui->tableWidget_settings_filters->item(enum_int(TableFiltersRows::table_filters_row_K_I), 0)->setText(QString().sprintf("%.3f", static_cast<double>(K_I)));
     _ui->tableWidget_settings_filters->item(enum_int(TableFiltersRows::table_filters_row_K_U), 0)->setText(QString().sprintf("%.3f", static_cast<double>(K_U)));
