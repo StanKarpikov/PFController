@@ -162,10 +162,10 @@ static void preprocess_answer(
  */
 static void protocol_command_switch_on_off(void *pc)
 {
-    struct s_command_switch_on_off *req = 0;
-    struct s_answer_switch_on_off *answer = 0;
+    struct command_switch_on_off *req = 0;
+    struct answer_switch_on_off *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_switch_on_off), PFC_COMMAND_SWITCH_ON_OFF);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_switch_on_off), PFC_COMMAND_SWITCH_ON_OFF);
 
     answer->result = 1;
     if (pfc_apply_command((pfc_commands_t)req->command, req->data) != PFC_SUCCESS)
@@ -173,7 +173,7 @@ static void protocol_command_switch_on_off(void *pc)
         answer->result = 0;
     }
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_switch_on_off));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_switch_on_off));
     protocol_send_packet(pc);
 }
 
@@ -184,10 +184,10 @@ static void protocol_command_switch_on_off(void *pc)
  */
 static void protocol_command_get_adc_active(void *pc)
 {
-    struct s_command_get_adc_active *req = 0;
-    struct s_answer_get_adc_active *answer = 0;
+    struct command_get_adc_active *req = 0;
+    struct answer_get_adc_active *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_get_adc_active), PFC_COMMAND_GET_ADC_ACTIVE);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_get_adc_active), PFC_COMMAND_GET_ADC_ACTIVE);
 
     float active[ADC_CHANNEL_FULL_COUNT] = {0};
     adc_get_active(active);
@@ -210,7 +210,7 @@ static void protocol_command_get_adc_active(void *pc)
     answer->ADC_MATH_B = active[ADC_EDC_B];
     answer->ADC_MATH_C = active[ADC_EDC_C];
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_get_adc_active));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_get_adc_active));
     protocol_send_packet(pc);
 }
 
@@ -221,10 +221,10 @@ static void protocol_command_get_adc_active(void *pc)
  */
 static void protocol_command_get_net_params(void *pc)
 {
-    struct s_command_get_net_params *req = 0;
-    struct s_answer_get_net_params *answer = 0;
+    struct command_get_net_params *req = 0;
+    struct answer_get_net_params *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_get_net_params), PFC_COMMAND_GET_NET_PARAMS);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_get_net_params), PFC_COMMAND_GET_NET_PARAMS);
 
     float U_0Hz[PFC_NCHAN] = {0};
     float I_0Hz[PFC_NCHAN] = {0};
@@ -249,7 +249,7 @@ static void protocol_command_get_net_params(void *pc)
     answer->U_phase_B = U_phase[PFC_BCHAN];
     answer->U_phase_C = U_phase[PFC_CCHAN];
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_get_net_params));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_get_net_params));
     protocol_send_packet(pc);
 }
 
@@ -260,10 +260,10 @@ static void protocol_command_get_net_params(void *pc)
  */
 static void protocol_command_get_adc_active_raw(void *pc)
 {
-    struct s_command_get_adc_active_raw *req = 0;
-    struct s_answer_get_adc_active_raw *answer = 0;
+    struct command_get_adc_active_raw *req = 0;
+    struct answer_get_adc_active_raw *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_get_adc_active_raw), PFC_COMMAND_GET_ADC_ACTIVE_RAW);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_get_adc_active_raw), PFC_COMMAND_GET_ADC_ACTIVE_RAW);
 
     float active_raw[ADC_CHANNEL_NUMBER] = {0};
     adc_get_active_raw(active_raw);
@@ -283,7 +283,7 @@ static void protocol_command_get_adc_active_raw(void *pc)
     answer->ADC_EDC_C = active_raw[ADC_EDC_C];
     answer->ADC_EDC_I = active_raw[ADC_EDC_I];
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_get_adc_active_raw));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_get_adc_active_raw));
     protocol_send_packet(pc);
 }
 
@@ -294,10 +294,10 @@ static void protocol_command_get_adc_active_raw(void *pc)
  */
 static void protocol_command_get_work_state(void *pc)
 {
-    struct s_command_get_work_state *req = 0;
-    struct s_answer_get_work_state *answer = 0;
+    struct command_get_work_state *req = 0;
+    struct answer_get_work_state *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_get_work_state), PFC_COMMAND_GET_WORK_STATE);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_get_work_state), PFC_COMMAND_GET_WORK_STATE);
 
     system_set_time(req->currentTime);
 
@@ -308,7 +308,7 @@ static void protocol_command_get_work_state(void *pc)
     answer->active_channels[PFC_BCHAN] = pwm_settings.active_channels[PFC_BCHAN];
     answer->active_channels[PFC_CCHAN] = pwm_settings.active_channels[PFC_CCHAN];
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_get_work_state));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_get_work_state));
     protocol_send_packet(pc);
 }
 
@@ -319,10 +319,10 @@ static void protocol_command_get_work_state(void *pc)
  */
 static void protocol_command_get_version_info(void *pc)
 {
-    struct s_command_get_version_info *req = 0;
-    struct s_answer_get_version_info *answer = 0;
+    struct command_get_version_info *req = 0;
+    struct answer_get_version_info *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_get_version_info), PFC_COMMAND_GET_VERSION_INFO);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_get_version_info), PFC_COMMAND_GET_VERSION_INFO);
 
     answer->major = FW_VERSION_MAJOR;
     answer->minor = FW_VERSION_MINOR;
@@ -339,7 +339,7 @@ static void protocol_command_get_version_info(void *pc)
     answer->minute = MN;
     answer->second = SS;
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_get_version_info));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_get_version_info));
     protocol_send_packet(pc);
 }
 
@@ -350,10 +350,10 @@ static void protocol_command_get_version_info(void *pc)
  */
 static void protocol_command_get_oscillog(void *pc)
 {
-    struct s_command_get_oscillog *req = 0;
-    struct s_answer_get_oscillog *answer = 0;
+    struct command_get_oscillog *req = 0;
+    struct answer_get_oscillog *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_get_oscillog), PFC_COMMAND_GET_OSCILLOG);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_get_oscillog), PFC_COMMAND_GET_OSCILLOG);
 
     if (req->num > OSC_CHANNEL_NUMBER)
     {
@@ -386,7 +386,7 @@ static void protocol_command_get_oscillog(void *pc)
     answer->max = oscillog_max;
     answer->min = oscillog_min;
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_get_oscillog));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_get_oscillog));
     protocol_send_packet(pc);
 }
 
@@ -397,10 +397,10 @@ static void protocol_command_get_oscillog(void *pc)
  */
 static void protocol_command_get_settings_calibrations(void *pc)
 {
-    struct s_command_get_settings_calibrations *req = 0;
-    struct s_answer_get_settings_calibrations *answer = 0;
+    struct command_get_settings_calibrations *req = 0;
+    struct answer_get_settings_calibrations *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_get_settings_calibrations), PFC_COMMAND_GET_SETTINGS_CALIBRATIONS);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_get_settings_calibrations), PFC_COMMAND_GET_SETTINGS_CALIBRATIONS);
 
     settings_calibrations_t calibrations = settings_get_calibrations();
 
@@ -411,7 +411,7 @@ static void protocol_command_get_settings_calibrations(void *pc)
         answer->offset[i] = calibrations.offset[i];
     }
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_get_settings_calibrations));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_get_settings_calibrations));
     protocol_send_packet(pc);
 }
 
@@ -422,10 +422,10 @@ static void protocol_command_get_settings_calibrations(void *pc)
  */
 static void protocol_command_set_settings_calibrations(void *pc)
 {
-    struct s_command_set_settings_calibrations *req = 0;
-    struct s_answer_set_settings_calibrations *answer = 0;
+    struct command_set_settings_calibrations *req = 0;
+    struct answer_set_settings_calibrations *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_set_settings_calibrations), PFC_COMMAND_SET_SETTINGS_CALIBRATIONS);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_set_settings_calibrations), PFC_COMMAND_SET_SETTINGS_CALIBRATIONS);
 
     settings_calibrations_t calibrations = settings_get_calibrations();
 
@@ -438,7 +438,7 @@ static void protocol_command_set_settings_calibrations(void *pc)
 
     settings_set_calibrations(calibrations);
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_set_settings_calibrations));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_set_settings_calibrations));
     protocol_send_packet(pc);
 }
 
@@ -449,10 +449,10 @@ static void protocol_command_set_settings_calibrations(void *pc)
  */
 static void protocol_command_get_settings_protection(void *pc)
 {
-    struct s_command_get_settings_protection *req = 0;
-    struct s_answer_get_settings_protection *answer = 0;
+    struct command_get_settings_protection *req = 0;
+    struct answer_get_settings_protection *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_get_settings_protection), PFC_COMMAND_GET_SETTINGS_PROTECTION);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_get_settings_protection), PFC_COMMAND_GET_SETTINGS_PROTECTION);
 
     settings_protection_t protection = settings_get_protection();
 
@@ -466,7 +466,7 @@ static void protocol_command_get_settings_protection(void *pc)
     answer->I_max_rms = protection.I_max_rms;
     answer->I_max_peak = protection.I_max_peak;
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_get_settings_protection));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_get_settings_protection));
     protocol_send_packet(pc);
 }
 
@@ -477,10 +477,10 @@ static void protocol_command_get_settings_protection(void *pc)
  */
 static void protocol_command_set_settings_protection(void *pc)
 {
-    struct s_command_set_settings_protection *req = 0;
-    struct s_answer_set_settings_protection *answer = 0;
+    struct command_set_settings_protection *req = 0;
+    struct answer_set_settings_protection *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_set_settings_protection), PFC_COMMAND_SET_SETTINGS_PROTECTION);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_set_settings_protection), PFC_COMMAND_SET_SETTINGS_PROTECTION);
 
     settings_protection_t protection = settings_get_protection();
 
@@ -496,7 +496,7 @@ static void protocol_command_set_settings_protection(void *pc)
 
     settings_set_protection(protection);
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_set_settings_protection));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_set_settings_protection));
     protocol_send_packet(pc);
 }
 
@@ -507,10 +507,10 @@ static void protocol_command_set_settings_protection(void *pc)
  */
 static void protocol_command_get_settings_capacitors(void *pc)
 {
-    struct s_command_get_settings_capacitors *req = 0;
-    struct s_answer_get_settings_capacitors *answer = 0;
+    struct command_get_settings_capacitors *req = 0;
+    struct answer_get_settings_capacitors *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_get_settings_capacitors), PFC_COMMAND_GET_SETTINGS_CAPACITORS);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_get_settings_capacitors), PFC_COMMAND_GET_SETTINGS_CAPACITORS);
 
     settings_capacitors_t capacitors = settings_get_capacitors();
 
@@ -520,7 +520,7 @@ static void protocol_command_get_settings_capacitors(void *pc)
     answer->Ucap_nominal = capacitors.Ucap_nominal;
     answer->Ucap_precharge = capacitors.Ucap_precharge;
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_get_settings_capacitors));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_get_settings_capacitors));
     protocol_send_packet(pc);
 }
 
@@ -531,10 +531,10 @@ static void protocol_command_get_settings_capacitors(void *pc)
  */
 static void protocol_command_set_settings_capacitors(void *pc)
 {
-    struct s_command_set_settings_capacitors *req = 0;
-    struct s_answer_set_settings_capacitors *answer = 0;
+    struct command_set_settings_capacitors *req = 0;
+    struct answer_set_settings_capacitors *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_set_settings_capacitors), PFC_COMMAND_SET_SETTINGS_CAPACITORS);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_set_settings_capacitors), PFC_COMMAND_SET_SETTINGS_CAPACITORS);
 
     settings_capacitors_t capacitors = settings_get_capacitors();
 
@@ -546,7 +546,7 @@ static void protocol_command_set_settings_capacitors(void *pc)
 
     settings_set_capacitors(capacitors);
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_set_settings_capacitors));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_set_settings_capacitors));
     protocol_send_packet(pc);
 }
 
@@ -557,10 +557,10 @@ static void protocol_command_set_settings_capacitors(void *pc)
  */
 static void protocol_command_get_settings_filters(void *pc)
 {
-    struct s_command_get_settings_filters *req = 0;
-    struct s_answer_get_settings_filters *answer = 0;
+    struct command_get_settings_filters *req = 0;
+    struct answer_get_settings_filters *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_get_settings_filters), PFC_COMMAND_GET_SETTINGS_FILTERS);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_get_settings_filters), PFC_COMMAND_GET_SETTINGS_FILTERS);
 
     settings_filters_t filters = settings_get_filters();
 
@@ -568,7 +568,7 @@ static void protocol_command_get_settings_filters(void *pc)
     answer->K_U = filters.K_U;
     answer->K_Ucap = filters.K_Ucap;
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_get_settings_filters));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_get_settings_filters));
     protocol_send_packet(pc);
 }
 
@@ -579,10 +579,10 @@ static void protocol_command_get_settings_filters(void *pc)
  */
 static void protocol_command_set_settings_filters(void *pc)
 {
-    struct s_command_set_settings_filters *req = 0;
-    struct s_answer_set_settings_filters *answer = 0;
+    struct command_set_settings_filters *req = 0;
+    struct answer_set_settings_filters *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_set_settings_filters), PFC_COMMAND_SET_SETTINGS_FILTERS);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_set_settings_filters), PFC_COMMAND_SET_SETTINGS_FILTERS);
 
     settings_filters_t filters = settings_get_filters();
 
@@ -592,7 +592,7 @@ static void protocol_command_set_settings_filters(void *pc)
 
     settings_set_filters(filters);
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_set_settings_filters));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_set_settings_filters));
     protocol_send_packet(pc);
 }
 
@@ -603,14 +603,14 @@ static void protocol_command_set_settings_filters(void *pc)
  */
 static void protocol_command_get_events(void *pc)
 {
-    struct s_command_get_events *req = 0;
-    struct s_answer_get_events *answer = 0;
+    struct command_get_events *req = 0;
+    struct answer_get_events *answer = 0;
 
-    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct s_answer_get_events), PFC_COMMAND_GET_EVENTS);
+    preprocess_answer((void **)&req, (void **)&answer, pc, sizeof(struct answer_get_events), PFC_COMMAND_GET_EVENTS);
 
     answer->num = events_get(req->after_index, MAX_NUM_TRANSFERED_EVENTS, answer->events);
 
-    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct s_answer_get_events));
+    packet_set_data_len(&(((protocol_context_t *)pc)->packet_to_send), sizeof(struct answer_get_events));
     protocol_send_packet(pc);
 }
 

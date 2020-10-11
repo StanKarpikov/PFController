@@ -7,8 +7,16 @@
 #include <QGraphicsDropShadowEffect>
 #include <QListWidgetItem>
 
+/*--------------------------------------------------------------
+                       NAMESPACES
+--------------------------------------------------------------*/
+
+using namespace PFCconfig;
+using namespace PFCconfig::ADC;
+using namespace PFCconfig::Interface;
+using namespace PFCconfig::Events;
+
 void MainWindow::pageSettingsCalibrationsInit(){
-    //------------------------------------------------------
     for(int row=0;row<ui->tableWidget_settings_calibrations->rowCount();row++){
         ui->tableWidget_settings_calibrations->setItem(row,0,new QTableWidgetItem());
         ui->tableWidget_settings_calibrations->item(row, 0)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
@@ -16,17 +24,17 @@ void MainWindow::pageSettingsCalibrationsInit(){
         ui->tableWidget_settings_calibrations->setItem(row,1,new QTableWidgetItem());
         ui->tableWidget_settings_calibrations->setItem(row,2,new QTableWidgetItem());
         Qt::ItemFlags eFlags;
-        QWidget* pWidget;
-        QHBoxLayout* pLayout;
         QPushButton *btn_edit;
         btn_edit=new QPushButton();
-        buttons_edit.append(btn_edit);
+        buttons_edit.push_back(btn_edit);
         //Ячейка для авто значения
           eFlags = ui->tableWidget_settings_calibrations->item(row, 1)->flags();
           eFlags &= ~Qt::ItemIsEditable;
           ui->tableWidget_settings_calibrations->item(row, 1)->setFlags(eFlags);
-        //
-        /*if(row<ADC_CHANNEL_NUMBER){
+        /*
+            QWidget* pWidget;
+            QHBoxLayout* pLayout;
+            if(row<ADC_CHANNEL_NUMBER){
               //Ячейка с кнопкой авто
                 pWidget = new QWidget();
                 btn_edit->setText("Авто");
@@ -45,7 +53,9 @@ void MainWindow::pageSettingsCalibrationsInit(){
     pfc_settings.SETTINGS.CALIBRATIONS.calibration.resize(ADC_CHANNEL_NUMBER);
     pfc_settings.SETTINGS.CALIBRATIONS.offset.resize(ADC_CHANNEL_NUMBER);
 }
-/*void MainWindow::tableSettingsCalibrations_SetAutoSettings(){
+
+/*void MainWindow::tableSettingsCalibrations_SetAutoSettings()
+{
     float autoval=0;
 
     #define CALC_AUTO_COEF(CALIB,NOW,NOMINAL) \
@@ -118,7 +128,8 @@ void MainWindow::pageSettingsCalibrationsInit(){
     }
 }
 
-void MainWindow::tableSettingsCalibrations_auto_clicked(bool check){
+void MainWindow::tableSettingsCalibrations_auto_clicked(bool check)
+{
     QObject* obj = sender();
     int i=-1;
     for(int j=0;j<btns_edit.size();j++){
@@ -134,27 +145,29 @@ void MainWindow::tableSettingsCalibrations_auto_clicked(bool check){
     ui->tableWidget_settings_calibrations->item(i,0)->setText(QString().sprintf("%.4f",autoval));
 }*/
 
-void MainWindow::tableSettingsCalibrations_changed(int row, int col){
+void MainWindow::tableSettingsCalibrations_changed(int row, int col)
+{
     QTableWidgetItem *item=ui->tableWidget_settings_calibrations->item(row,col);
     float val=item->text().toFloat();
     if(row<ADC_CHANNEL_NUMBER){
-       pfc_settings.SETTINGS.CALIBRATIONS.offset[row]=val;
+       pfc_settings.SETTINGS.CALIBRATIONS.offset[static_cast<uint>(row)]=val;
     }else{
-       pfc_settings.SETTINGS.CALIBRATIONS.calibration[row-ADC_CHANNEL_NUMBER]=val;
+       pfc_settings.SETTINGS.CALIBRATIONS.calibration[static_cast<uint>(row-ADC_CHANNEL_NUMBER)]=val;
     }
     writeSettingsCalibrations(
                 pfc_settings.SETTINGS.CALIBRATIONS.calibration,
                 pfc_settings.SETTINGS.CALIBRATIONS.offset);
 }
-//========================================================================
+
 void MainWindow::setSettingsCalibrations(
-        QVector<float> calibration, //!< Калибровки для каналов
-        QVector<float> offset //!< Смещения для каналов
-        ){
+        std::vector<float> calibration,
+        std::vector<float> offset
+        )
+{
     ui->tableWidget_settings_calibrations->blockSignals(true);
     for(int i=0;i<ADC_CHANNEL_NUMBER;i++){
-       ui->tableWidget_settings_calibrations->item(i+ADC_CHANNEL_NUMBER,0)->setText(QString().sprintf("%.5f",calibration[i]));
-       ui->tableWidget_settings_calibrations->item(i,0)->setText(QString().sprintf("%.2f",offset[i]));
+       ui->tableWidget_settings_calibrations->item(i+ADC_CHANNEL_NUMBER,0)->setText(QString().sprintf("%.5f",static_cast<double>(calibration[static_cast<uint>(i)])));
+       ui->tableWidget_settings_calibrations->item(i,0)->setText(QString().sprintf("%.2f",static_cast<double>(offset[static_cast<uint>(i)])));
     }
     ui->tableWidget_settings_calibrations->blockSignals(false);
     pfc_settings.SETTINGS.CALIBRATIONS.calibration=calibration;

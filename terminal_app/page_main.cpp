@@ -7,6 +7,22 @@
 #include <QGraphicsDropShadowEffect>
 #include <QListWidgetItem>
 
+/*--------------------------------------------------------------
+                       NAMESPACES
+--------------------------------------------------------------*/
+
+using namespace PFCconfig;
+using namespace PFCconfig::ADC;
+using namespace PFCconfig::Interface;
+using namespace PFCconfig::Events;
+
+void MainWindow::UPDATE_CHECKBOX(QCheckBox* CHECK,bool VAL)
+{
+    CHECK->blockSignals(true);
+    CHECK->setChecked(VAL);
+    CHECK->blockSignals(false);
+}
+
 void MainWindow::pageMainInit(){
     ui->radioButton_Connection->setDisabled(true);    
 }
@@ -16,8 +32,8 @@ void MainWindow::setConnection(bool connected){
     ui->groupBox_net->setDisabled(!connected);
     ui->tabWidget->setDisabled(!connected);
 
-    connected=connected;
-    if(connected){        
+    _connected = connected;
+    if(connected){
         ui->radioButton_Connection->setText("Есть связь");
     }else{
         last_index_events=0;
@@ -26,61 +42,60 @@ void MainWindow::setConnection(bool connected){
 }
 void MainWindow::setWorkState(uint32_t state,uint32_t chA,uint32_t chB,uint32_t chC){
     pfc_settings.status=state;
-    pfc_settings.activeChannels[0]=chA;
-    pfc_settings.activeChannels[1]=chB;
-    pfc_settings.activeChannels[2]=chC;
+    pfc_settings.activeChannels[PFC_ACHAN]=chA;
+    pfc_settings.activeChannels[PFC_BCHAN]=chB;
+    pfc_settings.activeChannels[PFC_CCHAN]=chC;
 
-    if(pfc_settings.status!=PFC_STATE_STOP){
+    if(static_cast<PFCstate>(pfc_settings.status) != PFCstate::PFC_STATE_STOP)
+    {
         ui->pushButton_Save->setDisabled(true);
     }else{
         ui->pushButton_Save->setDisabled(false);
     }
 
-#define UPDATE_CHECKBOX(CHECK,VAL) \
-        CHECK->blockSignals(true);\
-        CHECK->setChecked(VAL);\
-        CHECK->blockSignals(false);
-
     UPDATE_CHECKBOX(ui->checkBox_channelA,chA);
     UPDATE_CHECKBOX(ui->checkBox_channelB,chB);
     UPDATE_CHECKBOX(ui->checkBox_channelC,chC);
 
-    switch(pfc_settings.status){
-        case PFC_STATE_INIT: //предзаряд
+    switch(static_cast<PFCstate>(pfc_settings.status)){
+        case PFCstate::PFC_STATE_INIT: //предзаряд
             ui->label_WorkState->setText("Инициализация");
         break;
-        case PFC_STATE_STOP: //не работает
+        case PFCstate::PFC_STATE_STOP: //не работает
             ui->label_WorkState->setText("Остановлен");
         break;
-        case PFC_STATE_SYNC: //синхронизация с сетью
+        case PFCstate::PFC_STATE_SYNC: //синхронизация с сетью
             ui->label_WorkState->setText("Синхронизация");
         break;
-        case PFC_STATE_PRECHARGE_PREPARE:
+        case PFCstate::PFC_STATE_PRECHARGE_PREPARE:
             ui->label_WorkState->setText("Подг.предзаряда");
         break;
-        case PFC_STATE_PRECHARGE: //предзаряд
+        case PFCstate::PFC_STATE_PRECHARGE: //предзаряд
             ui->label_WorkState->setText("Предзаряд");
         break;
-        case PFC_STATE_MAIN:
+        case PFCstate::PFC_STATE_MAIN:
             ui->label_WorkState->setText("Контактор");
         break;
-        case PFC_STATE_PRECHARGE_DISABLE: //работает, но без компенсации
+        case PFCstate::PFC_STATE_PRECHARGE_DISABLE: //работает, но без компенсации
             ui->label_WorkState->setText("Выкл.предзаряд");
         break;
-        case PFC_STATE_WORK: //работает, но без компенсации
+        case PFCstate::PFC_STATE_WORK: //работает, но без компенсации
              ui->label_WorkState->setText("Работа");
         break;
-        case PFC_STATE_CHARGE: //работает, но без компенсации
+        case PFCstate::PFC_STATE_CHARGE: //работает, но без компенсации
              ui->label_WorkState->setText("Заряд");
         break;
-        case PFC_STATE_TEST: //тестирование сети
+        case PFCstate::PFC_STATE_TEST: //тестирование сети
             ui->label_WorkState->setText("Тест");
         break;
-        case PFC_STATE_STOPPING: //ошибка
+        case PFCstate::PFC_STATE_STOPPING: //ошибка
             ui->label_WorkState->setText("Остановка..");
         break;
-        case PFC_STATE_FAULTBLOCK: //ошибка
+        case PFCstate::PFC_STATE_FAULTBLOCK: //ошибка
             ui->label_WorkState->setText("Авария");
+        break;
+        default:
+            ui->label_WorkState->setText("Unknown");
         break;
     }
 }

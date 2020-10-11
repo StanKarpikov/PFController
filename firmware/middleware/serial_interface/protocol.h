@@ -103,13 +103,13 @@ typedef struct
 --------------------------------------------------------------*/
 
 /** Command: get active ADC data */
-struct _PACKED s_command_get_adc_active
+struct _PACKED command_get_adc_active
 {
     uint8_t null;
 };
 
 /** Answer: get active ADC data */
-struct _PACKED s_answer_get_adc_active
+struct _PACKED answer_get_adc_active
 {
     float ADC_UCAP;     //CH10
     float ADC_U_A;      //CH11
@@ -132,13 +132,13 @@ struct _PACKED s_answer_get_adc_active
 };
 
 /** Command: get active ADC data in raw format */
-struct _PACKED s_command_get_adc_active_raw
+struct _PACKED command_get_adc_active_raw
 {
     uint8_t null;
 };
 
 /** Answer: get active ADC data in raw format */
-struct _PACKED s_answer_get_adc_active_raw
+struct _PACKED answer_get_adc_active_raw
 {
     uint16_t ADC_UCAP;     //CH10
     uint16_t ADC_U_A;      //CH11
@@ -157,39 +157,39 @@ struct _PACKED s_answer_get_adc_active_raw
 };
 
 /** Command: Switch ON/OFF control */
-struct _PACKED s_command_switch_on_off
+struct _PACKED command_switch_on_off
 {
     uint8_t command;
     uint32_t data;
 };
 
 /** Answer: Switch ON/OFF control */
-struct _PACKED s_answer_switch_on_off
+struct _PACKED answer_switch_on_off
 {
     uint8_t result;
 };
 
 /** Command: Get the work state */
-struct _PACKED s_command_get_work_state
+struct _PACKED command_get_work_state
 {
     uint64_t currentTime;
 };
 
 /** Answer: Get the work state */
-struct _PACKED s_answer_get_work_state
+struct _PACKED answer_get_work_state
 {
     uint8_t state;
     uint32_t active_channels[PFC_NCHAN];
 };
 
 /** Command: Get the version info */
-struct _PACKED s_command_get_version_info
+struct _PACKED command_get_version_info
 {
     uint8_t null;
 };
 
 /** Answer: Get the version info */
-struct _PACKED s_answer_get_version_info
+struct _PACKED answer_get_version_info
 {
     uint16_t major;
     uint16_t minor;
@@ -205,13 +205,13 @@ struct _PACKED s_answer_get_version_info
 };
 
 /** Command: Get oscillograms */
-struct _PACKED s_command_get_oscillog
+struct _PACKED command_get_oscillog
 {
     uint8_t num;
 };
 
 /** Answer: Get oscillograms */
-struct _PACKED s_answer_get_oscillog
+struct _PACKED answer_get_oscillog
 {
     uint8_t ch;
     float max;
@@ -221,26 +221,26 @@ struct _PACKED s_answer_get_oscillog
 };
 
 /** Command: Get calibration settings */
-struct _PACKED s_command_get_settings_calibrations
+struct _PACKED command_get_settings_calibrations
 {
     uint8_t null;
 };
 
 /** Answer: Get calibration settings */
-struct _PACKED s_answer_get_settings_calibrations
+struct _PACKED answer_get_settings_calibrations
 {
     float calibration[ADC_CHANNEL_NUMBER];
     float offset[ADC_CHANNEL_NUMBER];
 };
 
 /** Command: Get protection settings */
-struct _PACKED s_command_get_settings_protection
+struct _PACKED command_get_settings_protection
 {
     uint8_t null;
 };
 
 /** Answer: Get protection settings */
-struct _PACKED s_answer_get_settings_protection
+struct _PACKED answer_get_settings_protection
 {
     float Ucap_min;
     float Ucap_max;
@@ -254,13 +254,13 @@ struct _PACKED s_answer_get_settings_protection
 };
 
 /** Command: Get capacitor settings */
-struct _PACKED s_command_get_settings_capacitors
+struct _PACKED command_get_settings_capacitors
 {
     uint8_t null;
 };
 
 /** Answer: Get capacitor settings */
-struct _PACKED s_answer_get_settings_capacitors
+struct _PACKED answer_get_settings_capacitors
 {
     float ctrl_Ucap_Kp;
     float ctrl_Ucap_Ki;
@@ -270,13 +270,76 @@ struct _PACKED s_answer_get_settings_capacitors
 };
 
 /** Command: Get filter settings */
-struct _PACKED s_command_get_settings_filters
+struct _PACKED command_get_settings_filters
 {
     uint8_t null;
 };
 
 /** Answer: Get filter settings */
-struct _PACKED s_answer_get_settings_filters
+struct _PACKED answer_get_settings_filters
+{
+    float K_I;
+    float K_U;
+    float K_Ucap;
+};
+
+/** Answer: Set calibration settings */
+struct _PACKED answer_set_settings_calibrations
+{
+    uint8_t null;
+};
+
+/** Command: Set calibration settings */
+struct _PACKED command_set_settings_calibrations
+{
+    float calibration[ADC_CHANNEL_NUMBER];
+    float offset[ADC_CHANNEL_NUMBER];
+};
+
+/** Answer: Set protection settings */
+struct _PACKED answer_set_settings_protection
+{
+    uint8_t null;
+};
+
+/** Command: Set protection settings */
+struct _PACKED command_set_settings_protection
+{
+    float Ucap_min;
+    float Ucap_max;
+    float temperature;
+    float U_min;
+    float U_max;
+    float F_min;
+    float F_max;
+    float I_max_rms;
+    float I_max_peak;
+};
+
+/** Answer: Set capacitor settings */
+struct _PACKED answer_set_settings_capacitors
+{
+    uint8_t null;
+};
+
+/** Command: Set capacitor settings */
+struct _PACKED command_set_settings_capacitors
+{
+    float ctrl_Ucap_Kp;
+    float ctrl_Ucap_Ki;
+    float ctrl_Ucap_Kd;
+    float Ucap_nominal;
+    float Ucap_precharge;
+};
+
+/** Answer: Set filter settings */
+struct _PACKED answer_set_settings_filters
+{
+    uint8_t null;
+};
+
+/** Command: Set filter settings */
+struct _PACKED command_set_settings_filters
 {
     float K_I;
     float K_U;
@@ -284,13 +347,13 @@ struct _PACKED s_answer_get_settings_filters
 };
 
 /** Command: Get network settings */
-struct _PACKED s_command_get_net_params
+struct _PACKED command_get_net_params
 {
     uint8_t null;
 };
 
 /** Answer: Get network settings */
-struct _PACKED s_answer_get_net_params
+struct _PACKED answer_get_net_params
 {
     float period_fact;
     float U0Hz_A;
@@ -308,13 +371,13 @@ struct _PACKED s_answer_get_net_params
 };
 
 /** Command: Get events */
-struct _PACKED s_command_get_events
+struct _PACKED command_get_events
 {
     uint64_t after_index;
 };
 
 /** Answer: Get events */
-struct _PACKED s_answer_get_events
+struct _PACKED answer_get_events
 {
     uint16_t num;
     struct event_record_s events[MAX_NUM_TRANSFERED_EVENTS];
@@ -351,16 +414,6 @@ enum
     PROTECTION_WARNING_STOP,
     PROTECTION_ERROR_STOP
 };
-
-/* Reverse commands definitions */
-#define s_command_set_settings_calibrations s_answer_get_settings_calibrations
-#define s_answer_set_settings_calibrations  s_command_get_settings_calibrations
-#define s_command_set_settings_protection   s_answer_get_settings_protection
-#define s_answer_set_settings_protection    s_command_get_settings_protection
-#define s_command_set_settings_capacitors   s_answer_get_settings_capacitors
-#define s_answer_set_settings_capacitors    s_command_get_settings_capacitors
-#define s_command_set_settings_filters      s_answer_get_settings_filters
-#define s_answer_set_settings_filters       s_command_get_settings_filters
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONTS

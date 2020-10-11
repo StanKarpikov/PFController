@@ -20,29 +20,31 @@
                        DEFINES
 --------------------------------------------------------------*/
 
+#pragma pack(push)
 #pragma pack(1) /**< Enable packing to work with protocol structures */
-#define _PACKED /**< Packed indentifier is none to provide capability with the firmware code */
-
-/*--------------------------------------------------------------
-                       NAMESPACES
---------------------------------------------------------------*/
-
-using namespace PFCconfig;
-using namespace PFCconfig::ADC;
-using namespace PFCconfig::Interface;
+#define _FW_PACKED /**< Packed indentifier is none to provide capability with the firmware code */
 
 /*--------------------------------------------------------------
                   PUBLIC TYPES::COMMANDS
 --------------------------------------------------------------*/
 
+struct package_general
+{};
+
+struct command_general: public package_general
+{};
+
+struct answer_general: public package_general
+{};
+
 /** Command: get active ADC data */
-struct _PACKED s_command_get_adc_active
+struct _FW_PACKED command_get_adc_active: public command_general
 {
     uint8_t null;
 };
 
 /** Answer: get active ADC data */
-struct _PACKED s_answer_get_adc_active
+struct _FW_PACKED answer_get_adc_active: public answer_general
 {
     float ADC_UCAP;     //CH10
     float ADC_U_A;      //CH11
@@ -65,13 +67,13 @@ struct _PACKED s_answer_get_adc_active
 };
 
 /** Command: get active ADC data in raw format */
-struct _PACKED s_command_get_adc_active_raw
+struct _FW_PACKED command_get_adc_active_raw: public command_general
 {
     uint8_t null;
 };
 
 /** Answer: get active ADC data in raw format */
-struct _PACKED s_answer_get_adc_active_raw
+struct _FW_PACKED answer_get_adc_active_raw: public answer_general
 {
     uint16_t ADC_UCAP;     //CH10
     uint16_t ADC_U_A;      //CH11
@@ -90,39 +92,39 @@ struct _PACKED s_answer_get_adc_active_raw
 };
 
 /** Command: Switch ON/OFF control */
-struct _PACKED s_command_switch_on_off
+struct _FW_PACKED command_switch_on_off: public command_general
 {
     uint8_t command;
     uint32_t data;
 };
 
 /** Answer: Switch ON/OFF control */
-struct _PACKED s_answer_switch_on_off
+struct _FW_PACKED answer_switch_on_off: public answer_general
 {
     uint8_t result;
 };
 
 /** Command: Get the work state */
-struct _PACKED s_command_get_work_state
+struct _FW_PACKED command_get_work_state: public command_general
 {
     uint64_t currentTime;
 };
 
 /** Answer: Get the work state */
-struct _PACKED s_answer_get_work_state
+struct _FW_PACKED answer_get_work_state: public answer_general
 {
     uint8_t state;
-    uint32_t active_channels[PFC_NCHAN];
+    uint32_t active_channels[PFCconfig::PFC_NCHAN];
 };
 
 /** Command: Get the version info */
-struct _PACKED s_command_get_version_info
+struct _FW_PACKED command_get_version_info: public command_general
 {
     uint8_t null;
 };
 
 /** Answer: Get the version info */
-struct _PACKED s_answer_get_version_info
+struct _FW_PACKED answer_get_version_info: public answer_general
 {
     uint16_t major;
     uint16_t minor;
@@ -138,42 +140,42 @@ struct _PACKED s_answer_get_version_info
 };
 
 /** Command: Get oscillograms */
-struct _PACKED s_command_get_oscillog
+struct _FW_PACKED command_get_oscillog: public command_general
 {
     uint8_t num;
 };
 
 /** Answer: Get oscillograms */
-struct _PACKED s_answer_get_oscillog
+struct _FW_PACKED answer_get_oscillog: public answer_general
 {
     uint8_t ch;
     float max;
     float min;
     uint16_t len;
-    uint8_t data[OSCILLOG_TRANSFER_SIZE];
+    uint8_t data[PFCconfig::Interface::OSCILLOG_TRANSFER_SIZE];
 };
 
 /** Command: Get calibration settings */
-struct _PACKED s_command_get_settings_calibrations
+struct _FW_PACKED command_get_settings_calibrations: public command_general
 {
     uint8_t null;
 };
 
 /** Answer: Get calibration settings */
-struct _PACKED s_answer_get_settings_calibrations
+struct _FW_PACKED answer_get_settings_calibrations: public answer_general
 {
-    float calibration[ADC_CHANNEL_NUMBER];
-    float offset[ADC_CHANNEL_NUMBER];
+    float calibration[PFCconfig::ADC::ADC_CHANNEL_NUMBER];
+    float offset[PFCconfig::ADC::ADC_CHANNEL_NUMBER];
 };
 
 /** Command: Get protection settings */
-struct _PACKED s_command_get_settings_protection
+struct _FW_PACKED command_get_settings_protection: public command_general
 {
     uint8_t null;
 };
 
 /** Answer: Get protection settings */
-struct _PACKED s_answer_get_settings_protection
+struct _FW_PACKED answer_get_settings_protection: public answer_general
 {
     float Ucap_min;
     float Ucap_max;
@@ -187,13 +189,13 @@ struct _PACKED s_answer_get_settings_protection
 };
 
 /** Command: Get capacitor settings */
-struct _PACKED s_command_get_settings_capacitors
+struct _FW_PACKED command_get_settings_capacitors: public command_general
 {
     uint8_t null;
 };
 
 /** Answer: Get capacitor settings */
-struct _PACKED s_answer_get_settings_capacitors
+struct _FW_PACKED answer_get_settings_capacitors: public answer_general
 {
     float ctrl_Ucap_Kp;
     float ctrl_Ucap_Ki;
@@ -203,13 +205,76 @@ struct _PACKED s_answer_get_settings_capacitors
 };
 
 /** Command: Get filter settings */
-struct _PACKED s_command_get_settings_filters
+struct _FW_PACKED command_get_settings_filters: public command_general
 {
     uint8_t null;
 };
 
 /** Answer: Get filter settings */
-struct _PACKED s_answer_get_settings_filters
+struct _FW_PACKED answer_get_settings_filters: public answer_general
+{
+    float K_I;
+    float K_U;
+    float K_Ucap;
+};
+
+/** Answer: Set calibration settings */
+struct _FW_PACKED answer_set_settings_calibrations: public command_general
+{
+    uint8_t null;
+};
+
+/** Command: Set calibration settings */
+struct _FW_PACKED command_set_settings_calibrations: public answer_general
+{
+    float calibration[PFCconfig::ADC::ADC_CHANNEL_NUMBER];
+    float offset[PFCconfig::ADC::ADC_CHANNEL_NUMBER];
+};
+
+/** Answer: Set protection settings */
+struct _FW_PACKED answer_set_settings_protection: public command_general
+{
+    uint8_t null;
+};
+
+/** Command: Set protection settings */
+struct _FW_PACKED command_set_settings_protection: public answer_general
+{
+    float Ucap_min;
+    float Ucap_max;
+    float temperature;
+    float U_min;
+    float U_max;
+    float F_min;
+    float F_max;
+    float I_max_rms;
+    float I_max_peak;
+};
+
+/** Answer: Set capacitor settings */
+struct _FW_PACKED answer_set_settings_capacitors: public command_general
+{
+    uint8_t null;
+};
+
+/** Command: Set capacitor settings */
+struct _FW_PACKED command_set_settings_capacitors: public answer_general
+{
+    float ctrl_Ucap_Kp;
+    float ctrl_Ucap_Ki;
+    float ctrl_Ucap_Kd;
+    float Ucap_nominal;
+    float Ucap_precharge;
+};
+
+/** Answer: Set filter settings */
+struct _FW_PACKED answer_set_settings_filters: public command_general
+{
+    uint8_t null;
+};
+
+/** Command: Set filter settings */
+struct _FW_PACKED command_set_settings_filters: public answer_general
 {
     float K_I;
     float K_U;
@@ -217,13 +282,13 @@ struct _PACKED s_answer_get_settings_filters
 };
 
 /** Command: Get network settings */
-struct _PACKED s_command_get_net_params
+struct _FW_PACKED command_get_net_params: public command_general
 {
     uint8_t null;
 };
 
 /** Answer: Get network settings */
-struct _PACKED s_answer_get_net_params
+struct _FW_PACKED answer_get_net_params: public answer_general
 {
     float period_fact;
     float U0Hz_A;
@@ -241,26 +306,18 @@ struct _PACKED s_answer_get_net_params
 };
 
 /** Command: Get events */
-struct _PACKED s_command_get_events
+struct _FW_PACKED command_get_events: public command_general
 {
     uint64_t after_index;
 };
 
 /** Answer: Get events */
-struct _PACKED s_answer_get_events
+struct _FW_PACKED answer_get_events: public answer_general
 {
     uint16_t num;
-    struct event_record_s events[MAX_NUM_TRANSFERED_EVENTS];
+    PFCconfig::Events::EventRecord events[PFCconfig::Interface::MAX_NUM_TRANSFERED_EVENTS];
 };
 
-/* Reverse commands definitions */
-#define s_command_set_settings_calibrations s_answer_get_settings_calibrations
-#define s_answer_set_settings_calibrations  s_command_get_settings_calibrations
-#define s_command_set_settings_protection   s_answer_get_settings_protection
-#define s_answer_set_settings_protection    s_command_get_settings_protection
-#define s_command_set_settings_capacitors   s_answer_get_settings_capacitors
-#define s_answer_set_settings_capacitors    s_command_get_settings_capacitors
-#define s_command_set_settings_filters      s_answer_get_settings_filters
-#define s_answer_set_settings_filters       s_command_get_settings_filters
+#pragma pack(pop)
 
 #endif // DEVICE_INTERFACE_COMMANDS_H

@@ -1,5 +1,7 @@
 QT += widgets serialport serialbus printsupport testlib
 
+CONFIG+=c++1z
+
 TARGET = terminal
 TEMPLATE = app
 
@@ -43,3 +45,6 @@ FORMS += \
 
 RESOURCES += \
     terminal_pfc.qrc
+
+TRANSLATIONS +=  \
+    translations/project_en.ts

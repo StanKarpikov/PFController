@@ -15,11 +15,12 @@
 
 using namespace std;
 
-ADFSerialInterface::ADFSerialInterface(QObject *parent) throw(ProtocolException)
+ADFSerialInterface::ADFSerialInterface(QObject *parent)
 {
+    Q_UNUSED(parent)
     qRegisterMetaType<std::vector<DeviceSerialMessage>>("std::vector<Package>");
-    connect(this, &connectionChanged,
-            this, &_ConnectionChanged);
+    connect(this, &ADFSerialInterface::informConnectionChanged,
+            this, &ADFSerialInterface::ConnectionChanged);
 }
 
 ADFSerialInterface::~ADFSerialInterface()
@@ -45,6 +46,9 @@ void ADFSerialInterface::ConnectTo(
     quint32 timeout,
     quint32 numberOfRetries)
 {
+    Q_UNUSED(localEchoEnabled)
+    Q_UNUSED(timeout)
+    Q_UNUSED(numberOfRetries)
     if (_serial->isOpen())
     {
         Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
@@ -222,8 +226,8 @@ int ADFSerialInterface::serialWrite(const vector<unsigned char> &dataToWrite)
 std::string ADFSerialInterface::hex_dump(const std::vector<unsigned char> &buf)
 {
     ostringstream oss;
-    for (int i = 0; i < buf.size(); i++)
-        oss << " " << std::uppercase << setfill('0') << setw(2) << std::hex << (int)buf[i];
+    for (uint i = 0; i < buf.size(); i++)
+        oss << " " << std::uppercase << setfill('0') << setw(2) << std::hex << buf[i];
     return oss.str();
 }
 
@@ -256,7 +260,7 @@ void ADFSerialInterface::sendQueue()
     if (written < 0)
     {
         pc->finishCommand(true);
-        emit connectionChanged(false);
+        emit informConnectionChanged(false);
         return;
     }
     Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_NONE,
@@ -275,7 +279,7 @@ void ADFSerialInterface::sendQueue()
     {
         Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_NONE,
                 QString("RECEIVED: ").append(QString::fromStdString(hex_dump(pc->package_in->data()))));
-        emit connectionChanged(true);
+        emit informConnectionChanged(true);
         pc->finishCommand(false);
     }
     else
@@ -283,7 +287,7 @@ void ADFSerialInterface::sendQueue()
         Message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
                 "Превышено время ожидания!");
         pc->finishCommand(true);
-        emit connectionChanged(false);
+        emit informConnectionChanged(false);
     }
 
     if (!_queue.empty()) emit couldWrite();  //избыточно

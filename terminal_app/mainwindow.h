@@ -28,12 +28,13 @@
 #include <QCustomPlot.h>
 #include <QSignalSpy>
 
+#include "device_definition.h"
+
 /*--------------------------------------------------------------
                        DEFINES
 --------------------------------------------------------------*/
 
 #define NOMINAL_VOLTAGE 220
-#define PFC_NCHAN   (3U)   /**< Three-phase network */
 
 /*--------------------------------------------------------------
                        PUBLIC TYPES
@@ -88,10 +89,10 @@ struct PFCsettings{
     }ADC_RAW;
     struct {
         float period_fact;
-        float U0Hz_A;//Постоянная составляющая
+        float U0Hz_A;
         float U0Hz_B;
         float U0Hz_C;
-        float I0Hz_A;//Постоянная составляющая
+        float I0Hz_A;
         float I0Hz_B;
         float I0Hz_C;
         float thdu_A;
@@ -103,25 +104,22 @@ struct PFCsettings{
     }NET_PARAMS;
     struct {
         struct {
-            //=== калибровки АЦП
-            QVector<float> calibration; //!< Калибровки для каналов
-            QVector<float> offset; //!< Смещения для каналов
+            std::vector<float> calibration;
+            std::vector<float> offset;
         }CALIBRATIONS;
         struct {
-            //=== защиты ======
-            float Ud_min; //!< Граничные значения для Ud
-            float Ud_max; //!< Граничные значения для Ud
-            float temperature; //!< Граничные значения для Температуры
-            float U_min; //!< Граничные значения для напряжения
+            float Ud_min;
+            float Ud_max;
+            float temperature;
+            float U_min;
             float U_max;
-            float Fnet_min; //!< минимальная частота сети
-            float Fnet_max; //!< максимальная частота сети
-            float I_max_rms; //!< Максимальное граничное значение тока фильтра по RMS
-            float I_max_peak; //!< Максимальное граничное мгновенное значение тока фильтра
+            float Fnet_min;
+            float Fnet_max;
+            float I_max_rms;
+            float I_max_peak;
         }PROTECTION;
         struct {
-            //==== накачка =====
-            float ctrlUd_Kp; //!< Управление накачкой
+            float ctrlUd_Kp;
             float ctrlUd_Ki;
             float ctrlUd_Kd;
             float Ud_nominal;
@@ -133,8 +131,8 @@ struct PFCsettings{
             float K_Ud;
         }FILTERS;
     }SETTINGS;
-    uint32_t status; //!< Текущее состояние работы фильтра
-    uint32_t activeChannels[3];
+    uint32_t status;
+    uint32_t activeChannels[PFCconfig::PFC_NCHAN];
 };
 
 class SettingsDialog;
@@ -147,12 +145,24 @@ class MainWindow : public QMainWindow
 public:
 
     /* Constants */
-    const std::string DARK_GREY = "#808080";
-    const std::string DARK_RED = "#800000";
-    const std::string LIGHT_GREY = "#c0c0c0";
-    const std::string DARK_GREEN = "#008000";
+    inline static const std::string DARK_GREY = "#808080";
+    inline static const std::string DARK_RED = "#800000";
+    inline static const std::string LIGHT_GREY = "#c0c0c0";
+    inline static const std::string DARK_GREEN = "#008000";
 
-    const static auto EVENTS_TIMER_TIMEOUT = 1000;
+    static constexpr auto TIMEOUT_UPDATE_MAIN_PARAMS = static_cast<std::chrono::milliseconds>(300);
+    static constexpr auto TIMEOUT_UPDATE_VOLTAGES = static_cast<std::chrono::milliseconds>(300);
+    static constexpr auto TIMEOUT_UPDATE_ADC_RAW = static_cast<std::chrono::milliseconds>(300);
+    static constexpr auto TIMEOUT_UPDATE_STATE = static_cast<std::chrono::milliseconds>(300);
+    static constexpr auto TIMEOUT_UPDATE_VERSION = static_cast<std::chrono::milliseconds>(3000);
+    static constexpr auto TIMEOUT_UPDATE_OSCILLOG = static_cast<std::chrono::milliseconds>(54);
+    static constexpr auto TIMEOUT_UPDATE_SETTINGS_CALIBRATIONS = static_cast<std::chrono::milliseconds>(300);
+    static constexpr auto TIMEOUT_UPDATE_SETTINGS_CAPACITORS = static_cast<std::chrono::milliseconds>(300);
+    static constexpr auto TIMEOUT_UPDATE_SETTINGS_PROTECTION = static_cast<std::chrono::milliseconds>(300);
+    static constexpr auto TIMEOUT_UPDATE_SETTINGS_FILTERS = static_cast<std::chrono::milliseconds>(300);
+
+    const static auto EVENTS_TIMER_TIMEOUT = 1000;    
+    const static auto UD_MAX_VALUE = 500;
 
     enum class OscillogChannels
     {
@@ -173,22 +183,17 @@ public:
         OSCILLOG_SIZE
     };
 
-    /** @brief State of the PFC */
-    enum class PFCstate
+    enum class table_rows
     {
-        PFC_STATE_INIT,              /**< Initial state */
-        PFC_STATE_STOP,              /**< Stop state (power hardware is switched off) */
-        PFC_STATE_SYNC,              /**< Syncronisation with the network */
-        PFC_STATE_PRECHARGE_PREPARE, /**< Prepare precharge */
-        PFC_STATE_PRECHARGE,         /**< Precharge (connector is in on state) */
-        PFC_STATE_MAIN,              /**< Main state. Precharge is finished */
-        PFC_STATE_PRECHARGE_DISABLE, /**< Precharge is switching off */
-        PFC_STATE_WORK,              /**< Ready state */
-        PFC_STATE_CHARGE,            /**< Main capacitors charge is ongoing */
-        PFC_STATE_TEST,              /**< Test state */
-        PFC_STATE_STOPPING,          /**< Stoping work: disable sensitive and power peripheral */
-        PFC_STATE_FAULTBLOCK,        /**< Fault state */
-        PFC_STATE_COUNT              /**< The count of the states */
+        table_protection_row_Ud_min,
+        table_protection_row_Ud_max,
+        table_protection_row_temperature,
+        table_protection_row_U_min,
+        table_protection_row_U_max,
+        table_protection_row_Fnet_min,
+        table_protection_row_Fnet_max,
+        table_protection_row_I_max_rms,
+        table_protection_row_I_max_peak
     };
 
     /* Functions */
@@ -202,27 +207,31 @@ public:
     void pageSettingsCapacitorsInit(void);
     void pageSettingsProtectionInit(void);
     void pageSettingsFiltersInit(void);
+    void SET_TABLE_PROT(table_rows row, float VAL);
+    void UPDATE_SPINBOX(QDoubleSpinBox *SPIN,float VAL);
+    void UPDATE_CHECKBOX(QCheckBox* CHECK,bool VAL);
 
     /* Data */
     Ui::MainWindow *ui;
     PFC *pfc;
     std::vector<double> oscillog_xval,harmonics_xval;
-    std::vector<double> oscillog_data;
-    std::vector<QPushButton*> buttons_edit;
+    std::vector<std::vector<double>> oscillog_data;
+    std::list<QPushButton*> buttons_edit;
     uint64_t last_index_events;
     PFCsettings pfc_settings;
+    QMap<PFCconfig::Interface::PFCOscillogCnannel,OscillogChannels> OSCILLOG_ARR;
 
 public slots:
 
     void openSerialPort();
     void closeSerialPort();
     void about();
-    void Message(quint8 type, quint8 level, quint8 target, QString message);
+    void Message(quint8 type, quint8 level, quint8 target, std::string message);
     void deviceConnected();
     void deviceDisconnected();
 
     /* Interface commands */
-    void setOscillog(uint16_t channel, std::vector<double> data);
+    void setOscillog(PFCconfig::Interface::PFCOscillogCnannel channel, std::vector<double> data);
     void setNetVoltage( float ADC_UD,
                         float ADC_U_A,
                         float ADC_U_B,
@@ -256,7 +265,7 @@ public slots:
                            float ADC_EMS_I);
     void setWorkState(uint32_t state, uint32_t chA, uint32_t chB, uint32_t chC);
     void setSwitchOnOff(uint32_t result);
-    void setEvents(QVector<struct sEventRecord> ev);
+    void setEvents(std::list<PFCconfig::Events::EventRecord> ev);
     void setVersionInfo(
             uint32_t major,
             uint32_t minor,
@@ -268,12 +277,12 @@ public slots:
             uint32_t hour,
             uint32_t minute,
             uint32_t second);
-    void setConnection(bool connected);
+    void setConnection(bool _connected);
     void setNetParams(float period_fact,
-                    float U0Hz_A,//Постоянная составляющая
+                    float U0Hz_A,
                     float U0Hz_B,
                     float U0Hz_C,
-                    float I0Hz_A,//Постоянная составляющая
+                    float I0Hz_A,
                     float I0Hz_B,
                     float I0Hz_C,
                     float thdu_A,
@@ -283,26 +292,26 @@ public slots:
                     float U_phase_B,
                     float U_phase_C);
     void setSettingsCalibrations(
-            QVector<float> calibration, //!< Калибровки для каналов
-            QVector<float> offset //!< Смещения для каналов
+            std::vector<float> calibration,
+            std::vector<float> offset
             );
     void setSettingsFilters(
             float K_I,
             float K_U,
             float K_Ud);
     void setSettingsProtection(
-            float Ud_min, //!< Граничные значения для Ud
-            float Ud_max, //!< Граничные значения для Ud
-            float temperature, //!< Граничные значения для Температуры
-            float U_min, //!< Граничные значения для напряжения
+            float Ud_min,
+            float Ud_max,
+            float temperature,
+            float U_min,
             float U_max,
-            float Fnet_min, //!< минимальная частота сети
-            float Fnet_max, //!< максимальная частота сети
-            float I_max_rms, //!< Максимальное граничное значение тока фильтра по RMS
-            float I_max_peak //!< Максимальное граничное мгновенное значение тока фильтра
+            float Fnet_min,
+            float Fnet_max,
+            float I_max_rms,
+            float I_max_peak
             );
     void setSettingsCapacitors(
-            float ctrlUd_Kp, //!< Управление накачкой
+            float ctrlUd_Kp,
             float ctrlUd_Ki,
             float ctrlUd_Kd,
             float Ud_nominal,
@@ -339,7 +348,7 @@ signals:
     void updateVersionInfo();
     void updateNetVoltageRAW();
     void updateNetParams();
-    void updateOscillog(uint16_t channel);
+    void updateOscillog(PFCconfig::Interface::PFCOscillogCnannel channel);
     void updateEvents(uint64_t afterIndex);
     void updateSettingsCalibrations();
     void updateSettingsProtection();
@@ -347,22 +356,22 @@ signals:
     void updateSettingsFilters();    
 
     void writeSettingsCalibrations(
-            QVector<float> calibration, //!< Калибровки для каналов
-            QVector<float> offset //!< Смещения для каналов
+            std::vector<float> calibration,
+            std::vector<float> offset
             );
     void writeSettingsProtection(
-            float Ud_min, //!< Граничные значения для Ud
-            float Ud_max, //!< Граничные значения для Ud
-            float temperature, //!< Граничные значения для Температуры
-            float U_min, //!< Граничные значения для напряжения
+            float Ud_min,
+            float Ud_max,
+            float temperature,
+            float U_min,
             float U_max,
-            float Fnet_min, //!< минимальная частота сети
-            float Fnet_max, //!< максимальная частота сети
-            float I_max_rms, //!< Максимальное граничное значение тока фильтра по RMS
-            float I_max_peak //!< Максимальное граничное мгновенное значение тока фильтра
+            float Fnet_min,
+            float Fnet_max,
+            float I_max_rms,
+            float I_max_peak
             );
     void writeSettingsCapacitors(
-            float ctrlUd_Kp, //!< Управление накачкой
+            float ctrlUd_Kp,
             float ctrlUd_Ki,
             float ctrlUd_Kd,
             float Ud_nominal,
@@ -371,7 +380,7 @@ signals:
             float K_I,
             float K_U,
             float K_Ud);
-    void writeSwitchOnOff(uint32_t command,uint32_t data);
+    void writeSwitchOnOff(PFCconfig::Interface::pfc_commands_t command,uint32_t data);
 
 private slots:
     void onPushButtonClicked();
@@ -407,7 +416,7 @@ private:
     QTimer timer_SettingsCapacitors;
     QTimer timer_SettingsProtection;
     QTimer timer_SettingsFilters;
-    bool connected=false;
+    bool _connected=false;
     QSharedPointer<QCPAxisTickerFixed> fixed_ticker;
 };
 

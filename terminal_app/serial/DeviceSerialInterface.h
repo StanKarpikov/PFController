@@ -1,5 +1,5 @@
-#ifndef _PROTOCOL_H_
-#define _PROTOCOL_H_
+#ifndef __PROTOCOL_H_
+#define __PROTOCOL_H_
 
 #include <exception>
 #include <QThread>
@@ -24,7 +24,7 @@ class ADFSerialInterface : public QObject
 {
     Q_OBJECT
    public:
-    explicit ADFSerialInterface(QObject *parent = 0) throw(ProtocolException);
+    explicit ADFSerialInterface(QObject *parent = Q_NULLPTR);
     virtual ~ADFSerialInterface();
 
     /**
@@ -66,7 +66,7 @@ class ADFSerialInterface : public QObject
    private slots:
     void sendQueue();  //!< Отправляет первый пакет из очереди.
     void handleError(QSerialPort::SerialPortError err);
-    void _ConnectionChanged(bool connected)
+    void ConnectionChanged(bool connected)
     {
         _connected = connected;
     }
@@ -75,7 +75,7 @@ class ADFSerialInterface : public QObject
     void couldWrite();  //!< Сигнал что в очереди появились пакеты на отправку
     void connected();
     void disconnected();
-    void connectionChanged(bool connected);
+    void informConnectionChanged(bool connected);
     void Message(quint8 type, quint8 level, quint8 target, QString message);
     // members
    private:
@@ -105,4 +105,4 @@ class ADFSerialInterface : public QObject
     static const int READ_TIMEOUT_MS = 500;  //!< таймаут ожидания на чтения в миллисекундах
 };
 
-#endif /* _PROTOCOL_H_ */
+#endif /* __PROTOCOL_H_ */

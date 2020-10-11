@@ -11,15 +11,26 @@
 #include <type_traits>
 
 template <typename E>
-constexpr auto enum_int(E e) noexcept
+constexpr auto enum_uint(E e) noexcept
 {
-    return static_cast<std::underlying_type_t<E>>(e);
+    return static_cast<uint32_t>(e);
 }
 
+template <typename E>
+constexpr auto enum_int(E e) noexcept
+{
+    return static_cast<int32_t>(e);
+}
+
+#pragma pack(push)
 #pragma pack(1) /**< Enable packing to work with protocol structures */
 
 namespace PFCconfig {
     auto const PFC_NCHAN = 3U;   /**< Three-phase network */
+
+    auto const PFC_ACHAN = 0U;   /**< Channel A */
+    auto const PFC_BCHAN = 1U;   /**< Channel B */
+    auto const PFC_CCHAN = 2U;   /**< Channel C */
 
     namespace ADC {
         enum {
@@ -47,7 +58,7 @@ namespace PFCconfig {
 
     namespace Events {
         /** The structure to store an event */
-        struct event_record_s
+        struct EventRecord
         {
             uint64_t unix_time_s_ms;
 
@@ -55,11 +66,12 @@ namespace PFCconfig {
             uint32_t info;
             float value;
         };
+        auto const TIME_MAX_VALUE = 4133894400000ULL; /**< Maximum time constant (used to exclude wrong packets) */
     }
 
     namespace Interface {
 
-        enum OscillogCnannel{
+        enum PFCOscillogCnannel{
             OSC_UD,
             OSC_U_A,
             OSC_U_B,
@@ -77,7 +89,16 @@ namespace PFCconfig {
         auto const MAX_EVENTS_PACKET_SIZE = 150; /**< The maximum size of the packet that can be occupied by events */
 
         /** The maximum number of events that can be transferred */
-        auto const MAX_NUM_TRANSFERED_EVENTS = (MAX_EVENTS_PACKET_SIZE / (sizeof(Events::event_record_s)));
+        auto const MAX_NUM_TRANSFERED_EVENTS = (MAX_EVENTS_PACKET_SIZE / (sizeof(Events::EventRecord)));
+
+        /** Event types: main */
+        enum event_type_t
+        {
+            EVENT_TYPE_POWER,       /**< Power parameters has been changed */
+            EVENT_TYPE_CHANGESTATE, /**< The PFC state has been changed */
+            EVENT_TYPE_PROTECTION,  /**< The protection has been activated */
+            EVENT_TYPE_EVENT        /**< An other event */
+        };
 
         /** brief Event types: subevents for power control */
         enum
@@ -111,6 +132,19 @@ namespace PFCconfig {
             PROTECTION_ERROR_STOP
         };
 
+        /** PFC commands fromt the panel */
+        enum class pfc_commands_t
+        {
+            COMMAND_WORK_ON = 1,   /**< Switch on the PFC operation */
+            COMMAND_WORK_OFF,      /**< Switch off the PFC operation */
+            COMMAND_CHARGE_ON,     /**< Switch charge on */
+            COMMAND_CHARGE_OFF,    /**< Switch charge off */
+            COMMAND_CHANNEL0_DATA, /**< Set the channel A data (enable the channel) */
+            COMMAND_CHANNEL1_DATA, /**< Set the channel B data (enable the channel) */
+            COMMAND_CHANNEL2_DATA, /**< Set the channel C data (enable the channel) */
+            COMMAND_SETTINGS_SAVE  /**< Save settings */
+        };
+
         /** Protocol commands list */
         enum class pfc_interface_commands_t
         {
@@ -140,6 +174,24 @@ namespace PFCconfig {
         };
     }
 
+    /** @brief State of the PFC */
+    enum class PFCstate
+    {
+        PFC_STATE_INIT,              /**< Initial state */
+        PFC_STATE_STOP,              /**< Stop state (power hardware is switched off) */
+        PFC_STATE_SYNC,              /**< Syncronisation with the network */
+        PFC_STATE_PRECHARGE_PREPARE, /**< Prepare precharge */
+        PFC_STATE_PRECHARGE,         /**< Precharge (connector is in on state) */
+        PFC_STATE_MAIN,              /**< Main state. Precharge is finished */
+        PFC_STATE_PRECHARGE_DISABLE, /**< Precharge is switching off */
+        PFC_STATE_WORK,              /**< Ready state */
+        PFC_STATE_CHARGE,            /**< Main capacitors charge is ongoing */
+        PFC_STATE_TEST,              /**< Test state */
+        PFC_STATE_STOPPING,          /**< Stoping work: disable sensitive and power peripheral */
+        PFC_STATE_FAULTBLOCK,        /**< Fault state */
+        PFC_STATE_COUNT              /**< The count of the states */
+    };
 }
 
+#pragma pack(pop)
 #endif // DEVICE_DEFINITION_H

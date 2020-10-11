@@ -7,6 +7,15 @@
 #include <QGraphicsDropShadowEffect>
 #include <QListWidgetItem>
 
+/*--------------------------------------------------------------
+                       NAMESPACES
+--------------------------------------------------------------*/
+
+using namespace PFCconfig;
+using namespace PFCconfig::ADC;
+using namespace PFCconfig::Interface;
+using namespace PFCconfig::Events;
+
 enum {
     table_filters_row_K_I,
     table_filters_row_K_U,
