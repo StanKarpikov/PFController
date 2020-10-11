@@ -48,3 +48,6 @@ RESOURCES += \
 
 TRANSLATIONS +=  \
     translations/project_en.ts
+
+DISTFILES += \
+    translations/project_en.ts
