@@ -1,11 +1,11 @@
 /**
- * @file board_stm32f7.h
+ * @file board_stm32f723_disco.h
  * @author Stanislav Karpikov
- * @brief Board definitions
+ * @brief Board definitions (STM32F723E-DISCO development board)
  */
 
-#ifndef _BOARD_STM32F7_H
-#define _BOARD_STM32F7_H
+#ifndef _BOARD_STM32F723_DISCO_H
+#define _BOARD_STM32F723_DISCO_H
 
 /** @addtogroup hdw_bsp_board
  * @{
@@ -14,6 +14,8 @@
 /*--------------------------------------------------------------
                        PUBLIC DEFINES
 --------------------------------------------------------------*/
+
+#define BOARD_REVISION 				"0.1" /**< The current PCB revision */
 
 #define TAHOMETER_1_Pin       GPIO_PIN_3
 #define TAHOMETER_1_GPIO_Port GPIOE
@@ -162,4 +164,4 @@
 #define TIMER_COOLER_CLK_DISABLE __HAL_RCC_TIM9_CLK_DISABLE
 
 /** @} */
-#endif /* _BOARD_STM32F7_H */
+#endif /* _BOARD_STM32F723_DISCO_H */

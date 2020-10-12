@@ -17,10 +17,13 @@
 
 #include "BSP/debug.h"
 
-#define BOARD_STM32F7 /**< Defines the hardware that is used */
+#undef BOARD_STM32F767_MAIN /**< Define to use the main production board */
+#define BOARD_STM32F723_DISCO /**< Define to use the STM32F723E-DISCO development board */
 
-#ifdef BOARD_STM32F7
-#include "board/board_stm32f7.h"
+#if defined(BOARD_STM32F767_MAIN)
+#include "board/board_stm32f767_main_v0_2.h"
+#elif defined(BOARD_STM32F723_DISCO)
+#include "board/board_stm32f723_disco.h"
 #else
 #error "Please define the board"
 #endif
