@@ -66,13 +66,13 @@ void ADFSerialInterface::ConnectTo(
     if (_serial->open(QIODevice::ReadWrite))
     {
         Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
-                QString("Порт %1 открыт: %2").arg(name).arg(QString::number(baudRate)));
+                (QString("Порт %1 открыт: %2").arg(name).arg(QString::number(baudRate))).toStdString());
         emit connected();
     }
     else
     {
         Message(MESSAGE_TYPE_CONNECTION, MESSAGE_WARNING, MESSAGE_TARGET_ALL,
-                QString("Ошибка открытия порта %1: %2").arg(name).arg(QString::number(baudRate)));
+                (QString("Ошибка открытия порта %1: %2").arg(name).arg(QString::number(baudRate))).toStdString());
     }
 }
 void ADFSerialInterface::Disconnect()
@@ -98,13 +98,13 @@ void ADFSerialInterface::handleError(QSerialPort::SerialPortError err)
     if (noError == 0) target = MESSAGE_TARGET_DEBUG;
     noError = 0;
     Message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
-            QString("Ошибка порта: %1(%2)")
+            (QString("Ошибка порта: %1(%2)")
                 .arg(err)
-                .arg(_serial->errorString()));
+                .arg(_serial->errorString())).toStdString());
     if (err == 12)
     {
         Message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, target,
-                QString("Соединение потеряно"));
+                "Соединение потеряно");
     }
     //Disconnect();
 }
@@ -124,9 +124,9 @@ DeviceSerialMessage *ADFSerialInterface::serialReadPackage(int timeout)
             if (portion.size())
             {
                 Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_NONE,
-                        QString("GET : ").append(QString::fromStdString(hex_dump(
+                        (QString("GET : ").append(QString::fromStdString(hex_dump(
                             std::vector<unsigned char>(
-                                portion.begin(), portion.end())))));
+                                portion.begin(), portion.end()))))).toStdString());
 
                 readBuf.reserve(readBuf.size() + portion.size());
                 copy(portion.begin(), portion.end(), back_inserter(readBuf));
@@ -138,7 +138,7 @@ DeviceSerialMessage *ADFSerialInterface::serialReadPackage(int timeout)
                     if (noError == 0)
                     {
                         Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
-                                QString("Соединение восстановлено"));
+                                "Соединение восстановлено");
                     }
                     noError = 1;
                     return response;
@@ -152,11 +152,11 @@ DeviceSerialMessage *ADFSerialInterface::serialReadPackage(int timeout)
     catch (ProtocolException &e)
     {
         Message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
-                QString("Exception %1")
-                    .arg(e.what()));
+                (QString("Exception %1")
+                    .arg(e.what())).toStdString());
     }
 
-    return NULL;
+    return Q_NULLPTR;
 }
 
 void ADFSerialInterface::run()
@@ -239,7 +239,7 @@ std::string ADFSerialInterface::hex_dump(const std::vector<unsigned char> &buf)
 void ADFSerialInterface::sendQueue()
 {
     int written;
-    PackageCommand *pc = NULL;
+    PackageCommand *pc = Q_NULLPTR;
 
     {  // Locking in the RAII style
         QMutexLocker locker(&sendQueueMutex);
@@ -264,13 +264,13 @@ void ADFSerialInterface::sendQueue()
         return;
     }
     Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_NONE,
-            QString("SENDED: ").append(QString::fromStdString(hex_dump(dataToWrite))));
+            (QString("SENDED: ").append(QString::fromStdString(hex_dump(dataToWrite)))).toStdString());
 
     // получаем ответ
     if (pc->package_in)
     {
         delete pc->package_in;
-        pc->package_in = NULL;
+        pc->package_in = Q_NULLPTR;
     }
 
     pc->package_in = this->serialReadPackage(READ_TIMEOUT_MS);
@@ -278,7 +278,7 @@ void ADFSerialInterface::sendQueue()
     if (pc->package_in)
     {
         Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_NONE,
-                QString("RECEIVED: ").append(QString::fromStdString(hex_dump(pc->package_in->data()))));
+                (QString("RECEIVED: ").append(QString::fromStdString(hex_dump(pc->package_in->data())))).toStdString());
         emit informConnectionChanged(true);
         pc->finishCommand(false);
     }

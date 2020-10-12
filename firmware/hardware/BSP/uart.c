@@ -28,7 +28,7 @@
 #define UART_DEBUG_TIMEOUT                   (2000)  /**< Timeout [ms] while writing to the debug output */
 #define USE_INTERFACE_AS_DEBUG               (0)     /**< Set to 1 to use the interface output as a debug output */
 #define UART_INTERFACE_BUFFER_DEFAULT_FILLER (0xFF)  /**< The default value to fill the buffer */
-#define RX_BUFFER_SIZE                       (0x3FF) /**< The size of the receive buffer, 0x3FF by default */
+#define RX_BUFFER_SIZE                       (0x7FF) /**< The size of the receive buffer, 0x3FF by default */
 #define TX_BUFFER_SIZE                       (0x3FF) /**< The size of the transmit buffer, 0x3FF by default */
 
 /*--------------------------------------------------------------
@@ -85,6 +85,9 @@ status_t uart_interface_get_byte(uint8_t* byte)
         mcu_port.rx_readed++;
         if (mcu_port.rx_readed == RX_BUFFER_SIZE)
         {
+						SCB_CleanDCache_by_Addr((uint32_t*)mcu_port.rx_buffer, RX_BUFFER_SIZE);
+						SCB_InvalidateDCache_by_Addr((uint32_t*)mcu_port.rx_buffer, RX_BUFFER_SIZE);
+	
             mcu_port.rx_readed = 0;
         }
         return PFC_SUCCESS;
@@ -101,6 +104,9 @@ status_t uart_interface_get_byte(uint8_t* byte)
  */
 status_t uart_interface_rx_init(void)
 {
+	  SCB_CleanDCache_by_Addr((uint32_t*)mcu_port.rx_buffer, RX_BUFFER_SIZE);
+    SCB_InvalidateDCache_by_Addr((uint32_t*)mcu_port.rx_buffer, RX_BUFFER_SIZE);
+	
     memset(mcu_port.rx_buffer, UART_INTERFACE_BUFFER_DEFAULT_FILLER, RX_BUFFER_SIZE);
     HAL_GPIO_WritePin(RE_485_GPIO_Port, RE_485_Pin, GPIO_PIN_RESET);
     HAL_UART_Receive_DMA(&huart_interface, (uint8_t*)mcu_port.rx_buffer, RX_BUFFER_SIZE);

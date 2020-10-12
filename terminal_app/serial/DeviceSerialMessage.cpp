@@ -4,12 +4,13 @@
 
 #include "crc.h"
 #include "DeviceSerialMessage.h"
+#include "QDebug.h"
 
 using namespace std;
 
 const int DeviceSerialMessage::MAX_LENGTH = 256;
-const unsigned char DeviceSerialMessage::START_BYTE = 0xAA;
-const unsigned char DeviceSerialMessage::STOP_BYTE = 0xBB;
+const unsigned char DeviceSerialMessage::START_BYTE = 0x55;
+const unsigned char DeviceSerialMessage::STOP_BYTE = 0x77;
 
 DeviceSerialMessage::DeviceSerialMessage()
     : DeviceSerialMessage(ADFMessagePriority::NORMAL, 0, Sender::PFC, false, false, 0, std::vector<unsigned char>())
@@ -159,7 +160,7 @@ std::vector<unsigned char> DeviceSerialMessage::toBuffer() const
 
     return raw_data;
 }
-#include "QDebug.h"
+
 DeviceSerialMessage *DeviceSerialMessage::popFromBuffer(std::vector<unsigned char> &data)
 {
     for (int i = 0; i < data.size(); i++)
@@ -205,5 +206,5 @@ DeviceSerialMessage *DeviceSerialMessage::popFromBuffer(std::vector<unsigned cha
         }
     }
 
-    return NULL;
+    return Q_NULLPTR;
 }

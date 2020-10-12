@@ -78,8 +78,7 @@ PFC::PFC()
     _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_FILTERS)] =
         std::bind(&PFC::protocolSetSettingsFilters, this, std::placeholders::_1);
 
-    connect(_interface, SIGNAL(message(quint8, quint8, quint8, QString)),
-            this, SIGNAL(message(quint8, quint8, quint8, QString)));
+    connect(_interface, &ADFSerialInterface::Message, this, &PFC::message);
 
     message(MESSAGE_TYPE_GENERAL, MESSAGE_NORMAL, MESSAGE_TARGET_DEBUG, "Поток АДФ запущен");
 }

@@ -76,7 +76,7 @@ class ADFSerialInterface : public QObject
     void connected();
     void disconnected();
     void informConnectionChanged(bool connected);
-    void Message(uint8_t type, uint8_t level, uint8_t target, QString message);
+    void Message(uint8_t type, uint8_t level, uint8_t target, std::string message);
     // members
    private:
     QSerialPort *_serial;  //!< Объект для работы с последовательным портом

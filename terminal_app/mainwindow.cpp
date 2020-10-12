@@ -70,6 +70,8 @@ MainWindow::MainWindow(QWidget* parent)
     qRegisterMetaType<QSerialPort::FlowControl>("QSerialPort::FlowControl");
     qRegisterMetaType<std::vector<uint8_t>>("std::vector<uint8_t>");
     qRegisterMetaType<PackageCommand*>("PackageCommand*");
+    qRegisterMetaType<uint8_t>("uint8_t");
+    qRegisterMetaType<std::string>("std::string");
 
     _ui->groupBox_State->installEventFilter(this);
     _ui->groupBox_net->installEventFilter(this);
@@ -540,10 +542,10 @@ void MainWindow::message(uint8_t type, uint8_t level, uint8_t target, std::strin
     QTextDocument doc;
     doc.setHtml(QString::fromStdString(prefix));
     QString ss(doc.toPlainText());
-    if (target & MESSAGE_TARGET_DEBUG)
-    {
+    //if (target & MESSAGE_TARGET_DEBUG)
+    //{
         qDebug() << ss;
-    }
+    //}
     if (target & MESSAGE_TARGET_STATUS)
     {
         _ui->statusBar->showMessage(ss, 5000);
