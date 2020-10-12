@@ -59,3 +59,4 @@ firmware/project/DebugConfig
 firmware/project/PFC.uvoptx
 terminal_app/.qmake.stash
 firmware/docs/html
+firmware/project/stm32cube_generated/pfc_template_stm32f723

@@ -192,13 +192,21 @@ void HAL_UART_MspInit(UART_HandleTypeDef* huart)
         USART_INTERFACE_RCC_ENABLE();
 
         RS485_GPIO_PORT_ENABLE();
-        GPIO_InitStruct.Pin = RS485_UART_TX_Pin | RS485_UART_RX_Pin | RE_485_Pin;
+        GPIO_InitStruct.Pin = RS485_UART_TX_Pin | RS485_UART_RX_Pin;
         GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
         GPIO_InitStruct.Pull = GPIO_NOPULL;
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
         GPIO_InitStruct.Alternate = USART_INTERFACE_AF;
         HAL_GPIO_Init(RS485_UART_TX_GPIO_Port, &GPIO_InitStruct);
 
+			  RS485_RE_GPIO_PORT_ENABLE();
+        GPIO_InitStruct.Pin = RE_485_Pin;
+        GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+        GPIO_InitStruct.Pull = GPIO_NOPULL;
+        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+        GPIO_InitStruct.Alternate = USART_INTERFACE_RE_AF;
+        HAL_GPIO_Init(RE_485_GPIO_Port, &GPIO_InitStruct);
+			
         /* USART1 DMA Init */
         /* USART1_RX Init */
         hdma_usart_interface_rx.Instance = USART_INTERFACE_DMA_RX_STREAM;

@@ -12,12 +12,8 @@
                        INCLUDES
 --------------------------------------------------------------*/
 
-#include "EEPROM_emulation.h"
-#include "command_processor.h"
-#include "events_process.h"
-#include "pfc_logic.h"
-#include "settings.h"
 /* BSP */
+#include "BSP/bsp.h"
 #include "BSP/adc.h"
 #include "BSP/debug.h"
 #include "BSP/dma.h"
@@ -26,6 +22,12 @@
 #include "BSP/system.h"
 #include "BSP/timer.h"
 #include "BSP/uart.h"
+/* MDW */
+#include "eeprom_emulation.h"
+#include "command_processor.h"
+#include "events_process.h"
+#include "pfc_logic.h"
+#include "settings.h"
 /* app */
 #include "adc_logic.h"
 /* settings */

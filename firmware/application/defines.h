@@ -41,14 +41,6 @@
 #define MATH_PI    ((float)3.141592653589793) /**< The PI value */
 
 /*--------------------------------------------------------------
-											PUBLIC DEFINES::EEPROM
---------------------------------------------------------------*/
-
-#define EEPROM_START_ADDRESS ((uint32_t)(0x08180000)) /**< The start address of the EEPROM block */
-#define EEPROM_PAGE0_SECTOR  (FLASH_SECTOR_12)        /**< The ID of the first EEPROM sector */
-#define EEPROM_PAGE1_SECTOR  (FLASH_SECTOR_13)        /**< The ID of the second EEPROM sector */
-
-/*--------------------------------------------------------------
 											PUBLIC DEFINES::INTERFACE
 --------------------------------------------------------------*/
 

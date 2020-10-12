@@ -1,11 +1,11 @@
 /**
- * @file board_stm32f767_main_v0_2.h
+ * @file board_stm32f765_main_v0_2.h
  * @author Stanislav Karpikov
  * @brief Board definitions (main production board)
  */
 
-#ifndef _BOARD_STM32F767_MAIN_H
-#define _BOARD_STM32F767_MAIN_H
+#ifndef _BOARD_STM32F765_MAIN_H
+#define _BOARD_STM32F765_MAIN_H
 
 /** @addtogroup hdw_bsp_board
  * @{
@@ -16,6 +16,31 @@
 --------------------------------------------------------------*/
 
 #define BOARD_REVISION 				"0.2" /**< The current PCB revision */
+
+#ifndef STM32F765xx
+	#error "STM32F765xx should be defined in the project settings"
+#endif
+
+/*--------------------------------------------------------------
+											PUBLIC DEFINES::CONFIGURATION
+--------------------------------------------------------------*/
+
+#undef ADC_MOCKING /**< Define to imitate the ADC insteade of using real data */
+#undef PWM_MOCKING /**< Define to imitate the PWM output */
+#undef EFMC_MOCKING /**< Define to imitate the EFMC output */
+#undef COOLER_MOCKING /**< Define to imitate the cooler output */
+
+/*--------------------------------------------------------------
+											PUBLIC DEFINES::EEPROM
+--------------------------------------------------------------*/
+
+#define EEPROM_START_ADDRESS ((uint32_t)(0x08180000)) /**< The start address of the EEPROM block */
+#define EEPROM_PAGE0_SECTOR  (FLASH_SECTOR_12)        /**< The ID of the first EEPROM sector */
+#define EEPROM_PAGE1_SECTOR  (FLASH_SECTOR_13)        /**< The ID of the second EEPROM sector */
+
+/*--------------------------------------------------------------
+											PUBLIC DEFINES::GPIO
+--------------------------------------------------------------*/
 
 #define TAHOMETER_1_Pin       GPIO_PIN_3
 #define TAHOMETER_1_GPIO_Port GPIOE
@@ -81,23 +106,27 @@
 
 #define RS485_UART_RX_Pin       GPIO_PIN_10
 #define RS485_UART_RX_GPIO_Port GPIOA
+#define USART_INTERFACE_AF          GPIO_AF7_USART1
 
 #define RE_485_Pin             GPIO_PIN_12
 #define RE_485_GPIO_Port       GPIOA
 #define RS485_GPIO_PORT_ENABLE __HAL_RCC_GPIOA_CLK_ENABLE
+#define RS485_RE_GPIO_PORT_ENABLE  __HAL_RCC_GPIOA_CLK_ENABLE
+#define USART_INTERFACE_RE_AF          GPIO_AF7_USART1
 
 #define USART_INTERFACE             USART1
 #define USART_INTERFACE_IRQ         USART1_IRQHandler
 #define USART_INTERFACE_IRQN        USART1_IRQn
-#define USART_INTERFACE_AF          GPIO_AF7_USART1
 #define USART_INTERFACE_RCC_DISABLE __HAL_RCC_USART1_CLK_DISABLE
 #define USART_INTERFACE_RCC_ENABLE  __HAL_RCC_USART1_CLK_ENABLE
 
 #define USART_INTERFACE_DMA_RX_IRQ     DMA2_Stream5_IRQHandler
+#define USART_INTERFACE_DMA_RX_IRQN     DMA2_Stream5_IRQn
 #define USART_INTERFACE_DMA_RX_STREAM  DMA2_Stream5
 #define USART_INTERFACE_DMA_RX_CHANNEL DMA_CHANNEL_4
 
 #define USART_INTERFACE_DMA_TX_IRQ     DMA2_Stream7_IRQHandler
+#define USART_INTERFACE_DMA_TX_IRQN     DMA2_Stream7_IRQn
 #define USART_INTERFACE_DMA_TX_STREAM  DMA2_Stream7
 #define USART_INTERFACE_DMA_TX_CHANNEL DMA_CHANNEL_4
 
@@ -106,6 +135,7 @@
 #define ADC_CLK_ENABLE  __HAL_RCC_ADC1_CLK_ENABLE
 #define ADC_CLK_DISABLE __HAL_RCC_ADC1_CLK_DISABLE
 #define ADC_DMA_IRQ     DMA2_Stream0_IRQHandler
+#define ADC_DMA_IRQN     DMA2_Stream0_IRQn
 
 #define ADC_DMA_STREAM  DMA2_Stream0
 #define ADC_DMA_CHANNEL DMA_CHANNEL_0
@@ -120,9 +150,11 @@
 #define TIMER_PWM_CH2_DMA_STREAM  DMA2_Stream2
 #define TIMER_PWM_CH2_DMA_CHANNEL DMA_CHANNEL_6
 #define TIMER_PWM_CH2_DMA_IRQ     DMA2_Stream2_IRQHandler
+#define TIMER_PWM_CH2_DMA_IRQN     DMA2_Stream2_IRQn
 #define TIMER_PWM_CH3_DMA_STREAM  DMA2_Stream6
 #define TIMER_PWM_CH3_DMA_CHANNEL DMA_CHANNEL_6
 #define TIMER_PWM_CH3_DMA_IRQ     DMA2_Stream6_IRQHandler
+#define TIMER_PWM_CH3_DMA_IRQN     DMA2_Stream6_IRQn
 
 #define TIMER_PWM_LOW_CH1N_Pin       GPIO_PIN_8
 #define TIMER_PWM_LOW_CH1N_GPIO_Port GPIOE
@@ -143,9 +175,11 @@
 #define TIMER_EFMC_CH2_DMA_STREAM     DMA2_Stream4
 #define TIMER_EFMC_CH2_DMA_CHANNEL    DMA_CHANNEL_7
 #define TIMER_EFMC_CH2_DMA_IRQ        DMA2_Stream4_IRQHandler
+#define TIMER_EFMC_CH2_DMA_IRQN       DMA2_Stream4_IRQn
 #define TIMER_EFMC_CH1_DMA_STREAM     DMA2_Stream3
 #define TIMER_EFMC_CH1_DMA_CHANNEL    DMA_CHANNEL_7
 #define TIMER_EFMC_CH1_DMA_IRQ        DMA2_Stream3_IRQHandler
+#define TIMER_EFMC_CH1_DMA_IRQN       DMA2_Stream3_IRQn
 #define TIMER_EFMC_HIGH_CH1_Pin       GPIO_PIN_7
 #define TIMER_EFMC_HIGH_CH1_GPIO_Port GPIOC
 #define TIMER_EFMC_HIGH_CH2_Pin       GPIO_PIN_8
@@ -164,4 +198,4 @@
 #define TIMER_COOLER_CLK_DISABLE __HAL_RCC_TIM9_CLK_DISABLE
 
 /** @} */
-#endif /* _BOARD_STM32F767_MAIN_H */
+#endif /* _BOARD_STM32F765_MAIN_H */

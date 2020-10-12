@@ -78,8 +78,10 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
  */
 status_t adc_start(uint32_t* buffer, uint32_t buffer_size)
 {
+#ifndef ADC_MOCKING
     HAL_ADC_Start(&hadc);
     HAL_ADC_Start_DMA(&hadc, (uint32_t*)buffer, buffer_size);
+#endif
     return PFC_SUCCESS;
 }
 
@@ -90,8 +92,9 @@ status_t adc_start(uint32_t* buffer, uint32_t buffer_size)
  */
 status_t adc_stop(void)
 {
+#ifndef ADC_MOCKING
     HAL_ADC_Stop_DMA(&hadc);
-
+#endif
     return PFC_SUCCESS;
 }
 
@@ -103,6 +106,7 @@ status_t adc_stop(void)
  */
 void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
 {
+#ifndef ADC_MOCKING
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     if (hadc->Instance == ADC_ID)
     {
@@ -147,6 +151,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
 
         __HAL_LINKDMA(hadc, DMA_Handle, hdma_adc);
     }
+#endif
 }
 
 /**
@@ -157,6 +162,7 @@ void HAL_ADC_MspInit(ADC_HandleTypeDef* hadc)
  */
 void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
 {
+#ifndef ADC_MOCKING
     if (hadc->Instance == ADC1)
     {
         ADC_CLK_DISABLE();
@@ -168,6 +174,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
         /* ADC1 DMA DeInit */
         HAL_DMA_DeInit(hadc->DMA_Handle);
     }
+#endif
 }
 
 /*
@@ -177,6 +184,7 @@ void HAL_ADC_MspDeInit(ADC_HandleTypeDef* hadc)
  */
 status_t adc_init(void)
 {
+#ifndef ADC_MOCKING
     ADC_ChannelConfTypeDef sConfig = {0};
 
     /**Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion) */
@@ -295,6 +303,7 @@ status_t adc_init(void)
     {
         error_handler();
     }
+#endif
     return PFC_SUCCESS;
 }
 
@@ -303,6 +312,8 @@ status_t adc_init(void)
   */
 void ADC_DMA_IRQ(void)
 {
+#ifndef ADC_MOCKING
     HAL_DMA_IRQHandler(&hdma_adc);
+#endif
 }
 /** @} */

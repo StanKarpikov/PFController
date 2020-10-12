@@ -16,7 +16,7 @@
 --------------------------------------------------------------*/
 
 #include "eeprom_emulation.h"
-
+#include "BSP/bsp.h"
 #include "BSP/system.h"
 #include "stm32f7xx_hal.h"
 

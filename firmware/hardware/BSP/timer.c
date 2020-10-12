@@ -51,11 +51,13 @@ static DMA_HandleTypeDef hdma_tim_efmc_ch3 = {0}; /**< Timer EFMC channel 2 DMA 
  *
  * @param htim The hardware handle
  */
-static void tim_msp_post_init(TIM_HandleTypeDef* htim)
+static __attribute((unused)) void tim_msp_post_init(TIM_HandleTypeDef* htim)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
+		(void)GPIO_InitStruct;
     if (htim->Instance == TIMER_PWM)
     {
+#ifndef PWM_MOCKING
         __HAL_RCC_GPIOE_CLK_ENABLE();
 
         GPIO_InitStruct.Pin = TIMER_PWM_LOW_CH1N_Pin | TIMER_PWM_HIGH_CH1_Pin | TIMER_PWM_LOW_CH2N_Pin | TIMER_PWM_HIGH_CH2_Pin | TIMER_PWM_LOW_CH3N_Pin | TIMER_PWM_HIGH_CH3_Pin;
@@ -64,9 +66,11 @@ static void tim_msp_post_init(TIM_HandleTypeDef* htim)
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
         GPIO_InitStruct.Alternate = GPIO_AF1_TIM1;
         HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
+#endif
     }
     else if (htim->Instance == TIMER_EFMC)
     {
+#ifndef EFMC_MOCKING
         __HAL_RCC_GPIOB_CLK_ENABLE();
         __HAL_RCC_GPIOC_CLK_ENABLE();
 
@@ -83,9 +87,11 @@ static void tim_msp_post_init(TIM_HandleTypeDef* htim)
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
         GPIO_InitStruct.Alternate = GPIO_AF3_TIM8;
         HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+#endif
     }
     else if (htim->Instance == TIMER_COOLER)
     {
+#ifndef COOLER_MOCKING
         __HAL_RCC_GPIOE_CLK_ENABLE();
 
         GPIO_InitStruct.Pin = PWM_COOLER_Pin;
@@ -94,6 +100,7 @@ static void tim_msp_post_init(TIM_HandleTypeDef* htim)
         GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
         GPIO_InitStruct.Alternate = GPIO_AF3_TIM9;
         HAL_GPIO_Init(PWM_COOLER_GPIO_Port, &GPIO_InitStruct);
+#endif			
     }
 }
 
@@ -104,6 +111,7 @@ static void tim_msp_post_init(TIM_HandleTypeDef* htim)
  */
 static status_t timer_pwm_init(void)
 {
+#ifndef PWM_MOCKING
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
     TIM_OC_InitTypeDef sConfigOC = {0};
@@ -172,6 +180,7 @@ static status_t timer_pwm_init(void)
     }
     //~400ns
     tim_msp_post_init(&timer_pwm);
+#endif
     return PFC_SUCCESS;
 }
 
@@ -216,6 +225,7 @@ static status_t timer_sync_init(void)
  */
 static status_t tim_efmc_Init(void)
 {
+#ifndef EFMC_MOCKING
     TIM_ClockConfigTypeDef sClockSourceConfig = {0};
     TIM_MasterConfigTypeDef sMasterConfig = {0};
     TIM_OC_InitTypeDef sConfigOC = {0};
@@ -279,6 +289,7 @@ static status_t tim_efmc_Init(void)
         error_handler();
     }
     tim_msp_post_init(&htim_efmc);
+#endif
     return PFC_SUCCESS;
 }
 
@@ -289,6 +300,7 @@ static status_t tim_efmc_Init(void)
  */
 static status_t timer_cooler_init(void)
 {
+#ifndef COOLER_MOCKING
     TIM_OC_InitTypeDef sConfigOC = {0};
 
     timer_cooler.Instance = TIMER_COOLER;
@@ -310,6 +322,7 @@ static status_t timer_cooler_init(void)
         error_handler();
     }
     tim_msp_post_init(&timer_cooler);
+#endif
     return PFC_SUCCESS;
 }
 
@@ -326,8 +339,10 @@ static status_t timer_cooler_init(void)
 void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
+		(void)GPIO_InitStruct;
     if (htim_base->Instance == TIMER_PWM)
     {
+#ifndef PWM_MOCKING
         /* Peripheral clock enable */
         TIMER_PWM_CLK_ENABLE();
 
@@ -394,6 +409,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
         }
 
         __HAL_LINKDMA(htim_base, hdma[TIM_DMA_ID_CC3], hdma_tim_pwm_ch3);
+#endif
     }
     else if (htim_base->Instance == TIMER_SYNC)
     {
@@ -401,6 +417,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     }
     else if (htim_base->Instance == TIMER_EFMC)
     {
+#ifndef EFMC_MOCKING
         TIMER_EFMC_CLK_ENABLE();
 
         __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -445,6 +462,7 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
         }
 
         __HAL_LINKDMA(htim_base, hdma[TIM_DMA_ID_CC3], hdma_tim_efmc_ch3);
+#endif
     }
 }
 
@@ -456,10 +474,12 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
 */
 void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef* htim)
 {
+#ifndef COOLER_MOCKING
     if (htim->Instance == TIMER_COOLER)
     {
         TIMER_COOLER_CLK_ENABLE();
     }
+#endif
 }
 
 /**
@@ -472,6 +492,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 {
     if (htim_base->Instance == TIMER_PWM)
     {
+#ifndef PWM_MOCKING
         TIMER_PWM_CLK_DISABLE();
 
         HAL_GPIO_DeInit(GPIOE, TIMER_PWM_LOW_CH1N_Pin | TIMER_PWM_HIGH_CH1_Pin | TIMER_PWM_LOW_CH2N_Pin | TIMER_PWM_HIGH_CH2_Pin | TIMER_PWM_LOW_CH3N_Pin | TIMER_PWM_HIGH_CH3_Pin | GPIO_PIN_15);
@@ -479,6 +500,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
         HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC1]);
         HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC2]);
         HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC3]);
+#endif
     }
     else if (htim_base->Instance == TIMER_SYNC)
     {
@@ -486,6 +508,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
     }
     else if (htim_base->Instance == TIMER_EFMC)
     {
+#ifndef EFMC_MOCKING
         TIMER_EFMC_CLK_DISABLE();
 
         HAL_GPIO_DeInit(GPIOB, TIMER_EFMC_LOW_CH1N_Pin | TIMER_EFMC_LOW_CH2N_Pin);
@@ -494,6 +517,7 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 
         HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC2]);
         HAL_DMA_DeInit(htim_base->hdma[TIM_DMA_ID_CC3]);
+#endif
     }
 }
 
@@ -505,10 +529,12 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
 */
 void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim)
 {
+#ifndef COOLER_MOCKING
     if (htim->Instance == TIMER_COOLER)
     {
         TIMER_COOLER_CLK_DISABLE();
     }
+#endif
 }
 
 /*
@@ -522,9 +548,11 @@ void HAL_TIM_PWM_MspDeInit(TIM_HandleTypeDef* htim)
  */
 status_t timer_write_pwm(uint32_t ccr1, uint32_t ccr2, uint32_t ccr3)
 {
+#ifndef PWM_MOCKING
     TIMER_PWM->CCR1 = ccr1;
     TIMER_PWM->CCR2 = ccr2;
     TIMER_PWM->CCR3 = ccr3;
+#endif
     return PFC_SUCCESS;
 }
 
@@ -551,6 +579,7 @@ status_t timer_correct_period(uint32_t arr)
  */
 status_t timer_restore_pwm(void)
 {
+#ifndef PWM_MOCKING
     TIMER_PWM->CCER |= (TIM_CCER_CC1E);
     TIMER_PWM->CCER |= (TIM_CCER_CC1NE);
     TIMER_PWM->CCER |= (TIM_CCER_CC2E);
@@ -560,7 +589,7 @@ status_t timer_restore_pwm(void)
 
     __HAL_TIM_MOE_ENABLE(&timer_pwm);
     __HAL_TIM_ENABLE(&timer_pwm);
-
+#endif
     return PFC_SUCCESS;
 }
 
@@ -571,6 +600,7 @@ status_t timer_restore_pwm(void)
  */
 status_t timer_disable_pwm(void)
 {
+#ifndef PWM_MOCKING
     __HAL_TIM_MOE_DISABLE(&timer_pwm);
     __HAL_TIM_DISABLE(&timer_pwm);
 
@@ -580,6 +610,7 @@ status_t timer_disable_pwm(void)
     TIMER_PWM->CCER &= ~(TIM_CCER_CC2NE);
     TIMER_PWM->CCER &= ~(TIM_CCER_CC3E);
     TIMER_PWM->CCER &= ~(TIM_CCER_CC3NE);
+#endif
     return PFC_SUCCESS;
 }
 
@@ -608,6 +639,7 @@ status_t timer_init(void)
     return PFC_SUCCESS;
 }
 
+#ifndef PWM_MOCKING
 /**
   * @brief This function handles PWM timer channel 1 global interrupt.
   */
@@ -631,6 +663,9 @@ void TIMER_PWM_CH3_DMA_IRQ(void)
 {
     HAL_DMA_IRQHandler(&hdma_tim_pwm_ch3);
 }
+#endif
+
+#ifndef EFMC_MOCKING
 
 /**
   * @brief This function handles timer EFMC DMA channel 1 global interrupt.
@@ -647,4 +682,6 @@ void TIMER_EFMC_CH2_DMA_IRQ(void)
 {
     HAL_DMA_IRQHandler(&hdma_tim_efmc_ch3);
 }
+
+#endif
 /** @} */

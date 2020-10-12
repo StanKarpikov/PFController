@@ -28,7 +28,7 @@
  */
 status_t gpio_main_relay_switch_off(void)
 {
-    HAL_GPIO_WritePin(GPIOD, RELAY_2_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(RELAY_2_GPIO_Port, RELAY_2_Pin, GPIO_PIN_RESET);
     return PFC_SUCCESS;
 }
 
@@ -39,7 +39,7 @@ status_t gpio_main_relay_switch_off(void)
  */
 status_t gpio_main_relay_switch_on(void)
 {
-    HAL_GPIO_WritePin(GPIOD, RELAY_2_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(RELAY_2_GPIO_Port, RELAY_2_Pin, GPIO_PIN_SET);
     return PFC_SUCCESS;
 }
 
@@ -50,7 +50,7 @@ status_t gpio_main_relay_switch_on(void)
  */
 status_t gpio_preload_relay_switch_off(void)
 {
-    HAL_GPIO_WritePin(GPIOD, RELAY_1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(RELAY_1_GPIO_Port, RELAY_1_Pin, GPIO_PIN_RESET);
     return PFC_SUCCESS;
 }
 
@@ -61,7 +61,7 @@ status_t gpio_preload_relay_switch_off(void)
  */
 status_t gpio_preload_relay_switch_on(void)
 {
-    HAL_GPIO_WritePin(GPIOD, RELAY_1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(RELAY_1_GPIO_Port, RELAY_1_Pin, GPIO_PIN_SET);
     return PFC_SUCCESS;
 }
 
@@ -116,7 +116,7 @@ status_t gpio_pwm_test_off(void)
  */
 status_t gpio_error_led_on(void)
 {
-    HAL_GPIO_WritePin(GPIOD, LED_1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LED_1_GPIO_Port, LED_1_Pin, GPIO_PIN_SET);
     return PFC_SUCCESS;
 }
 
@@ -127,7 +127,7 @@ status_t gpio_error_led_on(void)
  */
 status_t gpio_status_led_on(void)
 {
-    HAL_GPIO_WritePin(GPIOD, LED_2_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, GPIO_PIN_SET);
     return PFC_SUCCESS;
 }
 
@@ -138,7 +138,7 @@ status_t gpio_status_led_on(void)
  */
 status_t gpio_error_led_off(void)
 {
-    HAL_GPIO_WritePin(GPIOD, LED_1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED_1_GPIO_Port, LED_1_Pin, GPIO_PIN_RESET);
     return PFC_SUCCESS;
 }
 
@@ -149,7 +149,7 @@ status_t gpio_error_led_off(void)
  */
 status_t gpio_status_led_off(void)
 {
-    HAL_GPIO_WritePin(GPIOD, LED_2_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(LED_2_GPIO_Port, LED_2_Pin, GPIO_PIN_RESET);
     return PFC_SUCCESS;
 }
 
