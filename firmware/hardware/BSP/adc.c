@@ -13,11 +13,20 @@
 --------------------------------------------------------------*/
 
 #include "BSP/adc.h"
-
+#include "BSP/debug.h"
 #include "BSP/bsp.h"
 #include "BSP/timer.h"
 #include "defines.h"
 #include "stm32f7xx_hal.h"
+
+#ifdef ADC_MOCKING
+#include "adc_logic.h"
+#endif
+/*--------------------------------------------------------------
+                       DEFINES
+--------------------------------------------------------------*/
+
+#define ADC_TIMER_MOCKING_PERIOD (1U) /**< Syncronisation timer 50 Hz x 128 period count (used in the mocking mode) */
 
 /*--------------------------------------------------------------
                        PRIVATE DATA
@@ -28,6 +37,10 @@ static DMA_HandleTypeDef hdma_adc = {0}; /**< ADC DMA hardware handle */
 
 static ADC_TRANSFER_CALLBACK adc_cplt_callback = 0;      /**< ADC DMA full complete callback */
 static ADC_TRANSFER_CALLBACK adc_half_cplt_callback = 0; /**< ADC DMA half complete callback */
+
+#ifdef ADC_MOCKING
+static uint16_t* mocking_buffer = 0; /**< ADC buffer to mock data */
+#endif
 
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS
@@ -81,6 +94,8 @@ status_t adc_start(uint32_t* buffer, uint32_t buffer_size)
 #ifndef ADC_MOCKING
     HAL_ADC_Start(&hadc);
     HAL_ADC_Start_DMA(&hadc, (uint32_t*)buffer, buffer_size);
+#else
+		mocking_buffer = (uint16_t*)buffer;
 #endif
     return PFC_SUCCESS;
 }
@@ -305,6 +320,61 @@ status_t adc_init(void)
     }
 #endif
     return PFC_SUCCESS;
+}
+
+#include "math.h"
+
+/**
+  * @brief  Period elapsed callback in non blocking mode 
+  *
+  * @param  htim pointer to a TIM_HandleTypeDef structure that contains
+  *                the configuration information for TIM module.
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+#ifdef ADC_MOCKING
+		static uint32_t period=0;
+	  static float alpha = 0;
+
+		period++;
+		if(period >= ADC_VAL_NUM)
+		{
+			period = 0;
+		}
+		
+		ENTER_CRITICAL();
+		if(mocking_buffer)
+		{
+			#define ADC_MOCK_ADC_I_ET 2000
+			#define ADC_MOCK_ADC_I_TEMP1 2000
+			#define ADC_MOCK_ADC_I_TEMP2 2000
+			#define ADC_MOCK_ADC_EDC_A 2000
+			#define ADC_MOCK_ADC_EDC_B 2000
+			#define ADC_MOCK_ADC_EDC_C 2000
+			#define ADC_MOCK_ADC_EDC_I 2000
+			
+			alpha = (float)period/ADC_VAL_NUM*MATH_PI;
+			(void)alpha;
+		
+			mocking_buffer[ADC_U_A]  = sinf(alpha)*2000+2000;
+			mocking_buffer[ADC_U_B]  = sinf(alpha + MATH_PI/3.0f)*2000+2000;
+			mocking_buffer[ADC_U_C]  = sinf(alpha + MATH_PI/3.0f*2.0f)*2000+2000;
+			mocking_buffer[ADC_I_A]  = sinf(alpha)*2000+2000;
+			mocking_buffer[ADC_I_B]  = sinf(alpha + MATH_PI/3.0f)*2000+2000;
+			mocking_buffer[ADC_I_C]  = sinf(alpha + MATH_PI/3.0f*2.0f)*2000+2000;
+			mocking_buffer[ADC_I_ET] = ADC_MOCK_ADC_I_ET;
+			mocking_buffer[ADC_I_TEMP1] = ADC_MOCK_ADC_I_TEMP1;
+			mocking_buffer[ADC_I_TEMP2] = ADC_MOCK_ADC_I_TEMP2;
+			mocking_buffer[ADC_EDC_A] = ADC_MOCK_ADC_EDC_A;
+			mocking_buffer[ADC_EDC_B] = ADC_MOCK_ADC_EDC_B;
+			mocking_buffer[ADC_EDC_C] = ADC_MOCK_ADC_EDC_C;
+			mocking_buffer[ADC_EDC_I] = ADC_MOCK_ADC_EDC_I;
+			
+			EXIT_CRITICAL();
+			HAL_ADC_ConvCpltCallback(&hadc);
+			HAL_ADC_ConvHalfCpltCallback(&hadc);
+		}
+#endif
 }
 
 /**

@@ -414,6 +414,10 @@ void HAL_TIM_Base_MspInit(TIM_HandleTypeDef* htim_base)
     else if (htim_base->Instance == TIMER_SYNC)
     {
         TIMER_SYNC_CLK_ENABLE();
+#ifdef ADC_MOCKING
+			  HAL_NVIC_SetPriority(TIMER_SYNC_IRQN, 0, 0);
+				HAL_NVIC_EnableIRQ(TIMER_SYNC_IRQN);
+#endif
     }
     else if (htim_base->Instance == TIMER_EFMC)
     {
@@ -505,6 +509,9 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* htim_base)
     else if (htim_base->Instance == TIMER_SYNC)
     {
         TIMER_SYNC_CLK_DISABLE();
+#ifdef ADC_MOCKING
+				HAL_NVIC_DisableIRQ(TIMER_SYNC_IRQN);
+#endif
     }
     else if (htim_base->Instance == TIMER_EFMC)
     {
@@ -621,7 +628,11 @@ status_t timer_disable_pwm(void)
  */
 status_t timer_start_adc_timer(void)
 {
-    HAL_TIM_Base_Start(&timer_adc);
+#ifdef ADC_MOCKING
+    HAL_TIM_Base_Start_IT(&timer_adc);
+#else
+		HAL_TIM_Base_Start(&timer_adc);
+#endif
     return PFC_SUCCESS;
 }
 
@@ -638,6 +649,16 @@ status_t timer_init(void)
     timer_sync_init();
     return PFC_SUCCESS;
 }
+
+#ifdef ADC_MOCKING
+/**
+  * @brief This function handles SYNC timer interrupt.
+  */
+void TIMER_SYNC_IRQ(void)
+{
+    HAL_TIM_IRQHandler(&timer_adc);
+}
+#endif
 
 #ifndef PWM_MOCKING
 /**
