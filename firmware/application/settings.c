@@ -18,9 +18,12 @@
 #include "EEPROM_emulation.h"
 #include "string.h"
 
+
 /*--------------------------------------------------------------
                        DEFINES
 --------------------------------------------------------------*/
+
+#define MAGIC_WORD (0x55AB) /**< A word that is used to check the storage */
 
 #define DEFAULT_UCAP_MIN       (200U)      /**< Default settings: minimum capacitor voltage */
 #define DEFAULT_UCAP_MAX       (800U)      /**< Default settings: maximum capacitor voltage */

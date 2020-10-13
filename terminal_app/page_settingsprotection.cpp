@@ -18,7 +18,9 @@
 
 void MainWindow::setTableProtectionsVal(TableProtectionRows row, float value)
 {
+    _ui->tableWidget_settings_protection->blockSignals(true);
     _ui->tableWidget_settings_protection->item(enum_int(row), 0)->setText(QString().sprintf("%.2f", static_cast<double>(value)));
+    _ui->tableWidget_settings_protection->blockSignals(false);
 }
 
 void MainWindow::pageSettingsProtectionInit()

@@ -26,9 +26,6 @@
 
 #define __IO volatile
 
-#define EEPROM_PAGE_SIZE      ((uint32_t)8 * 1024)   /**< EEPROM memory storage size: 8 Kbytes */
-#define EEPROM_PAGE_FULL_SIZE ((uint32_t)256 * 1024) /**< EEPROM memory storage full size: 256 Kbytes */
-
 #define EEPROM_PAGE0_BASE ((uint32_t)(EEPROM_START_ADDRESS))                         /**< EEPROM memory storage: the first page address */
 #define EEPROM_PAGE1_BASE ((uint32_t)(EEPROM_START_ADDRESS + EEPROM_PAGE_FULL_SIZE)) /**< EEPROM memory storage: the second page address */
 

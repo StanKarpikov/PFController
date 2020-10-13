@@ -51,6 +51,9 @@ LD10 GREEN  VBUS_USB_FS     PA9
 #define EEPROM_PAGE0_SECTOR  (FLASH_SECTOR_2)        /**< The ID of the first EEPROM sector */
 #define EEPROM_PAGE1_SECTOR  (FLASH_SECTOR_3)        /**< The ID of the second EEPROM sector */
 
+#define EEPROM_PAGE_SIZE      ((uint32_t)16 * 1024)   /**< EEPROM memory storage size: 16 Kbytes */
+#define EEPROM_PAGE_FULL_SIZE ((uint32_t)16 * 1024) /**< EEPROM memory storage full size: 16 Kbytes */
+
 /*--------------------------------------------------------------
 											PUBLIC DEFINES::GPIO
 --------------------------------------------------------------*/

@@ -38,6 +38,9 @@
 #define EEPROM_PAGE0_SECTOR  (FLASH_SECTOR_12)        /**< The ID of the first EEPROM sector */
 #define EEPROM_PAGE1_SECTOR  (FLASH_SECTOR_13)        /**< The ID of the second EEPROM sector */
 
+#define EEPROM_PAGE_SIZE      ((uint32_t)8 * 1024)   /**< EEPROM memory storage size: 8 Kbytes */
+#define EEPROM_PAGE_FULL_SIZE ((uint32_t)256 * 1024) /**< EEPROM memory storage full size: 256 Kbytes */
+
 /*--------------------------------------------------------------
 											PUBLIC DEFINES::GPIO
 --------------------------------------------------------------*/

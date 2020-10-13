@@ -36,6 +36,9 @@
 #define PERIOD_DRIFT        (1000UL)  /**< The acceptable period drift in [us] */
 #define MAXIMUM_PERIOD_DIFF (10)      /**< The acceptable period difference */
 
+#undef PROTECTION_ADC_OVERLOAD_CHECK /**< Check ADC data for overload */
+#undef PROTECTION_OVERCURRENT_CHECK /**< Check currents */
+#undef PROTECTION_OVERVOLTAGE_CHECK/**< Check voltages */
 /*--------------------------------------------------------------
                        PRIVATE DATA
 --------------------------------------------------------------*/
@@ -194,8 +197,9 @@ static void adc_half_cplt_callback(void)
     {
         adc_values[i_isr] = adc_values_raw[i_isr];
     }
-    //events_check_adc_overload(adc_values);//TODO: Add event protection
-
+#ifdef PROTECTION_ADC_OVERLOAD_CHECK
+    events_check_adc_overload(adc_values);//TODO: Add event protection
+#endif
     settings_calibrations_t calibrations = settings_get_calibrations();
 
     /* Apply calibrations */
@@ -206,8 +210,12 @@ static void adc_half_cplt_callback(void)
 
         pfc.adc.ch[current_buffer][i_isr][symbol] = adc_values[i_isr];
     }
-    //events_check_overcurrent(&adc_values[ADC_I_A]);
-    //events_check_overvoltage(&adc_values[ADC_U_A]);
+#ifdef PROTECTION_OVERCURRENT_CHECK
+    events_check_overcurrent(&adc_values[ADC_I_A]);
+#endif
+#ifdef PROTECTION_OVERVOLTAGE_CHECK
+    events_check_overvoltage(&adc_values[ADC_U_A]);
+#endif
     if (pfc_get_state() >= PFC_STATE_CHARGE && pfc_get_state() < PFC_STATE_FAULTBLOCK)
     {
         events_check_ud(adc_values[ADC_UCAP]);
