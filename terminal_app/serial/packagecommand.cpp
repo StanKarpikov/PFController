@@ -1,27 +1,27 @@
 #include "packagecommand.h"
 
-PackageCommand::PackageCommand(QObject *parent)
+InterfacePackage::InterfacePackage(QObject *parent)
     : QObject(parent)
 {
-    this->package_in = nullptr;
-    this->package_out = new DeviceSerialMessage();
+    this->package_read = nullptr;
+    this->package_to_send = new DeviceSerialMessage();
 }
 
-PackageCommand::~PackageCommand()
+InterfacePackage::~InterfacePackage()
 {
-    if (this->package_in)
+    if (this->package_read)
     {
-        delete this->package_in;
-        this->package_in = NULL;
+        delete this->package_read;
+        this->package_read = Q_NULLPTR;
     }
-    if (this->package_out)
+    if (this->package_to_send)
     {
-        delete this->package_out;
-        this->package_out = NULL;
+        delete this->package_to_send;
+        this->package_to_send = Q_NULLPTR;
     }
 }
 
-void PackageCommand::finishCommand(bool is_timed_out)
+void InterfacePackage::finishProcessing(bool is_timed_out)
 {
     emit complete(is_timed_out, this);
     this->deleteLater();

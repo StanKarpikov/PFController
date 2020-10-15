@@ -11,7 +11,7 @@
 #include "mainwindow.h"
 #include "types.h"
 #include <QEventLoop>
-#include "serial/DeviceSerialInterface.h"
+#include "serial/deviceserialinterface.h"
 #include "ui_mainwindow.h"
 
 #include "device_definition.h"
@@ -32,7 +32,7 @@ private:
     typedef std::function<void(package_general*)> package_handler;
 
 private:
-    ADFSerialInterface* _interface;
+    PFCSerialInterface* _interface;
     std::vector<package_handler> _handlers;
     QThread* _thread;
 
@@ -226,7 +226,7 @@ private slots:
     void protocolSetSettingsCapacitors(package_general* package);
 
 private:
-    void getAnswer(bool is_timeout, PackageCommand *pc);
+    void getAnswer(bool is_timeout, InterfacePackage *pc);
 
     inline float lineFloat(float x, float x1, float y1, float x2, float y2);
     void interpolateShiftResizeFloat(
@@ -235,7 +235,7 @@ private:
             float offset,
             std::vector<float> &out);
     void protocolUnknownCommand(package_general* answer);
-    void endRequest(package_general &req, PFCconfig::Interface::pfc_interface_commands_t command, ADFMessagePriority priority = ADFMessagePriority::NORMAL);
+    void endRequest(package_general &req, PFCconfig::Interface::pfc_interface_commands_t command, uint32_t packet_size, DeviceSerialMessage::MessagePriority priority = DeviceSerialMessage::MessagePriority::NORMAL);
 
 };
 

@@ -8,6 +8,8 @@ TEMPLATE = app
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    serial/deviceserialinterface.cpp \
+    serial/deviceserialmessage.cpp \
     settingsdialog.cpp \
     serial/crc.cpp \
     serial/packagecommand.cpp \
@@ -19,14 +21,14 @@ SOURCES += \
     page_settingsprotection.cpp \
     eqwidget.cpp \
     page_filters.cpp \
-    serial/DeviceSerialInterface.cpp \
-    serial/DeviceSerialMessage.cpp \
     device.cpp
 
 HEADERS += \
     device_definition.h \
     device_interface_commands.h \
     mainwindow.h \
+    serial/deviceserialinterface.h \
+    serial/deviceserialmessage.h \
     settingsdialog.h \
     mainwindow.h \
     serial/crc.h \
@@ -34,8 +36,6 @@ HEADERS += \
     qcustomplot.h \
     eqwidget.h \
     htmldelegate.h \
-    serial/DeviceSerialInterface.h \
-    serial/DeviceSerialMessage.h \
     device.h \
     types.h
 

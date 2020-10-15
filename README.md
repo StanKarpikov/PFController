@@ -99,6 +99,12 @@ The firmware was tested on the development board for STM32F765 (with modificatio
 Changes should be made before portion to the different hardware. The hardware description is defined mostly in the `board_stm32f7.h` file.
 
 ## Control software
+---
+**NOTE**
+
+Work in progress
+
+---
 
 ### Requirements
 

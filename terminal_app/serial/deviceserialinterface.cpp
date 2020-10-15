@@ -10,20 +10,20 @@
 #include <iostream>
 #include <sstream>
 #include <iomanip>
-#include "DeviceSerialInterface.h"
+#include "deviceserialinterface.h"
 #include <queue>
 
 using namespace std;
 
-ADFSerialInterface::ADFSerialInterface(QObject *parent)
+PFCSerialInterface::PFCSerialInterface(QObject *parent)
 {
     Q_UNUSED(parent)
     qRegisterMetaType<std::vector<DeviceSerialMessage>>("std::vector<Package>");
-    connect(this, &ADFSerialInterface::informConnectionChanged,
-            this, &ADFSerialInterface::ConnectionChanged);
+    connect(this, &PFCSerialInterface::informConnectionChanged,
+            this, &PFCSerialInterface::connectionHasChanged);
 }
 
-ADFSerialInterface::~ADFSerialInterface()
+PFCSerialInterface::~PFCSerialInterface()
 {
     {  // Locking in the RAII style
         QMutexLocker locker(&sendQueueMutex);
@@ -35,7 +35,7 @@ ADFSerialInterface::~ADFSerialInterface()
         }
     }
 }
-void ADFSerialInterface::ConnectTo(
+void PFCSerialInterface::ConnectTo(
     QString name,
     qint32 baudRate,
     QSerialPort::DataBits dataBits,
@@ -51,7 +51,7 @@ void ADFSerialInterface::ConnectTo(
     Q_UNUSED(numberOfRetries)
     if (_serial->isOpen())
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
                 "Порт закрыт");
         _serial->close();
     }
@@ -65,53 +65,53 @@ void ADFSerialInterface::ConnectTo(
 
     if (_serial->open(QIODevice::ReadWrite))
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
                 (QString("Порт %1 открыт: %2").arg(name).arg(QString::number(baudRate))).toStdString());
         emit connected();
     }
     else
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_WARNING, MESSAGE_TARGET_ALL,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_WARNING, MESSAGE_TARGET_ALL,
                 (QString("Ошибка открытия порта %1: %2").arg(name).arg(QString::number(baudRate))).toStdString());
     }
 }
-void ADFSerialInterface::Disconnect()
+void PFCSerialInterface::disconnectFromDevice()
 {
     if (_serial->isOpen())
     {
         _serial->close();
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
                 "Порт закрыт");
         emit disconnected();
     }
     else
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_WARNING, MESSAGE_TARGET_DEBUG,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_WARNING, MESSAGE_TARGET_DEBUG,
                 "Попытка закрытия неотрытого порта!");
         emit disconnected();
     }
 }
-void ADFSerialInterface::handleError(QSerialPort::SerialPortError err)
+void PFCSerialInterface::handleError(QSerialPort::SerialPortError err)
 {
     if (err == 0) return;
     uint32_t target = MESSAGE_TARGET_ALL;
     if (noError == 0) target = MESSAGE_TARGET_DEBUG;
     noError = 0;
-    Message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
+    message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
             (QString("Ошибка порта: %1(%2)")
                 .arg(err)
                 .arg(_serial->errorString())).toStdString());
     if (err == 12)
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, target,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, target,
                 "Соединение потеряно");
     }
     //Disconnect();
 }
-DeviceSerialMessage *ADFSerialInterface::serialReadPackage(int timeout)
+DeviceSerialMessage *PFCSerialInterface::serialReadPackage(int timeout)
 {
     QElapsedTimer timer;
-    vector<unsigned char> readBuf;
+    vector<uint8_t> readBuf;
 
     timer.start();
 
@@ -123,9 +123,9 @@ DeviceSerialMessage *ADFSerialInterface::serialReadPackage(int timeout)
 
             if (portion.size())
             {
-                Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_NONE,
+                message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_NONE,
                         (QString("GET : ").append(QString::fromStdString(hex_dump(
-                            std::vector<unsigned char>(
+                            std::vector<uint8_t>(
                                 portion.begin(), portion.end()))))).toStdString());
 
                 readBuf.reserve(readBuf.size() + portion.size());
@@ -137,7 +137,7 @@ DeviceSerialMessage *ADFSerialInterface::serialReadPackage(int timeout)
                 {
                     if (noError == 0)
                     {
-                        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
+                        message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
                                 "Соединение восстановлено");
                     }
                     noError = 1;
@@ -146,12 +146,12 @@ DeviceSerialMessage *ADFSerialInterface::serialReadPackage(int timeout)
             }
             _serial->waitForReadyRead(timeout - timer.elapsed());
         }
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_WARNING, MESSAGE_TARGET_DEBUG,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_WARNING, MESSAGE_TARGET_DEBUG,
                 "Ошибка ожидания ответа");
     }
     catch (ProtocolException &e)
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
                 (QString("Exception %1")
                     .arg(e.what())).toStdString());
     }
@@ -159,7 +159,7 @@ DeviceSerialMessage *ADFSerialInterface::serialReadPackage(int timeout)
     return Q_NULLPTR;
 }
 
-void ADFSerialInterface::run()
+void PFCSerialInterface::run()
 {
     {  // Locking in the RAII style
         QMutexLocker locker(&sendQueueMutex);
@@ -174,27 +174,20 @@ void ADFSerialInterface::run()
     _serial = new QSerialPort();
     connect(_serial, SIGNAL(error(QSerialPort::SerialPortError)), this,
             SLOT(handleError(QSerialPort::SerialPortError)));
-    connect(this, &ADFSerialInterface::couldWrite,
-            this, &ADFSerialInterface::sendQueue, Qt::QueuedConnection);
+    connect(this, &PFCSerialInterface::couldWrite,
+            this, &PFCSerialInterface::sendQueue, Qt::QueuedConnection);
 }
 
-/**
- * @brief Protocol::serialWrite
- * Отправка данных по QSerialPort
- *
- * @param dataToWrite
- */
-int ADFSerialInterface::serialWrite(const vector<unsigned char> &dataToWrite)
+int PFCSerialInterface::serialWrite(const vector<uint8_t> &dataToWrite)
 {
     int dataSize = dataToWrite.size();
 
     // C11++ style - get raw data from vector
     const char *data = (const char *)dataToWrite.data();
 
-    // отправляем
     if (!_serial || !_serial->isOpen())
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_NONE,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_NONE,
                 "Port not opened");
         return -1;
     }
@@ -202,20 +195,20 @@ int ADFSerialInterface::serialWrite(const vector<unsigned char> &dataToWrite)
 
     if (written < 0)
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
                 "Write error");
         return -1;
     }
     else if (written != dataSize)
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
                 "Write error: not all");
         return -1;
     }
-    // ждем пока все отправится
+
     if (!_serial->waitForBytesWritten(3000))
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
                 "Write error: wait");
         return -1;
     }
@@ -223,7 +216,7 @@ int ADFSerialInterface::serialWrite(const vector<unsigned char> &dataToWrite)
     return written;
 }
 
-std::string ADFSerialInterface::hex_dump(const std::vector<unsigned char> &buf)
+std::string PFCSerialInterface::hex_dump(const std::vector<uint8_t> &buf)
 {
     ostringstream oss;
     for (uint i = 0; i < buf.size(); i++)
@@ -231,15 +224,10 @@ std::string ADFSerialInterface::hex_dump(const std::vector<unsigned char> &buf)
     return oss.str();
 }
 
-/**
- * @brief Protocol::sendQueue
- * Оправляем первый пакет из очереди.
- * Непосредственно отправляет\получает данные с QSerialPort
- */
-void ADFSerialInterface::sendQueue()
+void PFCSerialInterface::sendQueue()
 {
     int written;
-    PackageCommand *pc = Q_NULLPTR;
+    InterfacePackage *pc = Q_NULLPTR;
 
     {  // Locking in the RAII style
         QMutexLocker locker(&sendQueueMutex);
@@ -253,80 +241,77 @@ void ADFSerialInterface::sendQueue()
         }
     }
 
-    const vector<unsigned char> &dataToWrite = pc->package_out->toBuffer();
+    const vector<uint8_t> &dataToWrite = pc->package_to_send->toBuffer();
 
     // отправляем пакет
     written = serialWrite(dataToWrite);
     if (written < 0)
     {
-        pc->finishCommand(true);
+        pc->finishProcessing(true);
         emit informConnectionChanged(false);
         return;
     }
-    Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_NONE,
-            (QString("SENDED: ").append(QString::fromStdString(hex_dump(dataToWrite)))).toStdString());
+    message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_NONE,
+            (QString("SENT: ").append(QString::fromStdString(hex_dump(dataToWrite)))).toStdString());
 
     // получаем ответ
-    if (pc->package_in)
+    if (pc->package_read)
     {
-        delete pc->package_in;
-        pc->package_in = Q_NULLPTR;
+        delete pc->package_read;
+        pc->package_read = Q_NULLPTR;
     }
 
-    pc->package_in = this->serialReadPackage(READ_TIMEOUT_MS);
+    pc->package_read = this->serialReadPackage(READ_TIMEOUT_MS);
 
-    if (pc->package_in)
+    if (pc->package_read)
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_NONE,
-                (QString("RECEIVED: ").append(QString::fromStdString(hex_dump(pc->package_in->data())))).toStdString());
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_NONE,
+                (QString("RECEIVED: ").append(QString::fromStdString(hex_dump(pc->package_read->data())))).toStdString());
         emit informConnectionChanged(true);
-        pc->finishCommand(false);
+        pc->finishProcessing(false);
     }
     else
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
                 "Превышено время ожидания!");
-        pc->finishCommand(true);
+        pc->finishProcessing(true);
         emit informConnectionChanged(false);
     }
 
     if (!_queue.empty()) emit couldWrite();  //избыточно
 }
 
-/**
- * @brief enqueueCommand Добавляет пакет в очередь на отправку.
- * @param pack Пакет для отправки
- */
-void ADFSerialInterface::enqueueCommand(PackageCommand *pc)
+void PFCSerialInterface::connectionHasChanged(bool connected)
 {
-    /*
-     * Вызов этого метода происходит в потоке, отличном от протокольного,
-     * поэтому синхронизируем доступ к очереди.
-     */
+    _connected = connected;
+}
+
+void PFCSerialInterface::enqueueCommand(InterfacePackage *pc)
+{
     //if (!_connected){
     //    pc->finishCommand(true);
     //   return;
     //}
     if (_queue.size() > SEND_QUEUE_LEN_MAX)
     {
-        Message(MESSAGE_TYPE_CONNECTION, MESSAGE_WARNING, MESSAGE_TARGET_DEBUG,
+        message(MESSAGE_TYPE_CONNECTION, MESSAGE_WARNING, MESSAGE_TARGET_DEBUG,
                 "Очередь отправки переполнена!");
-        pc->finishCommand(true);
+        pc->finishProcessing(true);
         return;
     }
     {  // Locking in the RAII style
         QMutexLocker locker(&sendQueueMutex);
 
-        std::priority_queue<PackageCommand *, std::vector<PackageCommand *>, CustomCompare> tmp_q = _queue;  //copy the original queue to the temporary queue
+        std::priority_queue<InterfacePackage *, std::vector<InterfacePackage *>, CustomCompare> tmp_q = _queue;
 
         while (!tmp_q.empty())
         {
-            PackageCommand *q_element = tmp_q.top();
-            if (q_element->package_out->command() == pc->package_out->command())
+            InterfacePackage *q_element = tmp_q.top();
+            if (q_element->package_to_send->command() == pc->package_to_send->command())
             {
-                if (q_element->package_out->_data == pc->package_out->_data)
+                if (q_element->package_to_send->data() == pc->package_to_send->data())
                 {
-                    pc->finishCommand(true);
+                    pc->finishProcessing(true);
                     return;
                 }
             }
@@ -336,6 +321,5 @@ void ADFSerialInterface::enqueueCommand(PackageCommand *pc)
         _queue.push(pc);
     }
 
-    // Посылаем сигнал только если очередь раньше была пуста
     emit couldWrite();
 }

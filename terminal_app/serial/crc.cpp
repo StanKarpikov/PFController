@@ -1,9 +1,9 @@
 #include "crc.h"
 
-quint16 crc16(unsigned char *pcBlock, unsigned char len)
+uint16_t crc16(uint8_t *pcBlock, uint8_t len)
 {
-    quint16 crc = CRC16_INITIAL_VALUE;  // initial value
-    quint16 polynomial = 0x1021;        // 0001 0000 0010 0001  (0, 5, 12)
+    uint16_t crc = CRC16_INITIAL_VALUE;  // initial value
+    uint16_t polynomial = 0x1021;        // 0001 0000 0010 0001  (0, 5, 12)
 
     for (int b = 0; b < len; b++)
     {
@@ -20,10 +20,10 @@ quint16 crc16(unsigned char *pcBlock, unsigned char len)
     return crc;
 }
 
-quint16 crc16(const std::vector<unsigned char> &block)
+uint16_t crc16(const std::vector<uint8_t> &block)
 {
-    quint16 crc = CRC16_INITIAL_VALUE;  // initial value
-    quint16 polynomial = 0x1021;        // 0001 0000 0010 0001  (0, 5, 12)
+    uint16_t crc = CRC16_INITIAL_VALUE;  // initial value
+    uint16_t polynomial = 0x1021;        // 0001 0000 0010 0001  (0, 5, 12)
 
     for (int b = 0; b < block.size(); b++)
     {

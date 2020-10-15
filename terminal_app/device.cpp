@@ -24,13 +24,13 @@ using namespace PFCconfig::Events;
 --------------------------------------------------------------*/
 
 PFC::PFC()
-    : _interface(new ADFSerialInterface(Q_NULLPTR)),
+    : _interface(new PFCSerialInterface(Q_NULLPTR)),
       _handlers(enum_int(pfc_interface_commands_t::PFC_COMMAND_COUNT)),
       _thread(new QThread())
 {
     /* Translate interface link signals to the upper level */
-    connect(_interface, &ADFSerialInterface::connected, this, &PFC::interfaceConnected);
-    connect(_interface, &ADFSerialInterface::disconnected, this, &PFC::interfaceDisconnected);
+    connect(_interface, &PFCSerialInterface::connected, this, &PFC::interfaceConnected);
+    connect(_interface, &PFCSerialInterface::disconnected, this, &PFC::interfaceDisconnected);
 
     /* Run the interface in a separate thread */
     _interface->moveToThread(_thread);
@@ -78,7 +78,7 @@ PFC::PFC()
     _handlers[enum_int(pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_FILTERS)] =
         std::bind(&PFC::protocolSetSettingsFilters, this, std::placeholders::_1);
 
-    connect(_interface, &ADFSerialInterface::Message, this, &PFC::message);
+    connect(_interface, &PFCSerialInterface::message, this, &PFC::message);
 
     message(MESSAGE_TYPE_GENERAL, MESSAGE_NORMAL, MESSAGE_TARGET_DEBUG, "Поток АДФ запущен");
 }
@@ -99,81 +99,81 @@ void PFC::protocolUnknownCommand(package_general* answer)
          PUBLIC CLASS FUNCTIONS::REQUESTS
 --------------------------------------------------------------*/
 
-void PFC::endRequest(package_general& req, pfc_interface_commands_t command, ADFMessagePriority priority)
+void PFC::endRequest(package_general& req, pfc_interface_commands_t command, uint32_t packet_size, DeviceSerialMessage::MessagePriority priority)
 {
     std::vector<uint8_t> datareq;
     /* TODO: Verify sizeof */
-    if (sizeof(req))
+    if (packet_size)
     {
-        datareq.assign(reinterpret_cast<uint8_t*>(&req), reinterpret_cast<uint8_t*>(&req) + sizeof(req));
+        datareq.assign(reinterpret_cast<uint8_t*>(&req), reinterpret_cast<uint8_t*>(&req) + packet_size);
     }
-    PackageCommand* p = new PackageCommand();
-    p->package_out->fill(
+    InterfacePackage* p = new InterfacePackage();
+    p->package_to_send->fill(
         priority,
-        Sender::GUI,
+        DeviceSerialMessage::Sender::GUI,
         static_cast<uint8_t>(enum_int(command)),
         datareq);
     _interface->enqueueCommand(p);
-    connect(p, &PackageCommand::complete, this, &PFC::getAnswer /*,Qt::DirectConnection*/);
+    connect(p, &InterfacePackage::complete, this, &PFC::getAnswer /*,Qt::DirectConnection*/);
 }
 
 void PFC::updateNetVoltage()
 {
     command_get_adc_active req;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE, sizeof(req));
 }
 void PFC::updateWorkState(uint64_t currentTime)
 {
     command_get_work_state req;
     req.currentTime = currentTime;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_WORK_STATE);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_WORK_STATE, sizeof(req));
 }
 void PFC::updateEvents(uint64_t afterIndex)
 {
     command_get_events req;
     req.after_index = afterIndex;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_EVENTS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_EVENTS, sizeof(req));
 }
 void PFC::updateVersionInfo()
 {
     command_get_version_info req;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_VERSION_INFO);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_VERSION_INFO, sizeof(req));
 }
 void PFC::updateNetVoltageRAW()
 {
     command_get_adc_active_raw req;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE_RAW);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE_RAW, sizeof(req));
 }
 void PFC::updateOscillog(PFCOscillogCnannel channel)
 {
     command_get_oscillog req;
     req.num = static_cast<decltype(req.num)>(enum_int(channel));
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_OSCILLOG);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_OSCILLOG, sizeof(req));
 }
 void PFC::updateNetParams()
 {
     command_get_net_params req;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_NET_PARAMS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_NET_PARAMS, sizeof(req));
 }
 void PFC::updateSettingsCalibrations()
 {
     command_get_settings_calibrations req;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CALIBRATIONS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CALIBRATIONS, sizeof(req));
 }
 void PFC::updateSettingsProtection()
 {
     command_get_settings_protection req;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_PROTECTION);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_PROTECTION, sizeof(req));
 }
 void PFC::updateSettingsCapacitors()
 {
     command_get_settings_capacitors req;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CAPACITORS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CAPACITORS, sizeof(req));
 }
 void PFC::updateSettingsFilters()
 {
     command_get_settings_filters req;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_FILTERS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_FILTERS, sizeof(req));
 }
 
 /*--------------------------------------------------------------
@@ -187,7 +187,7 @@ void PFC::writeSettingsCalibrations(
     command_set_settings_calibrations req;
     for (uint i = 0; i < calibration.size(); i++) req.calibration[i] = calibration[i];
     for (uint i = 0; i < offset.size(); i++) req.offset[i] = offset[i];
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_CALIBRATIONS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_CALIBRATIONS, sizeof(req));
 }
 
 void PFC::writeSettingsProtection(
@@ -211,7 +211,7 @@ void PFC::writeSettingsProtection(
     req.F_max = Fnet_max;
     req.I_max_rms = I_max_rms;
     req.I_max_peak = I_max_peak;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_PROTECTION);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_PROTECTION, sizeof(req));
 }
 
 void PFC::writeSettingsCapacitors(
@@ -227,7 +227,7 @@ void PFC::writeSettingsCapacitors(
     req.ctrl_Ucap_Kd = ctrlUd_Kd;
     req.Ucap_nominal = Ud_nominal;
     req.Ucap_precharge = Ud_precharge;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_CAPACITORS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_CAPACITORS, sizeof(req));
 }
 
 void PFC::writeSettingsFilters(
@@ -239,7 +239,7 @@ void PFC::writeSettingsFilters(
     req.K_I = K_I;
     req.K_U = K_U;
     req.K_Ucap = K_UD;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_FILTERS);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SET_SETTINGS_FILTERS, sizeof(req));
 }
 
 void PFC::writeSwitchOnOff(pfc_commands_t command, uint32_t data)
@@ -247,19 +247,19 @@ void PFC::writeSwitchOnOff(pfc_commands_t command, uint32_t data)
     command_switch_on_off req;
     req.command = static_cast<decltype(req.command)>(command);
     req.data = data;
-    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SWITCH_ON_OFF, ADFMessagePriority::HIGH);
+    endRequest(req, pfc_interface_commands_t::PFC_COMMAND_SWITCH_ON_OFF, sizeof(req), DeviceSerialMessage::MessagePriority::HIGH);
 }
 
 /*--------------------------------------------------------------
          PRIVATE CLASS FUNCTIONS::ANSWER
 --------------------------------------------------------------*/
 
-void PFC::getAnswer(bool is_timeout, PackageCommand* pc)
+void PFC::getAnswer(bool is_timeout, InterfacePackage* pc)
 {
     //qDebug() << Q_FUNC_INFO;
     if (is_timeout) return;
 
-    auto command = static_cast<pfc_interface_commands_t>(pc->package_in->command());
+    auto command = static_cast<pfc_interface_commands_t>(pc->package_read->command());
 
     if (command >= pfc_interface_commands_t::PFC_COMMAND_COUNT)
     {
@@ -267,12 +267,13 @@ void PFC::getAnswer(bool is_timeout, PackageCommand* pc)
         return;
     }
     //qDebug() << pc->package_in->command();
-    if (pc->package_in->error())
+    if (pc->package_read->error())
     {
         message(MESSAGE_TYPE_GLOBALWARNING, MESSAGE_NORMAL, MESSAGE_TARGET_DEBUG, "Ошибка выполнения команды");
         return;
     }
-    uint8_t* command_data = pc->package_in->data().data();
+    auto package_data = pc->package_read->data();
+    uint8_t* command_data = &package_data[0];
 
     package_general* package = reinterpret_cast<package_general*>(command_data);
 
@@ -346,6 +347,10 @@ void PFC::protocolGetEvents(package_general* package)
     auto answer = static_cast<answer_get_events*>(package);
     if (answer->num == 0) return;
     std::list<EventRecord> ev;
+    if(answer->num > MAX_NUM_TRANSFERED_EVENTS)
+    {
+        return;
+    }
     for (int i = 0; i < answer->num; i++)
     {
         ev.push_back(answer->events[i]);

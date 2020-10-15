@@ -3,24 +3,20 @@
 #include <iostream>
 
 #include "crc.h"
-#include "DeviceSerialMessage.h"
-#include "QDebug.h"
+#include "deviceserialmessage.h"
+#include <QDebug>
 
 using namespace std;
 
-const int DeviceSerialMessage::MAX_LENGTH = 256;
-const unsigned char DeviceSerialMessage::START_BYTE = 0x55;
-const unsigned char DeviceSerialMessage::STOP_BYTE = 0x77;
-
 DeviceSerialMessage::DeviceSerialMessage()
-    : DeviceSerialMessage(ADFMessagePriority::NORMAL, 0, Sender::PFC, false, false, 0, std::vector<unsigned char>())
+    : DeviceSerialMessage(MessagePriority::NORMAL, 0, Sender::PFC, false, false, 0, std::vector<uint8_t>())
 {
 }
 
-DeviceSerialMessage::DeviceSerialMessage(const ADFMessagePriority priority, const unsigned char command, const Sender sender, const bool error,
-                                         const bool crcError, unsigned char crc,
-                                         const std::vector<unsigned char> &data)
-    : _sender(sender), _error(error), _crcError(crcError), _crc(crc), _priority(priority), _command(command)
+DeviceSerialMessage::DeviceSerialMessage(const MessagePriority priority, const uint8_t command, const Sender sender, const bool error,
+                                         const bool crcError, const uint16_t crc,
+                                         const std::vector<uint8_t> &data)
+    : _sender(sender), _error(error), _crcError(crcError), _crc(crc), _command(command), _priority(priority)
 {
     std::copy(data.begin(), data.end(), back_inserter(_data));
 }
@@ -36,11 +32,29 @@ DeviceSerialMessage::~DeviceSerialMessage()
 void DeviceSerialMessage::clear()
 {
     clearData();
-    setPriority(ADFMessagePriority::NORMAL);
+    setPriority(MessagePriority::NORMAL);
     setCommand(0);
     setSender(Sender::PFC);
     setError(false);
     setCrcError(false);
+}
+
+void DeviceSerialMessage::fill(
+    MessagePriority priority,
+    Sender sender,
+    uint8_t comm,
+    const std::vector<uint8_t> &data)
+{
+    setPriority(priority);
+    setSender(sender);
+    appendData(data);
+    setCommand(comm);
+    _timestamp = QDateTime::currentMSecsSinceEpoch();
+}
+
+uint64_t DeviceSerialMessage::timestamp(void)
+{
+    return _timestamp;
 }
 
 void DeviceSerialMessage::clearData()
@@ -48,7 +62,7 @@ void DeviceSerialMessage::clearData()
     _data.clear();
 }
 
-bool DeviceSerialMessage::addData(const std::vector<unsigned char> &data)
+bool DeviceSerialMessage::appendData(const std::vector<uint8_t> &data)
 {
     if (data.size() > MAX_LENGTH - MIN_LENGTH - _data.size())
         return false;
@@ -56,7 +70,7 @@ bool DeviceSerialMessage::addData(const std::vector<unsigned char> &data)
     return true;
 }
 
-bool DeviceSerialMessage::addData(const unsigned char data)
+bool DeviceSerialMessage::appendData(const uint8_t data)
 {
     if (_data.size() >= MAX_LENGTH - MIN_LENGTH)
         return false;
@@ -64,12 +78,12 @@ bool DeviceSerialMessage::addData(const unsigned char data)
     return true;
 }
 
-std::vector<unsigned char> DeviceSerialMessage::data() const
+std::vector<uint8_t> DeviceSerialMessage::data() const
 {
     return _data;
 }
 
-unsigned char DeviceSerialMessage::data(unsigned int pos) const
+uint8_t DeviceSerialMessage::data(uint pos) const
 {
     return _data[pos];
 }
@@ -79,17 +93,17 @@ unsigned int DeviceSerialMessage::dataLength() const
     return _data.size();
 }
 
-unsigned char DeviceSerialMessage::command() const
+uint8_t DeviceSerialMessage::command() const
 {
     return _command;
 }
 
-void DeviceSerialMessage::setCommand(unsigned char cmd)
+void DeviceSerialMessage::setCommand(uint8_t cmd)
 {
     _command = cmd;
 }
 
-Sender DeviceSerialMessage::sender() const
+DeviceSerialMessage::Sender DeviceSerialMessage::sender() const
 {
     return _sender;
 }
@@ -98,12 +112,12 @@ void DeviceSerialMessage::setSender(Sender sender)
 {
     _sender = sender;
 }
-ADFMessagePriority DeviceSerialMessage::priority() const
+DeviceSerialMessage::MessagePriority DeviceSerialMessage::priority() const
 {
     return _priority;
 }
 
-void DeviceSerialMessage::setPriority(ADFMessagePriority priority)
+void DeviceSerialMessage::setPriority(MessagePriority priority)
 {
     _priority = priority;
 }
@@ -128,22 +142,22 @@ void DeviceSerialMessage::setCrcError(bool crc_error)
     _crcError = crc_error;
 }
 
-quint16 DeviceSerialMessage::crc() const
+uint16_t DeviceSerialMessage::crc() const
 {
     return _crc;
 }
 
-void DeviceSerialMessage::setCrc(quint16 crc)
+void DeviceSerialMessage::setCrc(const uint16_t crc)
 {
     _crc = crc;
 }
 
-std::vector<unsigned char> DeviceSerialMessage::toBuffer() const
+std::vector<uint8_t> DeviceSerialMessage::toBuffer() const
 {
-    vector<unsigned char> raw_data;
+    vector<uint8_t> raw_data;
     raw_data.push_back(START_BYTE);
 
-    unsigned char status = 0;
+    uint8_t status = 0;
     if (sender() == Sender::GUI) status |= 0x01;
     if (error()) status |= 0x02;
     if (crcError()) status |= 0x04;
@@ -153,7 +167,7 @@ std::vector<unsigned char> DeviceSerialMessage::toBuffer() const
     raw_data.push_back(command());
     copy(_data.begin(), _data.end(), back_inserter(raw_data));
 
-    quint16 crc = crc16(vector<unsigned char>(raw_data.begin() + 1, raw_data.end()));
+    uint16_t crc = crc16(vector<uint8_t>(raw_data.begin() + 1, raw_data.end()));
     raw_data.push_back(crc & 0xFF);
     raw_data.push_back((crc >> 8) & 0xFF);
     raw_data.push_back(STOP_BYTE);
@@ -161,13 +175,13 @@ std::vector<unsigned char> DeviceSerialMessage::toBuffer() const
     return raw_data;
 }
 
-DeviceSerialMessage *DeviceSerialMessage::popFromBuffer(std::vector<unsigned char> &data)
+DeviceSerialMessage *DeviceSerialMessage::popFromBuffer(std::vector<uint8_t> &data)
 {
-    for (int i = 0; i < data.size(); i++)
+    for (uint i = 0; i < data.size(); i++)
     {
         if (data[i] == START_BYTE)
         {
-            int start_pos = i;
+            uint start_pos = i;
 
             if (start_pos + HEADER_LEN > data.size())
                 break;  // incomplete package header
@@ -178,15 +192,15 @@ DeviceSerialMessage *DeviceSerialMessage::popFromBuffer(std::vector<unsigned cha
             if (start_pos + HEADER_LEN + package_len > data.size())
                 break;  // incomplete package
 
-            int command = data[start_pos + 3];
-            quint16 crc = data[start_pos + HEADER_LEN + package_len - 2];
+            uint8_t command = data[start_pos + 3];
+            uint16_t crc = data[start_pos + HEADER_LEN + package_len - 2];
             crc |= data[start_pos + HEADER_LEN + package_len - 1] << 8;
-            int stop_byte = data[start_pos + HEADER_LEN + package_len];
+            uint8_t stop_byte = data[start_pos + HEADER_LEN + package_len];
 
             if (stop_byte != STOP_BYTE)
                 continue;  // no magic stop byte at the end of the package - this is not a valid package.
 
-            uint16_t crccalc = crc16(vector<unsigned char>(data.begin() + start_pos + 1,
+            uint16_t crccalc = crc16(vector<uint8_t>(data.begin() + start_pos + 1,
                                                            data.begin() + start_pos + HEADER_LEN + package_len - 2));
 
             if (crc != crccalc)
@@ -199,7 +213,7 @@ DeviceSerialMessage *DeviceSerialMessage::popFromBuffer(std::vector<unsigned cha
             p->setSender(status & 0x01 ? Sender::GUI : Sender::PFC);
             p->setError(status & 0x02 ? true : false);
             p->setCrcError(status & 0x04 ? true : false);
-            p->addData(vector<unsigned char>(data.begin() + start_pos + HEADER_LEN + 1, data.begin() + start_pos + HEADER_LEN + package_len - 2));
+            p->appendData(vector<uint8_t>(data.begin() + start_pos + HEADER_LEN + 1, data.begin() + start_pos + HEADER_LEN + package_len - 2));
             data.erase(data.begin(), data.begin() + HEADER_LEN + package_len);
 
             return p;

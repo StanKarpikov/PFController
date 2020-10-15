@@ -5,7 +5,7 @@
 #include <QtGlobal>
 #define CRC16_INITIAL_VALUE 0x1D0F
 
-quint16 crc16(unsigned char *pcBlock, unsigned char len);
-quint16 crc16(const std::vector<unsigned char> &block);
+uint16_t crc16(uint8_t *pcBlock, uint8_t len);
+uint16_t crc16(const std::vector<uint8_t> &block);
 
 #endif /* CRC_H_ */

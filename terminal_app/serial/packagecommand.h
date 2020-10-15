@@ -1,23 +1,22 @@
-#ifndef PACKAGECOMMAND_H
-#define PACKAGECOMMAND_H
+#ifndef __INTERFACE_PACKAGE_H
+#define __INTERFACE_PACKAGE_H
 
 #include <QObject>
-#include "DeviceSerialMessage.h"
+#include "deviceserialmessage.h"
 #include "types.h"
 
-class PackageCommand : public QObject
+class InterfacePackage : public QObject
 {
     Q_OBJECT
    public:
-    explicit PackageCommand(QObject *parent = 0);
-    virtual ~PackageCommand(void);
+    explicit InterfacePackage(QObject *parent = Q_NULLPTR);
+    virtual ~InterfacePackage(void);
 
-    DeviceSerialMessage *package_out;  //!< Пакет на отправку
-    DeviceSerialMessage *package_in;
-    void finishCommand(bool is_timed_out);
+    DeviceSerialMessage *package_to_send;
+    DeviceSerialMessage *package_read;
+    void finishProcessing(bool is_timed_out);
    signals:
-    void complete(bool timeout, PackageCommand *c);
-   public slots:
+    void complete(bool timeout, InterfacePackage *c);
 };
 
-#endif  // PACKAGECOMMAND_H
+#endif  /* __INTERFACE_PACKAGE_H */

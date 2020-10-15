@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget* parent)
     qRegisterMetaType<QSerialPort::StopBits>("QSerialPort::StopBits");
     qRegisterMetaType<QSerialPort::FlowControl>("QSerialPort::FlowControl");
     qRegisterMetaType<std::vector<uint8_t>>("std::vector<uint8_t>");
-    qRegisterMetaType<PackageCommand*>("PackageCommand*");
+    qRegisterMetaType<InterfacePackage*>("PackageCommand*");
     qRegisterMetaType<uint8_t>("uint8_t");
     qRegisterMetaType<std::string>("std::string");
 
@@ -542,10 +542,10 @@ void MainWindow::message(uint8_t type, uint8_t level, uint8_t target, std::strin
     QTextDocument doc;
     doc.setHtml(QString::fromStdString(prefix));
     QString ss(doc.toPlainText());
-    //if (target & MESSAGE_TARGET_DEBUG)
-    //{
+    if (target & MESSAGE_TARGET_DEBUG)
+    {
         qDebug() << ss;
-    //}
+    }
     if (target & MESSAGE_TARGET_STATUS)
     {
         _ui->statusBar->showMessage(ss, 5000);
