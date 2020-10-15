@@ -70,7 +70,7 @@ status_t command_handlers_init(void);
  *
  * @return The operation status
  */
-status_t protocol_write_osc_data(float** osc_adc_ch);
+status_t protocol_write_osc_data(float osc_adc_ch[PFC_NCHAN][ADC_VAL_NUM]);
 
 /** @} */
 #endif /*_COMMAND_PROCESSOR_H */

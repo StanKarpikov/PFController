@@ -353,7 +353,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			#define ADC_MOCK_ADC_EDC_C 2000
 			#define ADC_MOCK_ADC_EDC_I 2000
 			
-			alpha = (float)period/ADC_VAL_NUM*MATH_PI;
+			alpha = (float)period/ADC_VAL_NUM*2.0f*MATH_PI;
 			(void)alpha;
 		
 			mocking_buffer[ADC_U_A]  = sinf(alpha)*2000+2000;
@@ -365,9 +365,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			mocking_buffer[ADC_I_ET] = ADC_MOCK_ADC_I_ET;
 			mocking_buffer[ADC_I_TEMP1] = ADC_MOCK_ADC_I_TEMP1;
 			mocking_buffer[ADC_I_TEMP2] = ADC_MOCK_ADC_I_TEMP2;
-			mocking_buffer[ADC_EDC_A] = ADC_MOCK_ADC_EDC_A;
-			mocking_buffer[ADC_EDC_B] = ADC_MOCK_ADC_EDC_B;
-			mocking_buffer[ADC_EDC_C] = ADC_MOCK_ADC_EDC_C;
+			mocking_buffer[ADC_EDC_A] = sinf(alpha)*2000+2000;
+			mocking_buffer[ADC_EDC_B]   = sinf(alpha + MATH_PI/3.0f)*2000+2000;
+			mocking_buffer[ADC_EDC_C]   = sinf(alpha + MATH_PI/3.0f*2.0f)*2000+2000;
 			mocking_buffer[ADC_EDC_I] = ADC_MOCK_ADC_EDC_I;
 			
 			EXIT_CRITICAL();

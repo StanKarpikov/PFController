@@ -16,7 +16,7 @@
                        PRIVATE FUNCTIONS
 --------------------------------------------------------------*/
 
-void MainWindow::pageSettingsCapacitorsInit()
+void MainWindow::pageSettingsCapacitorsInit(void)
 {
 }
 
@@ -45,31 +45,31 @@ void MainWindow::setSettingsCapacitors(
 
     uint16_t value = 0;
     if (_pfc_settings.adc.ADC_UD < 0)
-    {  //< precharge
+    {  /* < precharge */
         value = 0;
     }
     else if (_pfc_settings.adc.ADC_UD < (Ud_precharge))
-    {  //< precharge
+    {  /* < precharge */
         value = static_cast<uint16_t>(_pfc_settings.adc.ADC_UD / Ud_precharge * (1000.0f / 4.0f));
     }
     else if (_pfc_settings.adc.ADC_UD < (Ud_nominal))
-    {  //precharge < x < nominal
+    {  /* precharge < x < nominal */
         value = static_cast<uint16_t>((_pfc_settings.adc.ADC_UD - Ud_precharge) / (Ud_nominal - Ud_precharge) * (1000.0f / 2.0f) + (1000.0f / 4.0f));
     }
     else
-    {  //> nominal
+    {  /* > nominal */
         value = static_cast<uint16_t>((_pfc_settings.adc.ADC_UD - Ud_nominal) / (UD_MAX_VALUE - Ud_nominal) * (1000.0f / 4.0f) + (3.0f * 1000.0f / 4.0f));
     }
 
-    _ui->progressBar_Ud1->setValue(value);
+    _ui->progressCapVoltage->setValue(value);
 
-    updateSpinVal(_ui->doubleSpinBox_cap_nominal, Ud_nominal);
-    updateSpinVal(_ui->doubleSpinBox_cap_precharge, Ud_precharge);
-    updateSpinVal(_ui->doubleSpinBox_capacitors_Kp, ctrlUd_Kp);
-    updateSpinVal(_ui->doubleSpinBox_capacitors_Ki, ctrlUd_Ki);
-    updateSpinVal(_ui->doubleSpinBox_capacitors_Kd, ctrlUd_Kd);
+    updateSpinVal(_ui->spinCapNominal, Ud_nominal);
+    updateSpinVal(_ui->spinCapPrecharge, Ud_precharge);
+    updateSpinVal(_ui->valueCapacitorsKp, ctrlUd_Kp);
+    updateSpinVal(_ui->valueCapacitorsKi, ctrlUd_Ki);
+    updateSpinVal(_ui->valueCapacitorsKd, ctrlUd_Kd);
 
-    _ui->label_Ud1->setText(QString().sprintf("%.0f В", static_cast<double>(_pfc_settings.adc.ADC_UD)));
+    _ui->valueCapVoltage->setText(QString().sprintf("%.0f В", static_cast<double>(_pfc_settings.adc.ADC_UD)));
 }
 
 void MainWindow::capacitorsKpValueChanged(double arg)

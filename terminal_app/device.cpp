@@ -23,7 +23,7 @@ using namespace PFCconfig::Events;
                PRIVATE CLASS FUNCTIONS
 --------------------------------------------------------------*/
 
-PFC::PFC()
+PFC::PFC(void)
     : _interface(new PFCSerialInterface(Q_NULLPTR)),
       _handlers(enum_int(pfc_interface_commands_t::PFC_COMMAND_COUNT)),
       _thread(new QThread())
@@ -34,9 +34,9 @@ PFC::PFC()
 
     /* Run the interface in a separate thread */
     _interface->moveToThread(_thread);
-    connect(_thread, SIGNAL(finished()), _thread, SLOT(deleteLater()));
-    connect(_thread, SIGNAL(started()), _interface, SLOT(run()));
-    connect(_interface, SIGNAL(informConnectionChanged(bool)), this, SLOT(connectionChanged(bool)));
+    connect(_thread, &QThread::finished, _thread, &QThread::deleteLater);
+    connect(_thread, &QThread::started, _interface, &PFCSerialInterface::run);
+    connect(_interface, &PFCSerialInterface::informConnectionChanged, this, &PFC::connectionChanged);
     _thread->start();
 
     /* Initialize protocol handlers */
@@ -117,7 +117,7 @@ void PFC::endRequest(package_general& req, pfc_interface_commands_t command, uin
     connect(p, &InterfacePackage::complete, this, &PFC::getAnswer /*,Qt::DirectConnection*/);
 }
 
-void PFC::updateNetVoltage()
+void PFC::updateNetVoltage(void)
 {
     command_get_adc_active req;
     endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE, sizeof(req));
@@ -134,12 +134,12 @@ void PFC::updateEvents(uint64_t afterIndex)
     req.after_index = afterIndex;
     endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_EVENTS, sizeof(req));
 }
-void PFC::updateVersionInfo()
+void PFC::updateVersionInfo(void)
 {
     command_get_version_info req;
     endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_VERSION_INFO, sizeof(req));
 }
-void PFC::updateNetVoltageRAW()
+void PFC::updateNetVoltageRAW(void)
 {
     command_get_adc_active_raw req;
     endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_ADC_ACTIVE_RAW, sizeof(req));
@@ -150,27 +150,27 @@ void PFC::updateOscillog(PFCOscillogCnannel channel)
     req.num = static_cast<decltype(req.num)>(enum_int(channel));
     endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_OSCILLOG, sizeof(req));
 }
-void PFC::updateNetParams()
+void PFC::updateNetParams(void)
 {
     command_get_net_params req;
     endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_NET_PARAMS, sizeof(req));
 }
-void PFC::updateSettingsCalibrations()
+void PFC::updateSettingsCalibrations(void)
 {
     command_get_settings_calibrations req;
     endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CALIBRATIONS, sizeof(req));
 }
-void PFC::updateSettingsProtection()
+void PFC::updateSettingsProtection(void)
 {
     command_get_settings_protection req;
     endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_PROTECTION, sizeof(req));
 }
-void PFC::updateSettingsCapacitors()
+void PFC::updateSettingsCapacitors(void)
 {
     command_get_settings_capacitors req;
     endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_CAPACITORS, sizeof(req));
 }
-void PFC::updateSettingsFilters()
+void PFC::updateSettingsFilters(void)
 {
     command_get_settings_filters req;
     endRequest(req, pfc_interface_commands_t::PFC_COMMAND_GET_SETTINGS_FILTERS, sizeof(req));

@@ -264,7 +264,7 @@ private:
     std::string stringWithColor(std::string str, std::string color);
 
 private slots:
-    void onPushButtonClicked(void);
+    void buttonAutoConfigOscClicked(void);
     void capacitorsKpValueChanged(double arg);
     void capacitorsKiValueChanged(double arg);
     void capacitorsKdValueChanged(double arg);
@@ -274,12 +274,12 @@ private slots:
     void startClicked(void);
     void saveClicked(void);
     void actionClearTriggered(void);
-    void buttonClicked(void);
     void channelACheckToggled(bool checked);
     void channelBCheckToggled(bool checked);
     void channelCCheckToggled(bool checked);
     void chargeOnClicked(void);
     void chargeOffClicked(void);
+
     /*--------------------------------------------------------------
                            PUBLIC FUNCTIONS
     --------------------------------------------------------------*/

@@ -633,9 +633,10 @@ static void protocol_command_test(void *pc)
  * 
  * @param osc_adc_ch A pointer to the ADC structure (should be in the specific format)
  */
-status_t protocol_write_osc_data(float **osc_adc_ch)
+status_t protocol_write_osc_data(float osc_adc_ch[PFC_NCHAN][ADC_VAL_NUM])
 {
-    ARGUMENT_ASSERT(osc_adc_ch);
+		ARGUMENT_ASSERT(osc_adc_ch);
+		
     /* TODO: Add lock protection */
     for (int i = 0; i < PFC_NCHAN; i++)
     {

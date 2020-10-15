@@ -448,7 +448,7 @@ void algorithm_process(void)
 
         /* Process oscillog data */
         //HAL_GPIO_TogglePin(GPIOD, LED_1_Pin);
-        protocol_write_osc_data((float**)pfc.adc.ch[last_buffer]);
+        protocol_write_osc_data(pfc.adc.ch[last_buffer]);
 
         /* Process events */
         events_check_rms_overcurrent();

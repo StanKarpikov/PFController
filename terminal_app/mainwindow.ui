@@ -21,7 +21,7 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QGroupBox" name="groupBox_State">
+       <widget class="QGroupBox" name="groupState">
         <property name="minimumSize">
          <size>
           <width>200</width>
@@ -39,7 +39,7 @@
         <property name="checkable">
          <bool>false</bool>
         </property>
-        <widget class="QLabel" name="label_WorkState">
+        <widget class="QLabel" name="valueWorkState">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -62,7 +62,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QRadioButton" name="radioButton_Connection">
+        <widget class="QRadioButton" name="radioConnection">
          <property name="geometry">
           <rect>
            <x>60</x>
@@ -78,7 +78,7 @@
           <bool>true</bool>
          </property>
         </widget>
-        <widget class="QLabel" name="label_ver">
+        <widget class="QLabel" name="valueVersion">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -102,7 +102,7 @@
           <bool>true</bool>
          </property>
         </widget>
-        <widget class="QPushButton" name="pushButton_STOP">
+        <widget class="QPushButton" name="buttonStop">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -115,7 +115,7 @@
           <string>СТОП</string>
          </property>
         </widget>
-        <widget class="QPushButton" name="pushButton_Start">
+        <widget class="QPushButton" name="buttonStart">
          <property name="geometry">
           <rect>
            <x>100</x>
@@ -128,7 +128,7 @@
           <string>Запуск</string>
          </property>
         </widget>
-        <widget class="QPushButton" name="pushButton_Save">
+        <widget class="QPushButton" name="buttonSave">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -141,7 +141,7 @@
           <string>Сохр.настр.</string>
          </property>
         </widget>
-        <widget class="QCheckBox" name="checkBox_channelA">
+        <widget class="QCheckBox" name="checkBoxChannelA">
          <property name="geometry">
           <rect>
            <x>20</x>
@@ -154,7 +154,7 @@
           <string>A</string>
          </property>
         </widget>
-        <widget class="QCheckBox" name="checkBox_channelB">
+        <widget class="QCheckBox" name="checkBoxChannelB">
          <property name="geometry">
           <rect>
            <x>80</x>
@@ -167,7 +167,7 @@
           <string>B</string>
          </property>
         </widget>
-        <widget class="QCheckBox" name="checkBox_channelC">
+        <widget class="QCheckBox" name="checkBoxChannelC">
          <property name="geometry">
           <rect>
            <x>140</x>
@@ -180,7 +180,7 @@
           <string>C</string>
          </property>
         </widget>
-        <widget class="QPushButton" name="pushButton_CHARGE_ON">
+        <widget class="QPushButton" name="buttonChargeOn">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -193,7 +193,7 @@
           <string>Заряд вкл.</string>
          </property>
         </widget>
-        <widget class="QPushButton" name="pushButton_CHARGE_OFF">
+        <widget class="QPushButton" name="buttonChargeOff">
          <property name="geometry">
           <rect>
            <x>100</x>
@@ -209,7 +209,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QGroupBox" name="groupBox_net">
+       <widget class="QGroupBox" name="groupNetworkParameters">
         <property name="font">
          <font>
           <pointsize>10</pointsize>
@@ -218,7 +218,7 @@
         <property name="title">
          <string>Сеть</string>
         </property>
-        <widget class="QLabel" name="label_Ua">
+        <widget class="QLabel" name="valueVoltageA">
          <property name="geometry">
           <rect>
            <x>110</x>
@@ -245,7 +245,7 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_3">
+        <widget class="QLabel" name="labelVoltageA">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -268,7 +268,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_Ub">
+        <widget class="QLabel" name="valueVoltageB">
          <property name="geometry">
           <rect>
            <x>110</x>
@@ -295,7 +295,7 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_5">
+        <widget class="QLabel" name="labelVoltageB">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -318,7 +318,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_Uc">
+        <widget class="QLabel" name="valueVoltageC">
          <property name="geometry">
           <rect>
            <x>110</x>
@@ -345,7 +345,7 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_7">
+        <widget class="QLabel" name="labelVoltageC">
          <property name="geometry">
           <rect>
            <x>10</x>
@@ -368,7 +368,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_I_A">
+        <widget class="QLabel" name="valueInstantCurrentA">
          <property name="geometry">
           <rect>
            <x>110</x>
@@ -395,7 +395,7 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_19">
+        <widget class="QLabel" name="labelInstantCurrentA">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -418,7 +418,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_20">
+        <widget class="QLabel" name="labelInstantCurrentB">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -441,7 +441,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_I_B">
+        <widget class="QLabel" name="valueInstantCurrentB">
          <property name="geometry">
           <rect>
            <x>110</x>
@@ -468,7 +468,7 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_48">
+        <widget class="QLabel" name="labelInstantCurrentC">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -491,7 +491,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_I_C">
+        <widget class="QLabel" name="valueInstantCurrentC">
          <property name="geometry">
           <rect>
            <x>110</x>
@@ -518,7 +518,7 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_temperature2">
+        <widget class="QLabel" name="valueTemperature2">
          <property name="geometry">
           <rect>
            <x>110</x>
@@ -545,7 +545,7 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_53">
+        <widget class="QLabel" name="labelTemperature">
          <property name="geometry">
           <rect>
            <x>0</x>
@@ -568,7 +568,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_temperature1">
+        <widget class="QLabel" name="valueTemperature1">
          <property name="geometry">
           <rect>
            <x>110</x>
@@ -604,11 +604,11 @@
       <property name="currentIndex">
        <number>1</number>
       </property>
-      <widget class="QWidget" name="tab_net">
+      <widget class="QWidget" name="tabNetwork">
        <attribute name="title">
         <string>Состояние</string>
        </attribute>
-       <widget class="QGroupBox" name="groupBox_5">
+       <widget class="QGroupBox" name="groupTHD">
         <property name="geometry">
          <rect>
           <x>10</x>
@@ -620,7 +620,7 @@
         <property name="title">
          <string>Коэффициент гармонических искажений напряжения</string>
         </property>
-        <widget class="QLabel" name="label_30">
+        <widget class="QLabel" name="labelTHDUA">
          <property name="geometry">
           <rect>
            <x>50</x>
@@ -643,7 +643,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_31">
+        <widget class="QLabel" name="labelTHDUB">
          <property name="geometry">
           <rect>
            <x>50</x>
@@ -666,7 +666,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_thdu_C">
+        <widget class="QLabel" name="valueTHDUC">
          <property name="geometry">
           <rect>
            <x>150</x>
@@ -693,7 +693,7 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_thdu_A">
+        <widget class="QLabel" name="valueTHDUA">
          <property name="geometry">
           <rect>
            <x>150</x>
@@ -720,7 +720,7 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_32">
+        <widget class="QLabel" name="labelTHDUC">
          <property name="geometry">
           <rect>
            <x>50</x>
@@ -743,7 +743,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_thdu_B">
+        <widget class="QLabel" name="valueTHDUB">
          <property name="geometry">
           <rect>
            <x>150</x>
@@ -783,7 +783,7 @@
         <property name="title">
          <string>Смещение фаз напряжения</string>
         </property>
-        <widget class="QLabel" name="label_22">
+        <widget class="QLabel" name="labelPhaseBC">
          <property name="geometry">
           <rect>
            <x>30</x>
@@ -806,7 +806,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_21">
+        <widget class="QLabel" name="labelPhaseAB">
          <property name="geometry">
           <rect>
            <x>30</x>
@@ -829,7 +829,7 @@
           <set>Qt::AlignCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_U_phase_B">
+        <widget class="QLabel" name="valuePhaseAB">
          <property name="geometry">
           <rect>
            <x>180</x>
@@ -856,7 +856,7 @@
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
-        <widget class="QLabel" name="label_U_phase_C">
+        <widget class="QLabel" name="valuePhaseBC">
          <property name="geometry">
           <rect>
            <x>180</x>
@@ -884,7 +884,7 @@
          </property>
         </widget>
        </widget>
-       <widget class="QLabel" name="label_18">
+       <widget class="QLabel" name="lavelFrequency">
         <property name="geometry">
          <rect>
           <x>20</x>
@@ -907,7 +907,7 @@
          <set>Qt::AlignCenter</set>
         </property>
        </widget>
-       <widget class="QLabel" name="label_freq">
+       <widget class="QLabel" name="valueFrequency">
         <property name="geometry">
          <rect>
           <x>120</x>
@@ -935,7 +935,7 @@
         </property>
        </widget>
       </widget>
-      <widget class="QWidget" name="tab_main">
+      <widget class="QWidget" name="tabMain">
        <attribute name="title">
         <string>Управление</string>
        </attribute>
@@ -955,7 +955,7 @@
            </font>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="pageCalibrations">
            <property name="geometry">
@@ -971,7 +971,7 @@
            </attribute>
            <layout class="QGridLayout" name="gridLayout">
             <item row="0" column="0">
-             <widget class="QTableWidget" name="tableWidget_settings_calibrations">
+             <widget class="QTableWidget" name="tableSettingsCalibrations">
               <row>
                <property name="text">
                 <string>Смещение Ud</string>
@@ -1285,7 +1285,7 @@
            </attribute>
            <layout class="QGridLayout" name="gridLayout_6">
             <item row="0" column="0">
-             <widget class="QTableWidget" name="tableWidget_settings_filters">
+             <widget class="QTableWidget" name="tableSettingsFilters">
               <property name="showGrid">
                <bool>true</bool>
               </property>
@@ -1382,14 +1382,14 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>100</width>
-             <height>30</height>
+             <width>808</width>
+             <height>473</height>
             </rect>
            </property>
            <attribute name="label">
             <string>Заряд конденсаторов</string>
            </attribute>
-           <widget class="QProgressBar" name="progressBar_Ud1">
+           <widget class="QProgressBar" name="progressCapVoltage">
             <property name="geometry">
              <rect>
               <x>160</x>
@@ -1408,7 +1408,7 @@
              <enum>Qt::Vertical</enum>
             </property>
            </widget>
-           <widget class="QDoubleSpinBox" name="doubleSpinBox_cap_nominal">
+           <widget class="QDoubleSpinBox" name="spinCapNominal">
             <property name="geometry">
              <rect>
               <x>270</x>
@@ -1421,7 +1421,7 @@
              <double>999.990000000000009</double>
             </property>
            </widget>
-           <widget class="Line" name="line_2">
+           <widget class="Line" name="lineCapNominal">
             <property name="geometry">
              <rect>
               <x>140</x>
@@ -1434,7 +1434,7 @@
              <enum>Qt::Horizontal</enum>
             </property>
            </widget>
-           <widget class="QLabel" name="label_2">
+           <widget class="QLabel" name="labelCapNominalName">
             <property name="geometry">
              <rect>
               <x>30</x>
@@ -1453,7 +1453,7 @@
              <bool>true</bool>
             </property>
            </widget>
-           <widget class="QLabel" name="label_Ud1">
+           <widget class="QLabel" name="valueCapVoltage">
             <property name="geometry">
              <rect>
               <x>170</x>
@@ -1469,7 +1469,7 @@
              <set>Qt::AlignCenter</set>
             </property>
            </widget>
-           <widget class="QLabel" name="label_8">
+           <widget class="QLabel" name="labelCapNominalVoltage">
             <property name="geometry">
              <rect>
               <x>330</x>
@@ -1485,7 +1485,7 @@
              <set>Qt::AlignCenter</set>
             </property>
            </widget>
-           <widget class="QGroupBox" name="groupBox_4">
+           <widget class="QGroupBox" name="groupCapCoefficients">
             <property name="geometry">
              <rect>
               <x>370</x>
@@ -1497,7 +1497,7 @@
             <property name="title">
              <string>Коэффициенты накачки</string>
             </property>
-            <widget class="QLabel" name="label_11">
+            <widget class="QLabel" name="labelCapacitorsKd">
              <property name="geometry">
               <rect>
                <x>10</x>
@@ -1513,7 +1513,7 @@
               <set>Qt::AlignCenter</set>
              </property>
             </widget>
-            <widget class="QDoubleSpinBox" name="doubleSpinBox_capacitors_Kp">
+            <widget class="QDoubleSpinBox" name="valueCapacitorsKp">
              <property name="geometry">
               <rect>
                <x>160</x>
@@ -1532,7 +1532,7 @@
               <double>9999.000000000000000</double>
              </property>
             </widget>
-            <widget class="QDoubleSpinBox" name="doubleSpinBox_capacitors_Ki">
+            <widget class="QDoubleSpinBox" name="valueCapacitorsKi">
              <property name="geometry">
               <rect>
                <x>160</x>
@@ -1551,7 +1551,7 @@
               <double>9999.000000000000000</double>
              </property>
             </widget>
-            <widget class="QLabel" name="label_10">
+            <widget class="QLabel" name="labelCapacitorsKi">
              <property name="geometry">
               <rect>
                <x>10</x>
@@ -1567,7 +1567,7 @@
               <set>Qt::AlignCenter</set>
              </property>
             </widget>
-            <widget class="QDoubleSpinBox" name="doubleSpinBox_capacitors_Kd">
+            <widget class="QDoubleSpinBox" name="valueCapacitorsKd">
              <property name="geometry">
               <rect>
                <x>160</x>
@@ -1586,7 +1586,7 @@
               <double>9999.000000000000000</double>
              </property>
             </widget>
-            <widget class="QLabel" name="label_9">
+            <widget class="QLabel" name="labelCapacitorsKp">
              <property name="geometry">
               <rect>
                <x>10</x>
@@ -1603,7 +1603,7 @@
              </property>
             </widget>
            </widget>
-           <widget class="QDoubleSpinBox" name="doubleSpinBox_cap_precharge">
+           <widget class="QDoubleSpinBox" name="spinCapPrecharge">
             <property name="geometry">
              <rect>
               <x>270</x>
@@ -1616,7 +1616,7 @@
              <double>999.990000000000009</double>
             </property>
            </widget>
-           <widget class="QLabel" name="label_12">
+           <widget class="QLabel" name="labelCapPrechargeVoltage">
             <property name="geometry">
              <rect>
               <x>330</x>
@@ -1632,7 +1632,7 @@
              <set>Qt::AlignCenter</set>
             </property>
            </widget>
-           <widget class="Line" name="line_3">
+           <widget class="Line" name="lineCapPrecharge">
             <property name="geometry">
              <rect>
               <x>140</x>
@@ -1645,7 +1645,7 @@
              <enum>Qt::Horizontal</enum>
             </property>
            </widget>
-           <widget class="QLabel" name="label_13">
+           <widget class="QLabel" name="labelCapPrechargeName">
             <property name="geometry">
              <rect>
               <x>30</x>
@@ -1670,8 +1670,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>808</width>
-             <height>473</height>
+             <width>89</width>
+             <height>89</height>
             </rect>
            </property>
            <attribute name="label">
@@ -1679,7 +1679,7 @@
            </attribute>
            <layout class="QGridLayout" name="gridLayout_2">
             <item row="0" column="0">
-             <widget class="QTableWidget" name="tableWidget_settings_protection">
+             <widget class="QTableWidget" name="tableSettingsProtection">
               <property name="showGrid">
                <bool>true</bool>
               </property>
@@ -1948,20 +1948,20 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_log">
+      <widget class="QWidget" name="tabLog">
        <attribute name="title">
         <string>Лог работы</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_7">
         <item row="0" column="1">
-         <widget class="QPushButton" name="pushButton_2">
+         <widget class="QPushButton" name="buttonClearLog">
           <property name="text">
            <string>Очистить</string>
           </property>
          </widget>
         </item>
         <item row="0" column="2">
-         <spacer name="horizontalSpacer">
+         <spacer name="spacerClearLogButton">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -1974,17 +1974,17 @@
          </spacer>
         </item>
         <item row="1" column="1" colspan="2">
-         <widget class="QListWidget" name="listWidget"/>
+         <widget class="QListWidget" name="listLog"/>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="tab_oscillog">
+      <widget class="QWidget" name="tabOscillog">
        <attribute name="title">
         <string>Осциллограммы</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
-         <widget class="QGroupBox" name="groupBox_2">
+         <widget class="QGroupBox" name="groupOscillogSettings">
           <property name="maximumSize">
            <size>
             <width>100</width>
@@ -1994,7 +1994,7 @@
           <property name="title">
            <string>Вид</string>
           </property>
-          <widget class="QCheckBox" name="checkBox_osc_Ua">
+          <widget class="QCheckBox" name="checkOscUa">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -2010,7 +2010,7 @@
             <bool>true</bool>
            </property>
           </widget>
-          <widget class="QCheckBox" name="checkBox_osc_Ub">
+          <widget class="QCheckBox" name="checkOscUb">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -2026,7 +2026,7 @@
             <bool>false</bool>
            </property>
           </widget>
-          <widget class="QCheckBox" name="checkBox_osc_Uc">
+          <widget class="QCheckBox" name="checkOscUc">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -2042,7 +2042,7 @@
             <bool>false</bool>
            </property>
           </widget>
-          <widget class="QCheckBox" name="checkBox_osc_I_a">
+          <widget class="QCheckBox" name="checkOscIa">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -2058,7 +2058,7 @@
             <bool>true</bool>
            </property>
           </widget>
-          <widget class="QCheckBox" name="checkBox_osc_I_b">
+          <widget class="QCheckBox" name="checkOscIb">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -2074,7 +2074,7 @@
             <bool>false</bool>
            </property>
           </widget>
-          <widget class="QCheckBox" name="checkBox_osc_I_c">
+          <widget class="QCheckBox" name="checkOscIc">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -2090,7 +2090,7 @@
             <bool>false</bool>
            </property>
           </widget>
-          <widget class="QPushButton" name="pushButton">
+          <widget class="QPushButton" name="buttonAutoConfigOsc">
            <property name="geometry">
             <rect>
              <x>4</x>
@@ -2103,7 +2103,7 @@
             <string>Автомасштаб</string>
            </property>
           </widget>
-          <widget class="QCheckBox" name="checkBox_osc_Ud">
+          <widget class="QCheckBox" name="checkOscUd">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -2116,7 +2116,7 @@
             <string>Ud</string>
            </property>
           </widget>
-          <widget class="QCheckBox" name="checkBox_osc_Icomp_a">
+          <widget class="QCheckBox" name="checkOscICompA">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -2132,7 +2132,7 @@
             <bool>true</bool>
            </property>
           </widget>
-          <widget class="QCheckBox" name="checkBox_osc_Icomp_c">
+          <widget class="QCheckBox" name="checkOscICompC">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -2148,7 +2148,7 @@
             <bool>false</bool>
            </property>
           </widget>
-          <widget class="QCheckBox" name="checkBox_osc_Icomp_b">
+          <widget class="QCheckBox" name="checkOscICompB">
            <property name="geometry">
             <rect>
              <x>10</x>
@@ -2164,7 +2164,7 @@
             <bool>false</bool>
            </property>
           </widget>
-          <widget class="QSlider" name="horizontalSlider_filter">
+          <widget class="QSlider" name="sliderOscFilter">
            <property name="geometry">
             <rect>
              <x>0</x>
@@ -2252,7 +2252,7 @@
   </action>
   <action name="actionConnect">
    <property name="icon">
-    <iconset resource="terminal_KKM.qrc">
+    <iconset resource="terminal_pfc.qrc">
      <normaloff>:/images/connect.png</normaloff>:/images/connect.png</iconset>
    </property>
    <property name="text">
@@ -2267,7 +2267,7 @@
   </action>
   <action name="actionDisconnect">
    <property name="icon">
-    <iconset resource="terminal_KKM.qrc">
+    <iconset resource="terminal_pfc.qrc">
      <normaloff>:/images/disconnect.png</normaloff>:/images/disconnect.png</iconset>
    </property>
    <property name="text">
@@ -2282,7 +2282,7 @@
   </action>
   <action name="actionConfigure">
    <property name="icon">
-    <iconset resource="terminal_KKM.qrc">
+    <iconset resource="terminal_pfc.qrc">
      <normaloff>:/images/settings.png</normaloff>:/images/settings.png</iconset>
    </property>
    <property name="text">
@@ -2297,7 +2297,7 @@
   </action>
   <action name="actionClear">
    <property name="icon">
-    <iconset resource="terminal_KKM.qrc">
+    <iconset resource="terminal_pfc.qrc">
      <normaloff>:/images/clear.png</normaloff>:/images/clear.png</iconset>
    </property>
    <property name="text">
@@ -2312,7 +2312,7 @@
   </action>
   <action name="actionQuit">
    <property name="icon">
-    <iconset resource="terminal_KKM.qrc">
+    <iconset resource="terminal_pfc.qrc">
      <normaloff>:/images/application-exit.png</normaloff>:/images/application-exit.png</iconset>
    </property>
    <property name="text">
@@ -2333,7 +2333,7 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="terminal_KKM.qrc"/>
+  <include location="terminal_pfc.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -1,5 +1,5 @@
-#ifndef ADF_H
-#define ADF_H
+#ifndef __DEVICE_H
+#define __DEVICE_H
 
 /*--------------------------------------------------------------
                        INCLUDES
@@ -239,4 +239,4 @@ private:
 
 };
 
-#endif // ADF_H
+#endif // __DEVICE_H

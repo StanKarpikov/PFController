@@ -18,27 +18,27 @@
 
 void MainWindow::setTableProtectionsVal(TableProtectionRows row, float value)
 {
-    _ui->tableWidget_settings_protection->blockSignals(true);
-    _ui->tableWidget_settings_protection->item(enum_int(row), 0)->setText(QString().sprintf("%.2f", static_cast<double>(value)));
-    _ui->tableWidget_settings_protection->blockSignals(false);
+    _ui->tableSettingsProtection->blockSignals(true);
+    _ui->tableSettingsProtection->item(enum_int(row), 0)->setText(QString().sprintf("%.2f", static_cast<double>(value)));
+    _ui->tableSettingsProtection->blockSignals(false);
 }
 
-void MainWindow::pageSettingsProtectionInit()
+void MainWindow::pageSettingsProtectionInit(void)
 {
-    for (int i = 0; i < _ui->tableWidget_settings_protection->rowCount(); i++)
+    for (int i = 0; i < _ui->tableSettingsProtection->rowCount(); i++)
     {
-        _ui->tableWidget_settings_protection->item(i, 0)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
-        _ui->tableWidget_settings_protection->item(i, 1)->setFlags(Q_NULLPTR);
-        _ui->tableWidget_settings_protection->item(i, 2)->setFlags(Q_NULLPTR);
-        _ui->tableWidget_settings_protection->item(i, 0)->setBackground(editableCellBrush);
+        _ui->tableSettingsProtection->item(i, 0)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
+        _ui->tableSettingsProtection->item(i, 1)->setFlags(Q_NULLPTR);
+        _ui->tableSettingsProtection->item(i, 2)->setFlags(Q_NULLPTR);
+        _ui->tableSettingsProtection->item(i, 0)->setBackground(editableCellBrush);
     }
-    connect(_ui->tableWidget_settings_protection, SIGNAL(cellChanged(int, int)),
-            this, SLOT(tableSettingsProtectionChanged(int, int)));
+    connect(_ui->tableSettingsProtection, &QTableWidget::cellChanged,
+            this, &MainWindow::tableSettingsProtectionChanged);
 }
 
 void MainWindow::tableSettingsProtectionChanged(int row, int col)
 {
-    QTableWidgetItem *item = _ui->tableWidget_settings_protection->item(row, col);
+    QTableWidgetItem *item = _ui->tableSettingsProtection->item(row, col);
     float value = item->text().toFloat();
     switch (static_cast<TableProtectionRows>(row))
     {

@@ -20,7 +20,7 @@ using namespace PFCconfig::Events;
                        RIVATE FUNCTIONS
 --------------------------------------------------------------*/
 
-void MainWindow::pageOscillogInit()
+void MainWindow::pageOscillogInit(void)
 {
     _oscillog_array[PFCOscillogCnannel::OSC_U_A] = OscillogChannels::OSCILLOG_U_A;
     _oscillog_array[PFCOscillogCnannel::OSC_U_B] = OscillogChannels::OSCILLOG_U_B;
@@ -84,7 +84,7 @@ void MainWindow::pageOscillogInit()
     }
     for (uint i = 0; i < OSCILLOG_TRANSFER_SIZE; i++)
     {
-        _oscillog_xval[i] = (1.0 / 50.0 / 128.0) * (float)i * 1e3;
+        _oscillog_xval[i] = (1.0 / 50.0 / 128.0) * static_cast<double>(i) * 1e3;
     }
 
     _ui->OscillogPlot->xAxis->setRange(0, 20.0 /*-20.0/128.0*/);
@@ -92,8 +92,8 @@ void MainWindow::pageOscillogInit()
     _ui->OscillogPlot->yAxis->setRange(-1.2, 1.2);
     _ui->OscillogPlot->replot();
 
-    connect(_ui->OscillogPlot->xAxis, SIGNAL(rangeChanged(QCPRange, QCPRange)),
-            this, SLOT(xAxisRangeChanged(QCPRange, QCPRange)));
+    connect(_ui->OscillogPlot->xAxis, static_cast<void(QCPAxis::*)(const QCPRange &, const QCPRange &)>(&QCPAxis::rangeChanged),
+            this, &MainWindow::xAxisRangeChanged);
 }
 void MainWindow::xAxisRangeChanged(QCPRange newRange, QCPRange oldRange)
 {
@@ -115,13 +115,13 @@ void MainWindow::mouseWheel(QWheelEvent *event)
     factor = qPow(_ui->OscillogPlot->axisRect()->rangeZoomFactor(Qt::Vertical), wheelSteps);
     _ui->OscillogPlot->yAxis2->scaleRange(factor, _ui->OscillogPlot->yAxis2->pixelToCoord(event->pos().y()));
 }
-void MainWindow::onPushButtonClicked()
+void MainWindow::buttonAutoConfigOscClicked(void)
 {
     _ui->OscillogPlot->rescaleAxes(true);
 }
 void MainWindow::setOscillog(PFCOscillogCnannel channel, std::vector<double> data)
 {
-    double K1 = (static_cast<double>(_ui->horizontalSlider_filter->value())) / 1000.0;
+    double K1 = (static_cast<double>(_ui->sliderOscFilter->value())) / 1000.0;
     //qDebug()<<data;
     if (channel <= PFCOscillogCnannel::OSC_COMP_C)
     {

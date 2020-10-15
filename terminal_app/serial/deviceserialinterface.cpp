@@ -172,18 +172,18 @@ void PFCSerialInterface::run()
     }
 
     _serial = new QSerialPort();
-    connect(_serial, SIGNAL(error(QSerialPort::SerialPortError)), this,
-            SLOT(handleError(QSerialPort::SerialPortError)));
+    connect(_serial, static_cast<void(QSerialPort::*)(QSerialPort::SerialPortError)>(&QSerialPort::error),
+            this, &PFCSerialInterface::handleError);
     connect(this, &PFCSerialInterface::couldWrite,
             this, &PFCSerialInterface::sendQueue, Qt::QueuedConnection);
 }
 
 int PFCSerialInterface::serialWrite(const vector<uint8_t> &dataToWrite)
 {
-    int dataSize = dataToWrite.size();
+    auto dataSize = dataToWrite.size();
 
     // C11++ style - get raw data from vector
-    const char *data = (const char *)dataToWrite.data();
+    const char *data = reinterpret_cast<const char *>(&dataToWrite.data()[0]);
 
     if (!_serial || !_serial->isOpen())
     {
@@ -191,7 +191,7 @@ int PFCSerialInterface::serialWrite(const vector<uint8_t> &dataToWrite)
                 "Port not opened");
         return -1;
     }
-    int written = _serial->write(data, dataSize);
+    auto written = _serial->write(data, dataSize);
 
     if (written < 0)
     {
@@ -213,7 +213,7 @@ int PFCSerialInterface::serialWrite(const vector<uint8_t> &dataToWrite)
         return -1;
     }
 
-    return written;
+    return static_cast<int>(written);
 }
 
 std::string PFCSerialInterface::hex_dump(const std::vector<uint8_t> &buf)

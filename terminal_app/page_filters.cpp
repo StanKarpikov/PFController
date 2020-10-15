@@ -22,20 +22,20 @@ using namespace PFCconfig::Events;
 
 void MainWindow::pageSettingsFiltersInit()
 {
-    for (int i = 0; i < _ui->tableWidget_settings_filters->rowCount(); i++)
+    for (int i = 0; i < _ui->tableSettingsFilters->rowCount(); i++)
     {
-        _ui->tableWidget_settings_filters->item(i, 0)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
-        _ui->tableWidget_settings_filters->item(i, 1)->setFlags(Q_NULLPTR);
-        _ui->tableWidget_settings_filters->item(i, 2)->setFlags(Q_NULLPTR);
-        _ui->tableWidget_settings_filters->item(i, 0)->setBackground(editableCellBrush);
+        _ui->tableSettingsFilters->item(i, 0)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
+        _ui->tableSettingsFilters->item(i, 1)->setFlags(Q_NULLPTR);
+        _ui->tableSettingsFilters->item(i, 2)->setFlags(Q_NULLPTR);
+        _ui->tableSettingsFilters->item(i, 0)->setBackground(editableCellBrush);
     }
-    connect(_ui->tableWidget_settings_filters, SIGNAL(cellChanged(int, int)),
-            this, SLOT(tableSettingsFiltersChanged(int, int)));
+    connect(_ui->tableSettingsFilters, &QTableWidget::cellChanged,
+            this, &MainWindow::tableSettingsFiltersChanged);
 }
 
 void MainWindow::tableSettingsFiltersChanged(int row, int col)
 {
-    QTableWidgetItem *item = _ui->tableWidget_settings_filters->item(row, col);
+    QTableWidgetItem *item = _ui->tableSettingsFilters->item(row, col);
     float value = item->text().toFloat();
     switch (static_cast<TableFiltersRows>(row))
     {
@@ -64,7 +64,7 @@ void MainWindow::setSettingsFilters(
     _pfc_settings.settings.filters.K_U = K_U;
     _pfc_settings.settings.filters.K_Ud = K_Ud;
 
-    _ui->tableWidget_settings_filters->item(enum_int(TableFiltersRows::table_filters_row_K_I), 0)->setText(QString().sprintf("%.3f", static_cast<double>(K_I)));
-    _ui->tableWidget_settings_filters->item(enum_int(TableFiltersRows::table_filters_row_K_U), 0)->setText(QString().sprintf("%.3f", static_cast<double>(K_U)));
-    _ui->tableWidget_settings_filters->item(enum_int(TableFiltersRows::table_filters_row_K_Ud), 0)->setText(QString().sprintf("%.3f", static_cast<double>(K_Ud)));
+    _ui->tableSettingsFilters->item(enum_int(TableFiltersRows::table_filters_row_K_I), 0)->setText(QString().sprintf("%.3f", static_cast<double>(K_I)));
+    _ui->tableSettingsFilters->item(enum_int(TableFiltersRows::table_filters_row_K_U), 0)->setText(QString().sprintf("%.3f", static_cast<double>(K_U)));
+    _ui->tableSettingsFilters->item(enum_int(TableFiltersRows::table_filters_row_K_Ud), 0)->setText(QString().sprintf("%.3f", static_cast<double>(K_Ud)));
 }
