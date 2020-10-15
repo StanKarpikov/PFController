@@ -69,7 +69,7 @@ void MainWindow::setSettingsCapacitors(
     updateSpinVal(_ui->valueCapacitorsKi, ctrlUd_Ki);
     updateSpinVal(_ui->valueCapacitorsKd, ctrlUd_Kd);
 
-    _ui->valueCapVoltage->setText(QString().sprintf("%.0f В", static_cast<double>(_pfc_settings.adc.ADC_UD)));
+    _ui->valueCapVoltage->setText(QString().sprintf("%.0f V", static_cast<double>(_pfc_settings.adc.ADC_UD)));
 }
 
 void MainWindow::capacitorsKpValueChanged(double arg)

@@ -33,19 +33,19 @@ void MainWindow::pageOscillogInit(void)
     _oscillog_array[PFCOscillogCnannel::OSC_COMP_B] = OscillogChannels::OSCILLOG_COMP_B;
     _oscillog_array[PFCOscillogCnannel::OSC_COMP_C] = OscillogChannels::OSCILLOG_COMP_C;
 
-    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("Ia");  // Ia
-    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("Ib");  // Ib
-    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("Ic");  // Ic
+    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("I A");
+    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("I B");
+    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("I C");
 
-    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis2)->setName("Ua");  // Ua
-    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis2)->setName("Ub");  // Ub
-    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis2)->setName("Uc");  // Uc
+    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis2)->setName("U A");
+    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis2)->setName("U B");
+    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis2)->setName("U C");
 
-    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis2)->setName("U");  // U1
+    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis2)->setName("U cap");
 
-    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("Icompa");  // Icompa
-    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("Icompb");  // Icompb
-    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("Icompc");  // Icompc
+    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("Icomp A");
+    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("Icomp B");
+    _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("Icomp C");
 
     _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_U_A))->setPen(QPen(Qt::red));
     _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_U_B))->setPen(QPen(Qt::blue));

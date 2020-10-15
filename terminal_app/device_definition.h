@@ -14,7 +14,7 @@
 template <typename E>
 constexpr auto enum_uint(E e) noexcept
 {
-    return static_cast<uint32_t>(e);
+    return static_cast<size_t>(e);
 }
 
 template <typename E>
@@ -33,6 +33,9 @@ namespace PFCconfig {
     auto const PFC_BCHAN = 1U;   /**< Channel B */
     auto const PFC_CCHAN = 2U;   /**< Channel C */
 
+    auto const PFC_NOMINAL_VOLTAGE = 230.0f;   /**< Nominal grid voltage, 230x3, 380 [V] */
+    auto const PFC_CALIBRATION_CURRENT = 10.0f; /**< PFC current used for calibration [Amp] */
+
     namespace Serial {
         const static auto PORT_BADRATE = QSerialPort::Baud115200;
         const static auto PORT_DATA_BITS = QSerialPort::Data8;
@@ -45,27 +48,28 @@ namespace PFCconfig {
     }
 
     namespace ADC {
-        enum {
-            ADC_UD,			//CH10
-            ADC_U_A,		//CH11
-            ADC_U_B,		//CH12
-            ADC_U_C,		//CH13
-            ADC_I_A,		//CH0
-            ADC_I_B,		//CH1
-            ADC_I_C,		//CH2
-            ADC_I_ET,		//CH3
-            ADC_I_TEMP1,//CH5
-            ADC_I_TEMP2,//CH6
-            ADC_EMS_A,	//CH14
-            ADC_EMS_B,	//CH15
-            ADC_EMS_C,	//CH8
+        enum class ADCchannel{
+            ADC_UD,
+            ADC_U_A,
+            ADC_U_B,
+            ADC_U_C,
+            ADC_I_A,
+            ADC_I_B,
+            ADC_I_C,
+            ADC_I_ET,
+            ADC_I_TEMP1,
+            ADC_I_TEMP2,
+            ADC_EMS_A,
+            ADC_EMS_B,
+            ADC_EMS_C,
             ADC_EMS_I,
             ADC_MATH_A,
             ADC_MATH_B,
             ADC_MATH_C
         };
-        auto const ADC_CHANNEL_NUMBER = ADC_MATH_A;
+        auto const ADC_CHANNEL_NUMBER = static_cast<size_t>(ADCchannel::ADC_MATH_A);
         auto const ADC_MATH_NUMBER = 3;
+        auto const ADC_UREF = 0;
     }
 
     namespace Events {
@@ -128,7 +132,7 @@ namespace PFCconfig {
             SUB_EVENT_TYPE_PROTECTION_U_MAX,
             SUB_EVENT_TYPE_PROTECTION_F_MIN,
             SUB_EVENT_TYPE_PROTECTION_F_MAX,
-            SUB_EVENT_TYPE_PROTECTION_IAFG_MAX_RMS,
+            SUB_EVENT_TYPE_PROTECTION_IPFC_MAX_RMS,
             SUB_EVENT_TYPE_PROTECTION_IAFG_MAX_PEAK,
             SUB_EVENT_TYPE_PROTECTION_PHASES,
             SUB_EVENT_TYPE_PROTECTION_ADC_OVERLOAD,

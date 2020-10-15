@@ -163,6 +163,20 @@ private:
     inline static const std::string LIGHT_GREY = "#c0c0c0";
     inline static const std::string DARK_GREEN = "#008000";
 
+    inline static const std::string STRING_PFC_STATE_INIT = "Initialization";
+    inline static const std::string STRING_PFC_STATE_STOP = "Stopped";
+    inline static const std::string STRING_PFC_STATE_SYNC = "Syncronisation";
+    inline static const std::string STRING_PFC_STATE_PRECHARGE_PREPARE = "Precharge prepare";
+    inline static const std::string STRING_PFC_STATE_PRECHARGE = "Precharge";
+    inline static const std::string STRING_PFC_STATE_MAIN = "Main switch";
+    inline static const std::string STRING_PFC_STATE_PRECHARGE_DISABLE = "Precharge off";
+    inline static const std::string STRING_PFC_STATE_WORK = "Work";
+    inline static const std::string STRING_PFC_STATE_CHARGE = "Charge";
+    inline static const std::string STRING_PFC_STATE_TEST = "Test";
+    inline static const std::string STRING_PFC_STATE_STOPPING = "Stopping..";
+    inline static const std::string STRING_PFC_STATE_FAULTBLOCK = " Fault ";
+    inline static const std::string STRING_PFC_STATE_UNKNOWN = "Unknown state";
+
     static const QBrush editableCellBrush;
 
     static constexpr auto FCOEFF = 0.9f;
@@ -220,6 +234,48 @@ private:
         table_filters_row_K_Ud
     };
 
+    enum class TableCalibrationRows
+    {
+            table_calibrations_row_offset_U_cap,
+            table_calibrations_row_offset_U_A,
+            table_calibrations_row_offset_U_B,
+            table_calibrations_row_offset_U_C,
+            table_calibrations_row_offset_I_A,
+            table_calibrations_row_offset_I_B,
+            table_calibrations_row_offset_I_C,
+            table_calibrations_row_offset_I_et,
+            table_calibrations_row_offset_temperature_1,
+            table_calibrations_row_offset_temperature_2,
+            table_calibrations_row_offset_U_EMS_A,
+            table_calibrations_row_offset_U_EMS_B,
+            table_calibrations_row_offset_U_EMS_C,
+            table_calibrations_row_offset_U_EMS_I,
+            table_calibrations_row_multiplier_U_cap,
+            table_calibrations_row_multiplier_U_A,
+            table_calibrations_row_multiplier_U_B,
+            table_calibrations_row_multiplier_U_C,
+            table_calibrations_row_multiplier_I_A,
+            table_calibrations_row_multiplier_I_B,
+            table_calibrations_row_multiplier_I_C,
+            table_calibrations_row_multiplier_I_et,
+            table_calibrations_row_multiplier_temperature_1,
+            table_calibrations_row_multiplier_temperature_2,
+            table_calibrations_row_multiplier_U_EMS_A,
+            table_calibrations_row_multiplier_U_EMS_B,
+            table_calibrations_row_multiplier_U_EMS_C,
+            table_calibrations_row_multiplier_U_EMS_I,
+            table_calibrations_row_count
+    };
+
+    enum class TableCalibrationColumns
+    {
+        TABLE_CALIBRATIONS_VALUE_COLUMN,
+        TABLE_CALIBRATIONS_AUTO_BUTTON_COLUMN,
+        TABLE_CALIBRATIONS_AUTO_VALUE_COLUMN
+    };
+
+    friend MainWindow::TableCalibrationRows& operator++(MainWindow::TableCalibrationRows& row, int);
+
     /* Data */
     Ui::MainWindow *_ui;
     PFC *_pfc;
@@ -243,6 +299,7 @@ private:
     QTimer _timer_settings_filters;
     bool _connected;
     QSharedPointer<QCPAxisTickerFixed> _fixed_ticker;
+    std::vector<QPushButton*> _btns_edit;
 
     /*--------------------------------------------------------------
                            PRIVATE FUNCTIONS
@@ -262,8 +319,11 @@ private:
     void filterApply(float &A, float B);
     void setFilter(QEvent* event, QObject* object, QWidget* ui_obj, QTimer* obj, std::chrono::milliseconds timeout);
     std::string stringWithColor(std::string str, std::string color);
+    void tableSettingsCalibrationsSetAutoSettings(void);
+    float CALC_AUTO_COEF(PFCconfig::ADC::ADCchannel CALIB, float NOW, float NOMINAL);
 
 private slots:
+    /* Interface slots */
     void buttonAutoConfigOscClicked(void);
     void capacitorsKpValueChanged(double arg);
     void capacitorsKiValueChanged(double arg);
@@ -280,6 +340,8 @@ private slots:
     void chargeOnClicked(void);
     void chargeOffClicked(void);
 
+    /* Internal slots */
+    void tableSettingsCalibrationsAutoClicked(bool check);
     /*--------------------------------------------------------------
                            PUBLIC FUNCTIONS
     --------------------------------------------------------------*/

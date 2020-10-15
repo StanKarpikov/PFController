@@ -45,6 +45,16 @@ const QBrush MainWindow::editableCellBrush = QBrush(QColor(240, 255, 240));
                        CLASS FUNCTIONS
 --------------------------------------------------------------*/
 
+MainWindow::TableCalibrationRows& operator++(MainWindow::TableCalibrationRows& row, int)
+{
+    row = static_cast<MainWindow::TableCalibrationRows>( enum_uint(row) + 1 );
+    return row;
+}
+
+/*--------------------------------------------------------------
+                       CLASS FUNCTIONS
+--------------------------------------------------------------*/
+
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
       _ui(new Ui::MainWindow),
@@ -52,7 +62,8 @@ MainWindow::MainWindow(QWidget* parent)
       _oscillog_data(static_cast<int>(OscillogChannels::OSCILLOG_SIZE)),
       _last_index_events(0),
       _port_settings(new SettingsDialog),
-      _connected(false)
+      _connected(false),
+      _btns_edit()
 {
     /* Init the UI */
     _ui->setupUi(this);
@@ -372,123 +383,123 @@ void MainWindow::setEvents(std::list<EventRecord> ev)
         switch (static_cast<event_type_t>(event.type & 0xFFFF))
         {
             case event_type_t::EVENT_TYPE_POWER:
-                message_stream << stringWithColor(" - Питание - ", DARK_GREEN);
+                message_stream << stringWithColor(" - Power - ", DARK_GREEN);
                 switch (subtype)
                 {
                     case SUB_EVENT_TYPE_POWER_ON:
-                        message_stream << "Включен";
+                        message_stream << "Power ON";
                         break;
                     default:
-                        message_stream << stringWithColor(" - Неизвестное событие! ", DARK_RED);
+                        message_stream << stringWithColor(" - Unknown event! ", DARK_RED);
                         break;
                 }
                 break;
             case event_type_t::EVENT_TYPE_CHANGESTATE:
-                message_stream << stringWithColor(" - Состояние - ", DARK_GREEN);
+                message_stream << stringWithColor(" - State - ", DARK_GREEN);
                 switch (static_cast<PFCstate>(subtype))
                 {
                     case PFCstate::PFC_STATE_INIT:
-                        message_stream << "Инициализация";
+                        message_stream << STRING_PFC_STATE_INIT;
                         break;
                     case PFCstate::PFC_STATE_STOP:
-                        message_stream << "Остановлен";
+                        message_stream << STRING_PFC_STATE_STOP;
                         break;
                     case PFCstate::PFC_STATE_SYNC:
-                        message_stream << "Синхронизация";
+                        message_stream << STRING_PFC_STATE_SYNC;
                         break;
                     case PFCstate::PFC_STATE_PRECHARGE_PREPARE:
-                        message_stream << "Подг.предзаряда";
+                        message_stream << STRING_PFC_STATE_PRECHARGE_PREPARE;
                         break;
                     case PFCstate::PFC_STATE_PRECHARGE:
-                        message_stream << "Предзаряд";
+                        message_stream << STRING_PFC_STATE_PRECHARGE;
                         break;
                     case PFCstate::PFC_STATE_MAIN:
-                        message_stream << "Контактор";
+                        message_stream << STRING_PFC_STATE_MAIN;
                         break;
                     case PFCstate::PFC_STATE_PRECHARGE_DISABLE:
-                        message_stream << "Выкл.предзаряда";
+                        message_stream << STRING_PFC_STATE_PRECHARGE_DISABLE;
                         break;
                     case PFCstate::PFC_STATE_WORK:
-                        message_stream << "Работа";
+                        message_stream << STRING_PFC_STATE_WORK;
                         break;
                     case PFCstate::PFC_STATE_CHARGE:
-                        message_stream << "Заряд";
+                        message_stream << STRING_PFC_STATE_CHARGE;
                         break;
                     case PFCstate::PFC_STATE_TEST:
-                        message_stream << "Тест";
+                        message_stream << STRING_PFC_STATE_TEST;
                         break;
                     case PFCstate::PFC_STATE_STOPPING:
-                        message_stream << "Остановка..";
+                        message_stream << STRING_PFC_STATE_STOPPING;
                         break;
                     case PFCstate::PFC_STATE_FAULTBLOCK:
-                        message_stream << stringWithColor(" Авария ", DARK_RED);
+                        message_stream << stringWithColor(STRING_PFC_STATE_FAULTBLOCK, DARK_RED);
                         break;
                     default:
-                        message_stream << "Unknown state";
+                        message_stream << STRING_PFC_STATE_UNKNOWN;
                         break;
                 }
                 break;
             case event_type_t::EVENT_TYPE_PROTECTION:
-                message_stream << stringWithColor(" - Защиты ", DARK_RED);
+                message_stream << stringWithColor(" - Protection ", DARK_RED);
                 switch (subtype)
                 {
                     case SUB_EVENT_TYPE_PROTECTION_UCAP_MIN:
-                        message_stream << " - Слишком низкое напряжение конденсатора во время работы ";
-                        message_stream << "(" << event.info + 1 << ") : " << event.value << " B";
+                        message_stream << " - The voltage of the capacitor is too low during operation ";
+                        message_stream << "(" << event.info + 1 << ") : " << event.value << " V";
                         break;
                     case SUB_EVENT_TYPE_PROTECTION_UCAP_MAX:
-                        message_stream << " - Превышение напряжения конденсатора ";
-                        message_stream << "(" << event.info + 1 << ") : " << event.value << " B";
+                        message_stream << " - The voltage of the capacitor is too high ";
+                        message_stream << "(" << event.info + 1 << ") : " << event.value << " V";
                         break;
                     case SUB_EVENT_TYPE_PROTECTION_TEMPERATURE:
-                        message_stream << " - Превышение температуры ";
+                        message_stream << " - The temperature is too high: ";
                         message_stream << event.value << " °С";
                         break;
                     case SUB_EVENT_TYPE_PROTECTION_U_MIN:
-                        message_stream << " - Слишком низкое напряжение фазы ";
-                        message_stream << Phases[event.info] << ": " << event.value << " B";
+                        message_stream << " - The voltage is too low at the phase ";
+                        message_stream << Phases[event.info] << ": " << event.value << " V";
                         break;
                     case SUB_EVENT_TYPE_PROTECTION_U_MAX:
-                        message_stream << " - Превышение напряжения фазы ";
-                        message_stream << Phases[event.info] << ": " << event.value << " B";
+                        message_stream << " - The voltage is too high at the phase ";
+                        message_stream << Phases[event.info] << ": " << event.value << " V";
                         break;
                     case SUB_EVENT_TYPE_PROTECTION_F_MIN:
-                        message_stream << " - Слишком низкая частота сети ";
+                        message_stream << " - The grid frequency is too low: ";
                         message_stream << event.value << "Гц";
                         break;
                     case SUB_EVENT_TYPE_PROTECTION_F_MAX:
-                        message_stream << " - Слишком высокая частота сети ";
+                        message_stream << " - The grid frequency is too high: ";
                         message_stream << event.value << "Гц";
                         break;
-                    case SUB_EVENT_TYPE_PROTECTION_IAFG_MAX_RMS:
-                        message_stream << " - Превышение среднеквадратического тока АДФ по фазе ";
+                    case SUB_EVENT_TYPE_PROTECTION_IPFC_MAX_RMS:
+                        message_stream << " - The RMS current exceeded the threshold on the phase ";
                         message_stream << Phases[event.info] << ": " << event.value << " A";
                         break;
                     case SUB_EVENT_TYPE_PROTECTION_IAFG_MAX_PEAK:
-                        message_stream << " - Превышение пикового тока АДФ по фазе ";
+                        message_stream << " - The peak current exceeded the threshold on the phase ";
                         message_stream << Phases[event.info] << ": " << event.value << " A";
                         break;
                     case SUB_EVENT_TYPE_PROTECTION_PHASES:
-                        message_stream << " - Неверное отношение фаз напряжения ";
+                        message_stream << " - Wrong phase rotation ";
                         break;
                     case SUB_EVENT_TYPE_PROTECTION_ADC_OVERLOAD:
-                        message_stream << " - Переполнение АЦП на канале ";
+                        message_stream << " - ADC overload on channel ";
                         message_stream << ADCchannels[event.info] << ": " << event.value;
                         break;
                     case SUB_EVENT_TYPE_PROTECTION_BAD_SYNC:
-                        message_stream << " - Проблемы синхронизации (качающаяся частота?) ";
+                        message_stream << " - Synchronisation failed (The grid frequency is unstable?) ";
                         break;
                     case SUB_EVENT_TYPE_PROTECTION_IGBT:
-                        message_stream << " - ошибка ключа IGBT ";
+                        message_stream << " - IGBT fault ";
                         message_stream << event.info;
                         break;
                     default:
-                        message_stream << stringWithColor(" - Неизвестное событие! ", DARK_RED);
+                        message_stream << stringWithColor(" - Unknown event! ", DARK_RED);
                         break;
                 }
                 break;
             case event_type_t::EVENT_TYPE_EVENT:
-                message_stream << " - Событие ";
+                message_stream << " - Event ";
                 break;
         }
 
@@ -582,9 +593,8 @@ void MainWindow::closeSerialPort(void)
 void MainWindow::about(void)
 {
     QMessageBox::about(this, tr("Program info"),
-                       tr("The <b>Simple Terminal</b> example demonstrates how to "
-                          "use the Qt Serial Port module in modern GUI applications "
-                          "using Qt, with a menu bar, toolbars, and a status bar."));
+                       tr("The <b>GUI Terminal</b> is used to control the power factor corrector (PFC). Can be connected via a serial port (RS-485 interface) to the PFC. \n"
+                          "Author: Stanislav Karpikov [stankarpikov@gmail.com]"));
 }
 
 void MainWindow::initInterfaceConnections(void)
@@ -654,13 +664,13 @@ void MainWindow::setNetVoltage(float ADC_UD,
     filterApply(_pfc_settings.adc.ADC_I_TEMP1, ADC_I_TEMP1);
     filterApply(_pfc_settings.adc.ADC_I_TEMP2, ADC_I_TEMP2);
 
-    _ui->valueVoltageA->setText(QString().sprintf("% 5.0f В", static_cast<double>(_pfc_settings.adc.ADC_MATH_A)));
-    _ui->valueVoltageB->setText(QString().sprintf("% 5.0f В", static_cast<double>(_pfc_settings.adc.ADC_MATH_B)));
-    _ui->valueVoltageC->setText(QString().sprintf("% 5.0f В", static_cast<double>(_pfc_settings.adc.ADC_MATH_C)));
+    _ui->valueVoltageA->setText(QString().sprintf("% 5.0f V", static_cast<double>(_pfc_settings.adc.ADC_MATH_A)));
+    _ui->valueVoltageB->setText(QString().sprintf("% 5.0f V", static_cast<double>(_pfc_settings.adc.ADC_MATH_B)));
+    _ui->valueVoltageC->setText(QString().sprintf("% 5.0f V", static_cast<double>(_pfc_settings.adc.ADC_MATH_C)));
 
-    _ui->valueInstantCurrentA->setText(QString().sprintf("% 5.1f А", static_cast<double>(_pfc_settings.adc.ADC_I_A)));
-    _ui->valueInstantCurrentB->setText(QString().sprintf("% 5.1f А", static_cast<double>(_pfc_settings.adc.ADC_I_B)));
-    _ui->valueInstantCurrentC->setText(QString().sprintf("% 5.1f А", static_cast<double>(_pfc_settings.adc.ADC_I_C)));
+    _ui->valueInstantCurrentA->setText(QString().sprintf("% 5.1f A", static_cast<double>(_pfc_settings.adc.ADC_I_A)));
+    _ui->valueInstantCurrentB->setText(QString().sprintf("% 5.1f A", static_cast<double>(_pfc_settings.adc.ADC_I_B)));
+    _ui->valueInstantCurrentC->setText(QString().sprintf("% 5.1f A", static_cast<double>(_pfc_settings.adc.ADC_I_C)));
 
     _ui->valueTemperature1->setText(QString().sprintf("% 3.0f °C", static_cast<double>(_pfc_settings.adc.ADC_I_TEMP1)));
     _ui->valueTemperature2->setText(QString().sprintf("% 3.0f °C", static_cast<double>(_pfc_settings.adc.ADC_I_TEMP2)));
@@ -739,7 +749,7 @@ void MainWindow::setNetParams(
     _ui->valueTHDUB->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.net_params.thdu_B)));
     _ui->valueTHDUC->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.net_params.thdu_C)));
 
-    _ui->valueFrequency->setText(QString().sprintf("% 6.3f Гц", static_cast<double>(1.0f / (_pfc_settings.net_params.period_fact / 1000000.0f))));
+    _ui->valueFrequency->setText(QString().sprintf("% 6.3f Hz", static_cast<double>(1.0f / (_pfc_settings.net_params.period_fact / 1000000.0f))));
 }
 
 void MainWindow::ansSettingsCalibrations(bool writed)

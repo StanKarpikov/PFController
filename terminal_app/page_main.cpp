@@ -41,12 +41,12 @@ void MainWindow::setConnection(bool connected)
     _connected = connected;
     if (connected)
     {
-        _ui->radioConnection->setText("Есть связь");
+        _ui->radioConnection->setText("Connected");
     }
     else
     {
         _last_index_events = 0;
-        _ui->radioConnection->setText("Нет связи");
+        _ui->radioConnection->setText("Disconnected");
     }
 }
 void MainWindow::setWorkState(uint32_t state, uint32_t ch_a, uint32_t ch_b, uint32_t ch_c)
@@ -71,44 +71,44 @@ void MainWindow::setWorkState(uint32_t state, uint32_t ch_a, uint32_t ch_b, uint
 
     switch (static_cast<PFCstate>(_pfc_settings.status))
     {
-        case PFCstate::PFC_STATE_INIT:  //предзаряд
-            _ui->valueWorkState->setText("Инициализация");
+        case PFCstate::PFC_STATE_INIT:
+            _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_INIT));
             break;
-        case PFCstate::PFC_STATE_STOP:  //не работает
-            _ui->valueWorkState->setText("Остановлен");
+        case PFCstate::PFC_STATE_STOP:
+            _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_STOP));
             break;
-        case PFCstate::PFC_STATE_SYNC:  //синхронизация с сетью
-            _ui->valueWorkState->setText("Синхронизация");
+        case PFCstate::PFC_STATE_SYNC:
+            _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_SYNC));
             break;
         case PFCstate::PFC_STATE_PRECHARGE_PREPARE:
-            _ui->valueWorkState->setText("Подг.предзаряда");
+            _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_PRECHARGE_PREPARE));
             break;
-        case PFCstate::PFC_STATE_PRECHARGE:  //предзаряд
-            _ui->valueWorkState->setText("Предзаряд");
+        case PFCstate::PFC_STATE_PRECHARGE:
+            _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_PRECHARGE));
             break;
         case PFCstate::PFC_STATE_MAIN:
-            _ui->valueWorkState->setText("Контактор");
+            _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_MAIN));
             break;
-        case PFCstate::PFC_STATE_PRECHARGE_DISABLE:  //работает, но без компенсации
-            _ui->valueWorkState->setText("Выкл.предзаряд");
+        case PFCstate::PFC_STATE_PRECHARGE_DISABLE:
+            _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_PRECHARGE_DISABLE));
             break;
-        case PFCstate::PFC_STATE_WORK:  //работает, но без компенсации
-            _ui->valueWorkState->setText("Работа");
+        case PFCstate::PFC_STATE_WORK:
+            _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_WORK));
             break;
-        case PFCstate::PFC_STATE_CHARGE:  //работает, но без компенсации
-            _ui->valueWorkState->setText("Заряд");
+        case PFCstate::PFC_STATE_CHARGE:
+            _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_CHARGE));
             break;
-        case PFCstate::PFC_STATE_TEST:  //тестирование сети
-            _ui->valueWorkState->setText("Тест");
+        case PFCstate::PFC_STATE_TEST:
+            _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_TEST));
             break;
-        case PFCstate::PFC_STATE_STOPPING:  //ошибка
-            _ui->valueWorkState->setText("Остановка..");
+        case PFCstate::PFC_STATE_STOPPING:
+            _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_STOPPING));
             break;
-        case PFCstate::PFC_STATE_FAULTBLOCK:  //ошибка
-            _ui->valueWorkState->setText("Авария");
+        case PFCstate::PFC_STATE_FAULTBLOCK:
+            _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_FAULTBLOCK));
             break;
         default:
-            _ui->valueWorkState->setText("Unknown");
+            _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_UNKNOWN));
             break;
     }
 }
@@ -124,7 +124,7 @@ void MainWindow::setVersionInfo(
     uint32_t minute,
     uint32_t second)
 {
-    _ui->valueVersion->setText(QString().sprintf("ККМ: %d.%d.%d.%d \n Build %02d.%02d.%04d %02d:%02d:%02d",
+    _ui->valueVersion->setText(QString().sprintf("PFC: %d.%d.%d.%d \n Build %02d.%02d.%04d %02d:%02d:%02d",
                                              major, minor, micro, build,
                                              day, month, year, hour, minute, second));
 }

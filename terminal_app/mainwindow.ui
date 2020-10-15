@@ -34,7 +34,7 @@
          </font>
         </property>
         <property name="title">
-         <string>Состояние</string>
+         <string>State</string>
         </property>
         <property name="checkable">
          <bool>false</bool>
@@ -56,7 +56,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Состояние</string>
+          <string>Work state</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -72,7 +72,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Есть связь</string>
+          <string>Connection</string>
          </property>
          <property name="checkable">
           <bool>true</bool>
@@ -112,7 +112,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>СТОП</string>
+          <string>STOP</string>
          </property>
         </widget>
         <widget class="QPushButton" name="buttonStart">
@@ -125,7 +125,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Запуск</string>
+          <string>START</string>
          </property>
         </widget>
         <widget class="QPushButton" name="buttonSave">
@@ -133,12 +133,12 @@
           <rect>
            <x>10</x>
            <y>220</y>
-           <width>81</width>
+           <width>171</width>
            <height>23</height>
           </rect>
          </property>
          <property name="text">
-          <string>Сохр.настр.</string>
+          <string>Save settings</string>
          </property>
         </widget>
         <widget class="QCheckBox" name="checkBoxChannelA">
@@ -190,7 +190,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Заряд вкл.</string>
+          <string>Charge ON</string>
          </property>
         </widget>
         <widget class="QPushButton" name="buttonChargeOff">
@@ -203,7 +203,7 @@
           </rect>
          </property>
          <property name="text">
-          <string>Заряд выкл.</string>
+          <string>Charge OFF</string>
          </property>
         </widget>
        </widget>
@@ -216,7 +216,7 @@
          </font>
         </property>
         <property name="title">
-         <string>Сеть</string>
+         <string>Grid</string>
         </property>
         <widget class="QLabel" name="valueVoltageA">
          <property name="geometry">
@@ -239,7 +239,7 @@
           <string notr="true">color: rgb(0, 170, 0);</string>
          </property>
          <property name="text">
-          <string>0 В</string>
+          <string>0 V</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -262,7 +262,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Напряжение А:</string>
+          <string>Voltage А:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -289,7 +289,7 @@
           <string notr="true">color: rgb(0, 170, 0);</string>
          </property>
          <property name="text">
-          <string>0 В</string>
+          <string>0 V</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -312,7 +312,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Напряжение B:</string>
+          <string>Voltage B:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -339,7 +339,7 @@
           <string notr="true">color: rgb(0, 170, 0);</string>
          </property>
          <property name="text">
-          <string>0 В</string>
+          <string>0 V</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -362,7 +362,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Напряжение C:</string>
+          <string>Voltage C:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -389,7 +389,7 @@
           <string notr="true">color: rgb(0, 170, 0);</string>
          </property>
          <property name="text">
-          <string>0 А</string>
+          <string>0 A</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -412,7 +412,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Ток A:</string>
+          <string>Current A:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -435,7 +435,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Ток B:</string>
+          <string>Current B:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -462,7 +462,7 @@
           <string notr="true">color: rgb(0, 170, 0);</string>
          </property>
          <property name="text">
-          <string>0 А</string>
+          <string>0 A</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -485,7 +485,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Ток C:</string>
+          <string>Current C:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -512,7 +512,7 @@
           <string notr="true">color: rgb(0, 170, 0);</string>
          </property>
          <property name="text">
-          <string>0 А</string>
+          <string>0 A</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -562,7 +562,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Температура:</string>
+          <string>Temperature:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -606,7 +606,7 @@
       </property>
       <widget class="QWidget" name="tabNetwork">
        <attribute name="title">
-        <string>Состояние</string>
+        <string>State</string>
        </attribute>
        <widget class="QGroupBox" name="groupTHD">
         <property name="geometry">
@@ -618,7 +618,7 @@
          </rect>
         </property>
         <property name="title">
-         <string>Коэффициент гармонических искажений напряжения</string>
+         <string>Total harmonic distortion (THD) on voltage U</string>
         </property>
         <widget class="QLabel" name="labelTHDUA">
          <property name="geometry">
@@ -637,7 +637,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Фаза А:</string>
+          <string>Phase А:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -660,7 +660,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Фаза B:</string>
+          <string>Phase B:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -737,7 +737,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Фаза C:</string>
+          <string>Phase C:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -781,7 +781,7 @@
          </rect>
         </property>
         <property name="title">
-         <string>Смещение фаз напряжения</string>
+         <string>Voltage phases</string>
         </property>
         <widget class="QLabel" name="labelPhaseBC">
          <property name="geometry">
@@ -800,7 +800,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Фаза напряжения B-C:</string>
+          <string>Phase B-C:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -823,7 +823,7 @@
           </font>
          </property>
          <property name="text">
-          <string>Фаза напряжения А-B:</string>
+          <string>Phase А-B:</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -901,7 +901,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Частота:</string>
+         <string>Frequency:</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -937,7 +937,7 @@
       </widget>
       <widget class="QWidget" name="tabMain">
        <attribute name="title">
-        <string>Управление</string>
+        <string>Settings and Control</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="0">
@@ -955,176 +955,176 @@
            </font>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="pageCalibrations">
            <property name="geometry">
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>89</width>
-             <height>89</height>
+             <width>808</width>
+             <height>473</height>
             </rect>
            </property>
            <attribute name="label">
-            <string>Настройка подключения к сети</string>
+            <string>Calibration settings</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout">
             <item row="0" column="0">
              <widget class="QTableWidget" name="tableSettingsCalibrations">
               <row>
                <property name="text">
-                <string>Смещение Ud</string>
+                <string>Offset Ucap</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Смещение Ua</string>
+                <string>Offset Ua</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Смещение Ub</string>
+                <string>Offset Ub</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Смещение Uc</string>
+                <string>Offset Uc</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Смещение Ia</string>
+                <string>Offset Ia</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Смещение Ib</string>
+                <string>Offset Ib</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Смещение Ic</string>
+                <string>Offset Ic</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Смещение Iet</string>
+                <string>Offset Iet</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Смещение temp1</string>
+                <string>Offset temp1</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Смещение temp2</string>
+                <string>Offset temp2</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Смещение EMS a</string>
+                <string>Offset EMS a</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Смещение EMS b</string>
+                <string>Offset EMS b</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Смещение EMS c</string>
+                <string>Offset EMS c</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Смещение EMS I</string>
+                <string>Offset EMS I</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах Ud</string>
+                <string>Multiplier Ucap</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах Ua</string>
+                <string>Multiplier Ua</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах Ub</string>
+                <string>Multiplier Ub</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах Uc</string>
+                <string>Multiplier Uc</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах Ia</string>
+                <string>Multiplier Ia</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах Ib</string>
+                <string>Multiplier Ib</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах Ic</string>
+                <string>Multiplier Ic</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах Et</string>
+                <string>Multiplier Et</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах temp1</string>
+                <string>Multiplier temp1</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах temp2</string>
+                <string>Multiplier temp2</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах EMS A</string>
+                <string>Multiplier EMS A</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах EMS B</string>
+                <string>Multiplier EMS B</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах EMS C</string>
+                <string>Multiplier EMS C</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Размах EMS I</string>
+                <string>Multiplier EMS I</string>
                </property>
               </row>
               <column>
                <property name="text">
-                <string>Значение</string>
+                <string>Value</string>
                </property>
               </column>
               <column>
                <property name="text">
-                <string>Авто</string>
+                <string>Auto conf.</string>
                </property>
               </column>
               <column>
                <property name="text">
-                <string>Расчёт</string>
+                <string>Calculation</string>
                </property>
               </column>
               <item row="0" column="0">
@@ -1276,12 +1276,12 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>89</width>
-             <height>89</height>
+             <width>808</width>
+             <height>473</height>
             </rect>
            </property>
            <attribute name="label">
-            <string>Фильтрация</string>
+            <string>Filtration</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_6">
             <item row="0" column="0">
@@ -1291,22 +1291,22 @@
               </property>
               <row>
                <property name="text">
-                <string>Коэффициент фильтра тока</string>
+                <string>Filter coefficient: current</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Коэффициент фильтра напряжения</string>
+                <string>Filter coefficient: voltage</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Коэффициент фильтра напряжения конденсаторов</string>
+                <string>Filter coefficient: capacitrs voltage</string>
                </property>
               </row>
               <column>
                <property name="text">
-                <string>Значение</string>
+                <string>Value</string>
                </property>
                <property name="textAlignment">
                 <set>AlignCenter</set>
@@ -1314,7 +1314,7 @@
               </column>
               <column>
                <property name="text">
-                <string>Номинал</string>
+                <string>Nominal value</string>
                </property>
                <property name="textAlignment">
                 <set>AlignCenter</set>
@@ -1322,7 +1322,7 @@
               </column>
               <column>
                <property name="text">
-                <string>Примечание</string>
+                <string>Comment</string>
                </property>
                <property name="textAlignment">
                 <set>AlignCenter</set>
@@ -1387,7 +1387,7 @@
             </rect>
            </property>
            <attribute name="label">
-            <string>Заряд конденсаторов</string>
+            <string>Capacitors charge</string>
            </attribute>
            <widget class="QProgressBar" name="progressCapVoltage">
             <property name="geometry">
@@ -1437,14 +1437,14 @@
            <widget class="QLabel" name="labelCapNominalName">
             <property name="geometry">
              <rect>
-              <x>30</x>
+              <x>20</x>
               <y>90</y>
-              <width>101</width>
+              <width>111</width>
               <height>41</height>
              </rect>
             </property>
             <property name="text">
-             <string>Номинальное напряжение</string>
+             <string>Capacitors nominal voltage</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1463,7 +1463,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>0 В</string>
+             <string>0 V</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -1479,7 +1479,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>В</string>
+             <string>V</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -1495,7 +1495,7 @@
              </rect>
             </property>
             <property name="title">
-             <string>Коэффициенты накачки</string>
+             <string>Capacitors charge coefficients</string>
             </property>
             <widget class="QLabel" name="labelCapacitorsKd">
              <property name="geometry">
@@ -1507,7 +1507,7 @@
               </rect>
              </property>
              <property name="text">
-              <string>Дифференциальный</string>
+              <string>Differential</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -1561,7 +1561,7 @@
               </rect>
              </property>
              <property name="text">
-              <string>Интегральный</string>
+              <string>Integral</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -1596,7 +1596,7 @@
               </rect>
              </property>
              <property name="text">
-              <string>Пропорциональный</string>
+              <string>Proportional</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -1626,7 +1626,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>В</string>
+             <string>V</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignCenter</set>
@@ -1655,7 +1655,7 @@
              </rect>
             </property>
             <property name="text">
-             <string>Уровень предзаряда</string>
+             <string>Precharge level</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1670,12 +1670,12 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>89</width>
-             <height>89</height>
+             <width>808</width>
+             <height>473</height>
             </rect>
            </property>
            <attribute name="label">
-            <string>Защиты</string>
+            <string>Protections</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_2">
             <item row="0" column="0">
@@ -1685,17 +1685,17 @@
               </property>
               <row>
                <property name="text">
-                <string>Ud min</string>
+                <string>Ucap min</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Ud max</string>
+                <string>Ucap max</string>
                </property>
               </row>
               <row>
                <property name="text">
-                <string>Температура</string>
+                <string>Temperature max</string>
                </property>
               </row>
               <row>
@@ -1730,7 +1730,7 @@
               </row>
               <column>
                <property name="text">
-                <string>Значение</string>
+                <string>Value</string>
                </property>
                <property name="textAlignment">
                 <set>AlignCenter</set>
@@ -1738,7 +1738,7 @@
               </column>
               <column>
                <property name="text">
-                <string>Номинал</string>
+                <string>Nominal value</string>
                </property>
                <property name="textAlignment">
                 <set>AlignCenter</set>
@@ -1746,7 +1746,7 @@
               </column>
               <column>
                <property name="text">
-                <string>Единицы измерения</string>
+                <string>Unit</string>
                </property>
                <property name="textAlignment">
                 <set>AlignCenter</set>
@@ -1754,7 +1754,7 @@
               </column>
               <column>
                <property name="text">
-                <string>Примечание</string>
+                <string>Comment</string>
                </property>
                <property name="textAlignment">
                 <set>AlignCenter</set>
@@ -1772,12 +1772,12 @@
               </item>
               <item row="0" column="2">
                <property name="text">
-                <string>В</string>
+                <string>V</string>
                </property>
               </item>
               <item row="0" column="3">
                <property name="text">
-                <string>Минимально допустимое напряжение на одном из конденсаторов</string>
+                <string>Minimal voltage on one capacitor</string>
                </property>
               </item>
               <item row="1" column="0">
@@ -1792,12 +1792,12 @@
               </item>
               <item row="1" column="2">
                <property name="text">
-                <string>В</string>
+                <string>V</string>
                </property>
               </item>
               <item row="1" column="3">
                <property name="text">
-                <string>Максимально допустимое напряжение на одном из конденсаторов</string>
+                <string>Maximal voltage on one capacitor</string>
                </property>
               </item>
               <item row="2" column="0">
@@ -1812,12 +1812,12 @@
               </item>
               <item row="2" column="2">
                <property name="text">
-                <string>ºС</string>
+                <string>ºC</string>
                </property>
               </item>
               <item row="2" column="3">
                <property name="text">
-                <string>Максимально допустимая температура</string>
+                <string>Maximal allowed temperature</string>
                </property>
               </item>
               <item row="3" column="0">
@@ -1832,12 +1832,12 @@
               </item>
               <item row="3" column="2">
                <property name="text">
-                <string>В</string>
+                <string>V</string>
                </property>
               </item>
               <item row="3" column="3">
                <property name="text">
-                <string>Минимально допустимое напряжение сети по одной фазе</string>
+                <string>Minimal phase voltage (on one phase)</string>
                </property>
               </item>
               <item row="4" column="0">
@@ -1852,12 +1852,12 @@
               </item>
               <item row="4" column="2">
                <property name="text">
-                <string>В</string>
+                <string>V</string>
                </property>
               </item>
               <item row="4" column="3">
                <property name="text">
-                <string>Максимально допустимое напряжение сети по одной фазе</string>
+                <string>Maximal phase voltage (on one phase)</string>
                </property>
               </item>
               <item row="5" column="0">
@@ -1872,12 +1872,12 @@
               </item>
               <item row="5" column="2">
                <property name="text">
-                <string>Гц</string>
+                <string>Hz</string>
                </property>
               </item>
               <item row="5" column="3">
                <property name="text">
-                <string>Минимально допустимая частота сети</string>
+                <string>Minimal grid voltage frequency</string>
                </property>
               </item>
               <item row="6" column="0">
@@ -1892,12 +1892,12 @@
               </item>
               <item row="6" column="2">
                <property name="text">
-                <string>Гц</string>
+                <string>Hz</string>
                </property>
               </item>
               <item row="6" column="3">
                <property name="text">
-                <string>Максимально допустимая частота сети</string>
+                <string>Maximal grid voltage frequency</string>
                </property>
               </item>
               <item row="7" column="0">
@@ -1912,12 +1912,12 @@
               </item>
               <item row="7" column="2">
                <property name="text">
-                <string>А</string>
+                <string>A</string>
                </property>
               </item>
               <item row="7" column="3">
                <property name="text">
-                <string>Максимальный ток АДФ среднеквадратический</string>
+                <string>Maximal PFC current (Root Mean Square value)</string>
                </property>
               </item>
               <item row="8" column="0">
@@ -1932,12 +1932,12 @@
               </item>
               <item row="8" column="2">
                <property name="text">
-                <string>А</string>
+                <string>A</string>
                </property>
               </item>
               <item row="8" column="3">
                <property name="text">
-                <string>Максимальный ток АДФ мгновенный</string>
+                <string>Maximal PFC current (in a peak)</string>
                </property>
               </item>
              </widget>
@@ -1950,13 +1950,13 @@
       </widget>
       <widget class="QWidget" name="tabLog">
        <attribute name="title">
-        <string>Лог работы</string>
+        <string>Log</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_7">
         <item row="0" column="1">
          <widget class="QPushButton" name="buttonClearLog">
           <property name="text">
-           <string>Очистить</string>
+           <string>Clear log</string>
           </property>
          </widget>
         </item>
@@ -1980,7 +1980,7 @@
       </widget>
       <widget class="QWidget" name="tabOscillog">
        <attribute name="title">
-        <string>Осциллограммы</string>
+        <string>Oscillograms</string>
        </attribute>
        <layout class="QHBoxLayout" name="horizontalLayout_4">
         <item>
@@ -1992,7 +1992,7 @@
            </size>
           </property>
           <property name="title">
-           <string>Вид</string>
+           <string>View</string>
           </property>
           <widget class="QCheckBox" name="checkOscUa">
            <property name="geometry">
@@ -2004,7 +2004,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>Ua</string>
+            <string>U A</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -2020,7 +2020,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>Ub</string>
+            <string>U B</string>
            </property>
            <property name="checked">
             <bool>false</bool>
@@ -2036,7 +2036,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>Uc</string>
+            <string>U C</string>
            </property>
            <property name="checked">
             <bool>false</bool>
@@ -2052,7 +2052,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>I_a</string>
+            <string>I A</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -2068,7 +2068,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>I_b</string>
+            <string>I B</string>
            </property>
            <property name="checked">
             <bool>false</bool>
@@ -2084,7 +2084,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>I_c</string>
+            <string>I C</string>
            </property>
            <property name="checked">
             <bool>false</bool>
@@ -2100,7 +2100,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>Автомасштаб</string>
+            <string>Auto scale</string>
            </property>
           </widget>
           <widget class="QCheckBox" name="checkOscUd">
@@ -2108,12 +2108,12 @@
             <rect>
              <x>10</x>
              <y>250</y>
-             <width>70</width>
+             <width>81</width>
              <height>17</height>
             </rect>
            </property>
            <property name="text">
-            <string>Ud</string>
+            <string>U capacitors</string>
            </property>
           </widget>
           <widget class="QCheckBox" name="checkOscICompA">
@@ -2126,7 +2126,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>Icomp_a</string>
+            <string>Icomp A</string>
            </property>
            <property name="checked">
             <bool>true</bool>
@@ -2142,7 +2142,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>Icomp_c</string>
+            <string>Icomp C</string>
            </property>
            <property name="checked">
             <bool>false</bool>
@@ -2158,7 +2158,7 @@
             </rect>
            </property>
            <property name="text">
-            <string>Icomp_b</string>
+            <string>Icomp B</string>
            </property>
            <property name="checked">
             <bool>false</bool>

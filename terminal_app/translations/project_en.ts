@@ -70,7 +70,7 @@
         <location filename="../mainwindow.ui" line="292"/>
         <location filename="../mainwindow.ui" line="342"/>
         <location filename="../mainwindow.ui" line="1466"/>
-        <source>0 В</source>
+        <source>0 V</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
