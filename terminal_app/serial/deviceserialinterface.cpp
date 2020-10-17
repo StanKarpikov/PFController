@@ -11,9 +11,10 @@
 #include <sstream>
 #include <iomanip>
 #include "deviceserialinterface.h"
+#include "interface_messaging.h"
 #include <queue>
-
 using namespace std;
+using namespace InterfaceMessaging;
 
 PFCSerialInterface::PFCSerialInterface(QObject *parent)
 {
@@ -66,13 +67,13 @@ void PFCSerialInterface::ConnectTo(
     if (_serial->open(QIODevice::ReadWrite))
     {
         message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
-                (QString("Порт %1 открыт: %2").arg(name).arg(QString::number(baudRate))).toStdString());
+                (QString("Port %1 opened: %2").arg(name).arg(QString::number(baudRate))).toStdString());
         emit connected();
     }
     else
     {
         message(MESSAGE_TYPE_CONNECTION, MESSAGE_WARNING, MESSAGE_TARGET_ALL,
-                (QString("Ошибка открытия порта %1: %2").arg(name).arg(QString::number(baudRate))).toStdString());
+                (QString("Error opening port %1: %2").arg(name).arg(QString::number(baudRate))).toStdString());
     }
 }
 void PFCSerialInterface::disconnectFromDevice()
@@ -81,13 +82,13 @@ void PFCSerialInterface::disconnectFromDevice()
     {
         _serial->close();
         message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
-                "Порт закрыт");
+                "Port closed");
         emit disconnected();
     }
     else
     {
         message(MESSAGE_TYPE_CONNECTION, MESSAGE_WARNING, MESSAGE_TARGET_DEBUG,
-                "Попытка закрытия неотрытого порта!");
+                "Trying to close a port that has not been opened!");
         emit disconnected();
     }
 }
@@ -98,13 +99,13 @@ void PFCSerialInterface::handleError(QSerialPort::SerialPortError err)
     if (noError == 0) target = MESSAGE_TARGET_DEBUG;
     noError = 0;
     message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
-            (QString("Ошибка порта: %1(%2)")
+            (QString("Port error: %1(%2)")
                 .arg(err)
                 .arg(_serial->errorString())).toStdString());
     if (err == 12)
     {
         message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, target,
-                "Соединение потеряно");
+                "Connection lost");
     }
     //Disconnect();
 }
@@ -138,7 +139,7 @@ DeviceSerialMessage *PFCSerialInterface::serialReadPackage(int timeout)
                     if (noError == 0)
                     {
                         message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_ALL,
-                                "Соединение восстановлено");
+                                "Connection restored");
                     }
                     noError = 1;
                     return response;
@@ -147,7 +148,7 @@ DeviceSerialMessage *PFCSerialInterface::serialReadPackage(int timeout)
             _serial->waitForReadyRead(timeout - timer.elapsed());
         }
         message(MESSAGE_TYPE_CONNECTION, MESSAGE_WARNING, MESSAGE_TARGET_DEBUG,
-                "Ошибка ожидания ответа");
+                "Timeout waiting for the answer");
     }
     catch (ProtocolException &e)
     {
@@ -243,7 +244,6 @@ void PFCSerialInterface::sendQueue()
 
     const vector<uint8_t> &dataToWrite = pc->package_to_send->toBuffer();
 
-    // отправляем пакет
     written = serialWrite(dataToWrite);
     if (written < 0)
     {
@@ -254,7 +254,6 @@ void PFCSerialInterface::sendQueue()
     message(MESSAGE_TYPE_CONNECTION, MESSAGE_NORMAL, MESSAGE_TARGET_NONE,
             (QString("SENT: ").append(QString::fromStdString(hex_dump(dataToWrite)))).toStdString());
 
-    // получаем ответ
     if (pc->package_read)
     {
         delete pc->package_read;
@@ -273,12 +272,12 @@ void PFCSerialInterface::sendQueue()
     else
     {
         message(MESSAGE_TYPE_CONNECTION, MESSAGE_ERROR, MESSAGE_TARGET_DEBUG,
-                "Превышено время ожидания!");
+                "Timeout is esceeded!");
         pc->finishProcessing(true);
         emit informConnectionChanged(false);
     }
 
-    if (!_queue.empty()) emit couldWrite();  //избыточно
+    if (!_queue.empty()) emit couldWrite(); /* TODO: Check if this is redundant */
 }
 
 void PFCSerialInterface::connectionHasChanged(bool connected)
@@ -295,7 +294,7 @@ void PFCSerialInterface::enqueueCommand(InterfacePackage *pc)
     if (_queue.size() > SEND_QUEUE_LEN_MAX)
     {
         message(MESSAGE_TYPE_CONNECTION, MESSAGE_WARNING, MESSAGE_TARGET_DEBUG,
-                "Очередь отправки переполнена!");
+                "The send queue is full!");
         pc->finishProcessing(true);
         return;
     }

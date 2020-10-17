@@ -5,15 +5,8 @@
                        INCLUDES
 --------------------------------------------------------------*/
 
-#include <QModbusRtuSerialMaster>
-#include <QWidget>
-#include <QTimer>
-#include "mainwindow.h"
-#include "types.h"
-#include <QEventLoop>
+#include <QtCore/QtGlobal>
 #include "serial/deviceserialinterface.h"
-#include "ui_mainwindow.h"
-
 #include "device_definition.h"
 #include "device_interface_commands.h"
 
@@ -49,7 +42,7 @@ signals:
     void interfaceConnected(void);
     void interfaceDisconnected(void);
 
-    void setOscillog(PFCconfig::Interface::PFCOscillogCnannel channel, std::vector<double> data);
+    void setOscillog(PFCconfig::Interface::OscillogCnannel channel, std::vector<double> data);
     void setNetVoltage(	float ADC_UD,
                         float ADC_U_A,
                         float ADC_U_B,
@@ -165,7 +158,7 @@ public slots:
     void updateEvents(uint64_t afterIndex);
     void updateVersionInfo(void);
     void updateNetVoltageRAW(void);
-    void updateOscillog(PFCconfig::Interface::PFCOscillogCnannel channel);
+    void updateOscillog(PFCconfig::Interface::OscillogCnannel channel);
     void updateNetParams(void);
     void updateSettingsCalibrations(void);
     void updateSettingsProtection(void);
@@ -201,7 +194,7 @@ public slots:
             float K_I,
             float K_U,
             float K_UD);
-    void writeSwitchOnOff(PFCconfig::Interface::pfc_commands_t command,uint32_t data);
+    void writeSwitchOnOff(PFCconfig::Interface::PFCCommands command,uint32_t data);
 
     /*--------------------------------------------------------------
                             PRIVATE FUNCTIONS
@@ -235,7 +228,7 @@ private:
             float offset,
             std::vector<float> &out);
     void protocolUnknownCommand(package_general* answer);
-    void endRequest(package_general &req, PFCconfig::Interface::pfc_interface_commands_t command, uint32_t packet_size, DeviceSerialMessage::MessagePriority priority = DeviceSerialMessage::MessagePriority::NORMAL);
+    void endRequest(package_general &req, PFCconfig::Interface::InterfaceCommands command, uint32_t packet_size, DeviceSerialMessage::MessagePriority priority = DeviceSerialMessage::MessagePriority::NORMAL);
 
 };
 

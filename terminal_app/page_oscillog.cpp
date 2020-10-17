@@ -22,16 +22,16 @@ using namespace PFCconfig::Events;
 
 void MainWindow::pageOscillogInit(void)
 {
-    _oscillog_array[PFCOscillogCnannel::OSC_U_A] = OscillogChannels::OSCILLOG_U_A;
-    _oscillog_array[PFCOscillogCnannel::OSC_U_B] = OscillogChannels::OSCILLOG_U_B;
-    _oscillog_array[PFCOscillogCnannel::OSC_U_C] = OscillogChannels::OSCILLOG_U_C;
-    _oscillog_array[PFCOscillogCnannel::OSC_I_A] = OscillogChannels::OSCILLOG_I_A;
-    _oscillog_array[PFCOscillogCnannel::OSC_I_B] = OscillogChannels::OSCILLOG_I_B;
-    _oscillog_array[PFCOscillogCnannel::OSC_I_C] = OscillogChannels::OSCILLOG_I_C;
-    _oscillog_array[PFCOscillogCnannel::OSC_UD] = OscillogChannels::OSCILLOG_UD;
-    _oscillog_array[PFCOscillogCnannel::OSC_COMP_A] = OscillogChannels::OSCILLOG_COMP_A;
-    _oscillog_array[PFCOscillogCnannel::OSC_COMP_B] = OscillogChannels::OSCILLOG_COMP_B;
-    _oscillog_array[PFCOscillogCnannel::OSC_COMP_C] = OscillogChannels::OSCILLOG_COMP_C;
+    _oscillog_array[OscillogCnannel::OSC_U_A] = DiagramOscillogChannels::OSCILLOG_U_A;
+    _oscillog_array[OscillogCnannel::OSC_U_B] = DiagramOscillogChannels::OSCILLOG_U_B;
+    _oscillog_array[OscillogCnannel::OSC_U_C] = DiagramOscillogChannels::OSCILLOG_U_C;
+    _oscillog_array[OscillogCnannel::OSC_I_A] = DiagramOscillogChannels::OSCILLOG_I_A;
+    _oscillog_array[OscillogCnannel::OSC_I_B] = DiagramOscillogChannels::OSCILLOG_I_B;
+    _oscillog_array[OscillogCnannel::OSC_I_C] = DiagramOscillogChannels::OSCILLOG_I_C;
+    _oscillog_array[OscillogCnannel::OSC_UD] = DiagramOscillogChannels::OSCILLOG_UD;
+    _oscillog_array[OscillogCnannel::OSC_COMP_A] = DiagramOscillogChannels::OSCILLOG_COMP_A;
+    _oscillog_array[OscillogCnannel::OSC_COMP_B] = DiagramOscillogChannels::OSCILLOG_COMP_B;
+    _oscillog_array[OscillogCnannel::OSC_COMP_C] = DiagramOscillogChannels::OSCILLOG_COMP_C;
 
     _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("I A");
     _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("I B");
@@ -47,22 +47,22 @@ void MainWindow::pageOscillogInit(void)
     _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("Icomp B");
     _ui->OscillogPlot->addGraph(_ui->OscillogPlot->xAxis, _ui->OscillogPlot->yAxis)->setName("Icomp C");
 
-    _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_U_A))->setPen(QPen(Qt::red));
-    _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_U_B))->setPen(QPen(Qt::blue));
-    _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_U_C))->setPen(QPen(Qt::green));
+    _ui->OscillogPlot->graph(enum_int(DiagramOscillogChannels::OSCILLOG_U_A))->setPen(QPen(Qt::red));
+    _ui->OscillogPlot->graph(enum_int(DiagramOscillogChannels::OSCILLOG_U_B))->setPen(QPen(Qt::blue));
+    _ui->OscillogPlot->graph(enum_int(DiagramOscillogChannels::OSCILLOG_U_C))->setPen(QPen(Qt::green));
 
-    _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_I_A))->setPen(QPen(QColor(Qt::darkRed).lighter(200)));
-    _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_I_B))->setPen(QPen(QColor(Qt::darkBlue).lighter(200)));
-    _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_I_C))->setPen(QPen(QColor(Qt::darkGreen).lighter(200)));
-    _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_I_A))->setBrush(QBrush(QColor(139, 0, 0, 100)));
-    _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_I_B))->setBrush(QBrush(QColor(0, 0, 139, 100)));
-    _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_I_C))->setBrush(QBrush(QColor(0, 139, 0, 100)));
+    _ui->OscillogPlot->graph(enum_int(DiagramOscillogChannels::OSCILLOG_I_A))->setPen(QPen(QColor(Qt::darkRed).lighter(200)));
+    _ui->OscillogPlot->graph(enum_int(DiagramOscillogChannels::OSCILLOG_I_B))->setPen(QPen(QColor(Qt::darkBlue).lighter(200)));
+    _ui->OscillogPlot->graph(enum_int(DiagramOscillogChannels::OSCILLOG_I_C))->setPen(QPen(QColor(Qt::darkGreen).lighter(200)));
+    _ui->OscillogPlot->graph(enum_int(DiagramOscillogChannels::OSCILLOG_I_A))->setBrush(QBrush(QColor(139, 0, 0, 100)));
+    _ui->OscillogPlot->graph(enum_int(DiagramOscillogChannels::OSCILLOG_I_B))->setBrush(QBrush(QColor(0, 0, 139, 100)));
+    _ui->OscillogPlot->graph(enum_int(DiagramOscillogChannels::OSCILLOG_I_C))->setBrush(QBrush(QColor(0, 139, 0, 100)));
 
-    _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_UD))->setPen(QPen(qRgb(139, 0, 139)));
+    _ui->OscillogPlot->graph(enum_int(DiagramOscillogChannels::OSCILLOG_UD))->setPen(QPen(qRgb(139, 0, 139)));
 
-    _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_COMP_A))->setPen(QPen(qRgb(255, 105, 180)));
-    _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_COMP_B))->setPen(QPen(qRgb(123, 104, 238)));
-    _ui->OscillogPlot->graph(enum_int(OscillogChannels::OSCILLOG_COMP_C))->setPen(QPen(qRgb(95, 158, 160)));
+    _ui->OscillogPlot->graph(enum_int(DiagramOscillogChannels::OSCILLOG_COMP_A))->setPen(QPen(qRgb(255, 105, 180)));
+    _ui->OscillogPlot->graph(enum_int(DiagramOscillogChannels::OSCILLOG_COMP_B))->setPen(QPen(qRgb(123, 104, 238)));
+    _ui->OscillogPlot->graph(enum_int(DiagramOscillogChannels::OSCILLOG_COMP_C))->setPen(QPen(qRgb(95, 158, 160)));
 
     _ui->OscillogPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
 
@@ -78,7 +78,7 @@ void MainWindow::pageOscillogInit(void)
 
     _oscillog_xval.resize(128);
 
-    for (uint i = 0; i < enum_int(OscillogChannels::OSCILLOG_SIZE); i++)
+    for (uint i = 0; i < enum_int(DiagramOscillogChannels::OSCILLOG_SIZE); i++)
     {
         _oscillog_data[i].resize(OSCILLOG_TRANSFER_SIZE);
     }
@@ -119,11 +119,11 @@ void MainWindow::buttonAutoConfigOscClicked(void)
 {
     _ui->OscillogPlot->rescaleAxes(true);
 }
-void MainWindow::setOscillog(PFCOscillogCnannel channel, std::vector<double> data)
+void MainWindow::setOscillog(OscillogCnannel channel, std::vector<double> data)
 {
     double K1 = (static_cast<double>(_ui->sliderOscFilter->value())) / 1000.0;
     //qDebug()<<data;
-    if (channel <= PFCOscillogCnannel::OSC_COMP_C)
+    if (channel <= OscillogCnannel::OSC_COMP_C)
     {
         if (!_oscillog_array.contains(channel))
         {

@@ -26,7 +26,10 @@ SOURCES += \
 HEADERS += \
     device_definition.h \
     device_interface_commands.h \
+    interface_definitions.h \
+    interface_messaging.h \
     mainwindow.h \
+    page_filters.h \
     serial/deviceserialinterface.h \
     serial/deviceserialmessage.h \
     settingsdialog.h \
@@ -36,8 +39,7 @@ HEADERS += \
     qcustomplot.h \
     eqwidget.h \
     htmldelegate.h \
-    device.h \
-    types.h
+    device.h
 
 FORMS += \
     mainwindow.ui \

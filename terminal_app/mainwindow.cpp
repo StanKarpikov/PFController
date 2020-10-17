@@ -22,6 +22,8 @@
 #include <QListWidgetItem>
 #include "htmldelegate.h"
 #include "device_definition.h"
+#include "interface_definitions.h"
+#include "interface_messaging.h"
 
 #include <sstream> /* std::stringstream */
 #include <iomanip> /* std::setfill, std::setw */
@@ -34,12 +36,13 @@ using namespace PFCconfig;
 using namespace PFCconfig::ADC;
 using namespace PFCconfig::Interface;
 using namespace PFCconfig::Events;
+using namespace InterfaceDefinitions;
+using namespace InterfaceMessaging;
 
 /*--------------------------------------------------------------
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-const QBrush MainWindow::editableCellBrush = QBrush(QColor(240, 255, 240));
 
 /*--------------------------------------------------------------
                        CLASS FUNCTIONS
@@ -59,7 +62,9 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent),
       _ui(new Ui::MainWindow),
       _pfc(new PFC),
-      _oscillog_data(static_cast<int>(OscillogChannels::OSCILLOG_SIZE)),
+      _pfc_settings(new PFCsettings),
+      _page_filters(_ui, _pfc_settings, _pfc),
+      _oscillog_data(static_cast<int>(DiagramOscillogChannels::OSCILLOG_SIZE)),
       _last_index_events(0),
       _port_settings(new SettingsDialog),
       _connected(false),
@@ -117,8 +122,6 @@ MainWindow::MainWindow(QWidget* parent)
             this, &MainWindow::setSettingsProtection);
     connect(_pfc, &PFC::setSettingsCapacitors,
             this, &MainWindow::setSettingsCapacitors);
-    connect(_pfc, &PFC::setSettingsFilters,
-            this, &MainWindow::setSettingsFilters);
 
     connect(_pfc, &PFC::ansSettingsCalibrations,
             this, &MainWindow::ansSettingsCalibrations);
@@ -126,8 +129,6 @@ MainWindow::MainWindow(QWidget* parent)
             this, &MainWindow::ansSettingsProtection);
     connect(_pfc, &PFC::ansSettingsCapacitors,
             this, &MainWindow::ansSettingsCapacitors);
-    connect(_pfc, &PFC::ansSettingsFilters,
-            this, &MainWindow::ansSettingsFilters);
 
     connect(this, &MainWindow::updateNetVoltage,
             _pfc, &PFC::updateNetVoltage);
@@ -159,8 +160,6 @@ MainWindow::MainWindow(QWidget* parent)
             _pfc, &PFC::writeSettingsProtection);
     connect(this, &MainWindow::writeSettingsCapacitors,
             _pfc, &PFC::writeSettingsCapacitors);
-    connect(this, &MainWindow::writeSettingsFilters,
-            _pfc, &PFC::writeSettingsFilters);
 
     connect(this, &MainWindow::writeSwitchOnOff,
             _pfc, &PFC::writeSwitchOnOff);
@@ -194,7 +193,7 @@ MainWindow::MainWindow(QWidget* parent)
     pageSettingsCalibrationsInit();
     pageSettingsCapacitorsInit();
     pageSettingsProtectionInit();
-    pageSettingsFiltersInit();
+    _page_filters.pageSettingsFiltersInit();
 
     _timer_events.start(EVENTS_TIMER_TIMEOUT);
 
@@ -278,33 +277,33 @@ void MainWindow::timerOscillog(void)
 {
     if (!_connected) return;
 
-    if (_ui->checkOscIa->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_I_A);
-    if (_ui->checkOscIb->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_I_B);
-    if (_ui->checkOscIc->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_I_C);
+    if (_ui->checkOscIa->isChecked()) emit updateOscillog(OscillogCnannel::OSC_I_A);
+    if (_ui->checkOscIb->isChecked()) emit updateOscillog(OscillogCnannel::OSC_I_B);
+    if (_ui->checkOscIc->isChecked()) emit updateOscillog(OscillogCnannel::OSC_I_C);
 
-    if (_ui->checkOscUa->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_U_A);
-    if (_ui->checkOscUb->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_U_B);
-    if (_ui->checkOscUc->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_U_C);
+    if (_ui->checkOscUa->isChecked()) emit updateOscillog(OscillogCnannel::OSC_U_A);
+    if (_ui->checkOscUb->isChecked()) emit updateOscillog(OscillogCnannel::OSC_U_B);
+    if (_ui->checkOscUc->isChecked()) emit updateOscillog(OscillogCnannel::OSC_U_C);
 
-    if (_ui->checkOscUd->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_UD);
+    if (_ui->checkOscUd->isChecked()) emit updateOscillog(OscillogCnannel::OSC_UD);
 
-    if (_ui->checkOscICompA->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_COMP_A);
-    if (_ui->checkOscICompB->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_COMP_B);
-    if (_ui->checkOscICompC->isChecked()) emit updateOscillog(PFCOscillogCnannel::OSC_COMP_C);
+    if (_ui->checkOscICompA->isChecked()) emit updateOscillog(OscillogCnannel::OSC_COMP_A);
+    if (_ui->checkOscICompB->isChecked()) emit updateOscillog(OscillogCnannel::OSC_COMP_B);
+    if (_ui->checkOscICompC->isChecked()) emit updateOscillog(OscillogCnannel::OSC_COMP_C);
 
-    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_A))->setVisible(_ui->checkOscIa->isChecked());
-    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_B))->setVisible(_ui->checkOscIb->isChecked());
-    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_I_C))->setVisible(_ui->checkOscIc->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_I_A))->setVisible(_ui->checkOscIa->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_I_B))->setVisible(_ui->checkOscIb->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_I_C))->setVisible(_ui->checkOscIc->isChecked());
 
-    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_U_A))->setVisible(_ui->checkOscUa->isChecked());
-    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_U_B))->setVisible(_ui->checkOscUb->isChecked());
-    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_U_C))->setVisible(_ui->checkOscUc->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_U_A))->setVisible(_ui->checkOscUa->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_U_B))->setVisible(_ui->checkOscUb->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_U_C))->setVisible(_ui->checkOscUc->isChecked());
 
-    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_UD))->setVisible(_ui->checkOscUd->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_UD))->setVisible(_ui->checkOscUd->isChecked());
 
-    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_COMP_A))->setVisible(_ui->checkOscICompA->isChecked());
-    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_COMP_B))->setVisible(_ui->checkOscICompB->isChecked());
-    _ui->OscillogPlot->graph(static_cast<int>(OscillogChannels::OSCILLOG_COMP_C))->setVisible(_ui->checkOscICompC->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_COMP_A))->setVisible(_ui->checkOscICompA->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_COMP_B))->setVisible(_ui->checkOscICompB->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_COMP_C))->setVisible(_ui->checkOscICompC->isChecked());
 }
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event)
@@ -366,8 +365,8 @@ void MainWindow::setEvents(std::list<EventRecord> ev)
             "ADC_EMS_I",
         };
         std::stringstream message_stream;
-        message_stream << std::fixed << 2;
-        uint32_t subtype = (event.type >> 16) & 0xFFFF;
+        message_stream << std::fixed << std::setprecision(2);
+        SubEventPower subtype = static_cast<SubEventPower>((event.type >> 16) & 0xFFFF);
 
         QDateTime timestamp;
         timestamp.setTime_t(static_cast<uint>(event.unix_time_s_ms / 1000));
@@ -380,13 +379,13 @@ void MainWindow::setEvents(std::list<EventRecord> ev)
 
         message_stream << stringWithColor(date_stream.str(), LIGHT_GREY);
 
-        switch (static_cast<event_type_t>(event.type & 0xFFFF))
+        switch (static_cast<EventType>(event.type & 0xFFFF))
         {
-            case event_type_t::EVENT_TYPE_POWER:
+            case EventType::EVENT_TYPE_POWER:
                 message_stream << stringWithColor(" - Power - ", DARK_GREEN);
                 switch (subtype)
                 {
-                    case SUB_EVENT_TYPE_POWER_ON:
+                    case SubEventPower::SUB_EVENT_TYPE_POWER_ON:
                         message_stream << "Power ON";
                         break;
                     default:
@@ -394,7 +393,7 @@ void MainWindow::setEvents(std::list<EventRecord> ev)
                         break;
                 }
                 break;
-            case event_type_t::EVENT_TYPE_CHANGESTATE:
+            case EventType::EVENT_TYPE_CHANGESTATE:
                 message_stream << stringWithColor(" - State - ", DARK_GREEN);
                 switch (static_cast<PFCstate>(subtype))
                 {
@@ -439,57 +438,57 @@ void MainWindow::setEvents(std::list<EventRecord> ev)
                         break;
                 }
                 break;
-            case event_type_t::EVENT_TYPE_PROTECTION:
+            case EventType::EVENT_TYPE_PROTECTION:
                 message_stream << stringWithColor(" - Protection ", DARK_RED);
-                switch (subtype)
+                switch (static_cast<SubEventProtection>(subtype))
                 {
-                    case SUB_EVENT_TYPE_PROTECTION_UCAP_MIN:
+                    case SubEventProtection::SUB_EVENT_TYPE_PROTECTION_UCAP_MIN:
                         message_stream << " - The voltage of the capacitor is too low during operation ";
                         message_stream << "(" << event.info + 1 << ") : " << event.value << " V";
                         break;
-                    case SUB_EVENT_TYPE_PROTECTION_UCAP_MAX:
+                    case SubEventProtection::SUB_EVENT_TYPE_PROTECTION_UCAP_MAX:
                         message_stream << " - The voltage of the capacitor is too high ";
                         message_stream << "(" << event.info + 1 << ") : " << event.value << " V";
                         break;
-                    case SUB_EVENT_TYPE_PROTECTION_TEMPERATURE:
+                    case SubEventProtection::SUB_EVENT_TYPE_PROTECTION_TEMPERATURE:
                         message_stream << " - The temperature is too high: ";
                         message_stream << event.value << " °С";
                         break;
-                    case SUB_EVENT_TYPE_PROTECTION_U_MIN:
+                    case SubEventProtection::SUB_EVENT_TYPE_PROTECTION_U_MIN:
                         message_stream << " - The voltage is too low at the phase ";
                         message_stream << Phases[event.info] << ": " << event.value << " V";
                         break;
-                    case SUB_EVENT_TYPE_PROTECTION_U_MAX:
+                    case SubEventProtection:: SUB_EVENT_TYPE_PROTECTION_U_MAX:
                         message_stream << " - The voltage is too high at the phase ";
                         message_stream << Phases[event.info] << ": " << event.value << " V";
                         break;
-                    case SUB_EVENT_TYPE_PROTECTION_F_MIN:
+                    case SubEventProtection::SUB_EVENT_TYPE_PROTECTION_F_MIN:
                         message_stream << " - The grid frequency is too low: ";
                         message_stream << event.value << "Гц";
                         break;
-                    case SUB_EVENT_TYPE_PROTECTION_F_MAX:
+                    case SubEventProtection::SUB_EVENT_TYPE_PROTECTION_F_MAX:
                         message_stream << " - The grid frequency is too high: ";
                         message_stream << event.value << "Гц";
                         break;
-                    case SUB_EVENT_TYPE_PROTECTION_IPFC_MAX_RMS:
+                    case SubEventProtection::SUB_EVENT_TYPE_PROTECTION_IPFC_MAX_RMS:
                         message_stream << " - The RMS current exceeded the threshold on the phase ";
                         message_stream << Phases[event.info] << ": " << event.value << " A";
                         break;
-                    case SUB_EVENT_TYPE_PROTECTION_IAFG_MAX_PEAK:
+                    case SubEventProtection::SUB_EVENT_TYPE_PROTECTION_IAFG_MAX_PEAK:
                         message_stream << " - The peak current exceeded the threshold on the phase ";
                         message_stream << Phases[event.info] << ": " << event.value << " A";
                         break;
-                    case SUB_EVENT_TYPE_PROTECTION_PHASES:
+                    case SubEventProtection::SUB_EVENT_TYPE_PROTECTION_PHASES:
                         message_stream << " - Wrong phase rotation ";
                         break;
-                    case SUB_EVENT_TYPE_PROTECTION_ADC_OVERLOAD:
+                    case SubEventProtection::SUB_EVENT_TYPE_PROTECTION_ADC_OVERLOAD:
                         message_stream << " - ADC overload on channel ";
                         message_stream << ADCchannels[event.info] << ": " << event.value;
                         break;
-                    case SUB_EVENT_TYPE_PROTECTION_BAD_SYNC:
+                    case SubEventProtection::SUB_EVENT_TYPE_PROTECTION_BAD_SYNC:
                         message_stream << " - Synchronisation failed (The grid frequency is unstable?) ";
                         break;
-                    case SUB_EVENT_TYPE_PROTECTION_IGBT:
+                    case SubEventProtection::SUB_EVENT_TYPE_PROTECTION_IGBT:
                         message_stream << " - IGBT fault ";
                         message_stream << event.info;
                         break;
@@ -498,7 +497,7 @@ void MainWindow::setEvents(std::list<EventRecord> ev)
                         break;
                 }
                 break;
-            case event_type_t::EVENT_TYPE_EVENT:
+            case EventType::EVENT_TYPE_EVENT:
                 message_stream << " - Event ";
                 break;
         }
@@ -518,7 +517,7 @@ void MainWindow::message(uint8_t type, uint8_t level, uint8_t target, std::strin
             prefix = stringWithColor("[GENERAL] ", DARK_GREY);
             break;
         case MESSAGE_TYPE_CONNECTION:
-            prefix = stringWithColor("[CONNECTION] ", "#999966");
+            prefix = stringWithColor("[CONNECTION] ", EXTRA_LIGHT_GREY);
             break;
         case MESSAGE_TYPE_GLOBALFAULT:
             prefix = stringWithColor("[FAULT] ", DARK_RED);
@@ -567,11 +566,11 @@ void MainWindow::message(uint8_t type, uint8_t level, uint8_t target, std::strin
         s.append(QDateTime::currentDateTime().toString("dd.MM.yyyy hh:mm:ss:").toStdString());
         s.append("</font>");
         s += prefix;
-        /*
-            QListWidgetItem *i=new QListWidgetItem(QString::fromStdString(s), ui->listWidget);
-            */
+        QListWidgetItem *i=new QListWidgetItem(QString::fromStdString(s), _ui->listLog);
+        (void)i;
     }
 }
+
 MainWindow::~MainWindow(void)
 {
     delete _port_settings;
@@ -647,33 +646,33 @@ void MainWindow::setNetVoltage(float ADC_UD,
     Q_UNUSED(ADC_EMS_B)
     Q_UNUSED(ADC_EMS_C)
     Q_UNUSED(ADC_EMS_I)
-    filterApply(_pfc_settings.adc.ADC_U_A, ADC_U_A);
-    filterApply(_pfc_settings.adc.ADC_U_B, ADC_U_B);
-    filterApply(_pfc_settings.adc.ADC_U_C, ADC_U_C);
+    filterApply(_pfc_settings->adc.ADC_U_A, ADC_U_A);
+    filterApply(_pfc_settings->adc.ADC_U_B, ADC_U_B);
+    filterApply(_pfc_settings->adc.ADC_U_C, ADC_U_C);
 
-    filterApply(_pfc_settings.adc.ADC_I_A, ADC_I_A);
-    filterApply(_pfc_settings.adc.ADC_I_B, ADC_I_B);
-    filterApply(_pfc_settings.adc.ADC_I_C, ADC_I_C);
+    filterApply(_pfc_settings->adc.ADC_I_A, ADC_I_A);
+    filterApply(_pfc_settings->adc.ADC_I_B, ADC_I_B);
+    filterApply(_pfc_settings->adc.ADC_I_C, ADC_I_C);
 
-    filterApply(_pfc_settings.adc.ADC_MATH_A, ADC_MATH_A);
-    filterApply(_pfc_settings.adc.ADC_MATH_B, ADC_MATH_B);
-    filterApply(_pfc_settings.adc.ADC_MATH_C, ADC_MATH_C);
+    filterApply(_pfc_settings->adc.ADC_MATH_A, ADC_MATH_A);
+    filterApply(_pfc_settings->adc.ADC_MATH_B, ADC_MATH_B);
+    filterApply(_pfc_settings->adc.ADC_MATH_C, ADC_MATH_C);
 
-    _pfc_settings.adc.ADC_UD = ADC_UD;
+    _pfc_settings->adc.ADC_UD = ADC_UD;
 
-    filterApply(_pfc_settings.adc.ADC_I_TEMP1, ADC_I_TEMP1);
-    filterApply(_pfc_settings.adc.ADC_I_TEMP2, ADC_I_TEMP2);
+    filterApply(_pfc_settings->adc.ADC_I_TEMP1, ADC_I_TEMP1);
+    filterApply(_pfc_settings->adc.ADC_I_TEMP2, ADC_I_TEMP2);
 
-    _ui->valueVoltageA->setText(QString().sprintf("% 5.0f V", static_cast<double>(_pfc_settings.adc.ADC_MATH_A)));
-    _ui->valueVoltageB->setText(QString().sprintf("% 5.0f V", static_cast<double>(_pfc_settings.adc.ADC_MATH_B)));
-    _ui->valueVoltageC->setText(QString().sprintf("% 5.0f V", static_cast<double>(_pfc_settings.adc.ADC_MATH_C)));
+    _ui->valueVoltageA->setText(QString().sprintf("% 5.0f V", static_cast<double>(_pfc_settings->adc.ADC_MATH_A)));
+    _ui->valueVoltageB->setText(QString().sprintf("% 5.0f V", static_cast<double>(_pfc_settings->adc.ADC_MATH_B)));
+    _ui->valueVoltageC->setText(QString().sprintf("% 5.0f V", static_cast<double>(_pfc_settings->adc.ADC_MATH_C)));
 
-    _ui->valueInstantCurrentA->setText(QString().sprintf("% 5.1f A", static_cast<double>(_pfc_settings.adc.ADC_I_A)));
-    _ui->valueInstantCurrentB->setText(QString().sprintf("% 5.1f A", static_cast<double>(_pfc_settings.adc.ADC_I_B)));
-    _ui->valueInstantCurrentC->setText(QString().sprintf("% 5.1f A", static_cast<double>(_pfc_settings.adc.ADC_I_C)));
+    _ui->valueInstantCurrentA->setText(QString().sprintf("% 5.1f A", static_cast<double>(_pfc_settings->adc.ADC_I_A)));
+    _ui->valueInstantCurrentB->setText(QString().sprintf("% 5.1f A", static_cast<double>(_pfc_settings->adc.ADC_I_B)));
+    _ui->valueInstantCurrentC->setText(QString().sprintf("% 5.1f A", static_cast<double>(_pfc_settings->adc.ADC_I_C)));
 
-    _ui->valueTemperature1->setText(QString().sprintf("% 3.0f °C", static_cast<double>(_pfc_settings.adc.ADC_I_TEMP1)));
-    _ui->valueTemperature2->setText(QString().sprintf("% 3.0f °C", static_cast<double>(_pfc_settings.adc.ADC_I_TEMP2)));
+    _ui->valueTemperature1->setText(QString().sprintf("% 3.0f °C", static_cast<double>(_pfc_settings->adc.ADC_I_TEMP1)));
+    _ui->valueTemperature2->setText(QString().sprintf("% 3.0f °C", static_cast<double>(_pfc_settings->adc.ADC_I_TEMP2)));
 }
 
 void MainWindow::setNetVoltageRAW(float ADC_UD,
@@ -696,18 +695,18 @@ void MainWindow::setNetVoltageRAW(float ADC_UD,
     Q_UNUSED(ADC_EMS_B)
     Q_UNUSED(ADC_EMS_C)
     Q_UNUSED(ADC_EMS_I)
-    filterApply(_pfc_settings.adc_raw.ADC_U_A, ADC_U_A);
-    filterApply(_pfc_settings.adc_raw.ADC_U_B, ADC_U_B);
-    filterApply(_pfc_settings.adc_raw.ADC_U_C, ADC_U_C);
+    filterApply(_pfc_settings->adc_raw.ADC_U_A, ADC_U_A);
+    filterApply(_pfc_settings->adc_raw.ADC_U_B, ADC_U_B);
+    filterApply(_pfc_settings->adc_raw.ADC_U_C, ADC_U_C);
 
-    filterApply(_pfc_settings.adc_raw.ADC_I_A, ADC_I_A);
-    filterApply(_pfc_settings.adc_raw.ADC_I_B, ADC_I_B);
-    filterApply(_pfc_settings.adc_raw.ADC_I_C, ADC_I_C);
+    filterApply(_pfc_settings->adc_raw.ADC_I_A, ADC_I_A);
+    filterApply(_pfc_settings->adc_raw.ADC_I_B, ADC_I_B);
+    filterApply(_pfc_settings->adc_raw.ADC_I_C, ADC_I_C);
 
-    filterApply(_pfc_settings.adc_raw.ADC_UD, ADC_UD);
+    filterApply(_pfc_settings->adc_raw.ADC_UD, ADC_UD);
 
-    filterApply(_pfc_settings.adc_raw.ADC_I_TEMP1, ADC_I_TEMP1);
-    filterApply(_pfc_settings.adc_raw.ADC_I_TEMP2, ADC_I_TEMP2);
+    filterApply(_pfc_settings->adc_raw.ADC_I_TEMP1, ADC_I_TEMP1);
+    filterApply(_pfc_settings->adc_raw.ADC_I_TEMP2, ADC_I_TEMP2);
 }
 
 void MainWindow::setNetParams(
@@ -725,31 +724,31 @@ void MainWindow::setNetParams(
     float U_phase_B,
     float U_phase_C)
 {
-    _pfc_settings.net_params.period_fact = period_fact;
+    _pfc_settings->net_params.period_fact = period_fact;
 
-    _pfc_settings.net_params.U0Hz_A = U0Hz_A;
-    _pfc_settings.net_params.U0Hz_B = U0Hz_B;
-    _pfc_settings.net_params.U0Hz_C = U0Hz_C;
-    _pfc_settings.net_params.I0Hz_A = I0Hz_A;
-    _pfc_settings.net_params.I0Hz_B = I0Hz_B;
-    _pfc_settings.net_params.I0Hz_C = I0Hz_C;
+    _pfc_settings->net_params.U0Hz_A = U0Hz_A;
+    _pfc_settings->net_params.U0Hz_B = U0Hz_B;
+    _pfc_settings->net_params.U0Hz_C = U0Hz_C;
+    _pfc_settings->net_params.I0Hz_A = I0Hz_A;
+    _pfc_settings->net_params.I0Hz_B = I0Hz_B;
+    _pfc_settings->net_params.I0Hz_C = I0Hz_C;
 
-    _pfc_settings.net_params.thdu_A = thdu_A;
-    _pfc_settings.net_params.thdu_B = thdu_B;
-    _pfc_settings.net_params.thdu_C = thdu_C;
+    _pfc_settings->net_params.thdu_A = thdu_A;
+    _pfc_settings->net_params.thdu_B = thdu_B;
+    _pfc_settings->net_params.thdu_C = thdu_C;
 
-    _pfc_settings.net_params.U_phase_A = U_phase_A * 360.0f / 3.1416f;
-    _pfc_settings.net_params.U_phase_B = U_phase_B * 360.0f / 3.1416f;
-    _pfc_settings.net_params.U_phase_C = U_phase_C * 360.0f / 3.1416f;
+    _pfc_settings->net_params.U_phase_A = U_phase_A * 360.0f / 3.1416f;
+    _pfc_settings->net_params.U_phase_B = U_phase_B * 360.0f / 3.1416f;
+    _pfc_settings->net_params.U_phase_C = U_phase_C * 360.0f / 3.1416f;
 
-    _ui->valuePhaseAB->setText(QString().sprintf("% 5.1f°", static_cast<double>(_pfc_settings.net_params.U_phase_B)));
-    _ui->valuePhaseBC->setText(QString().sprintf("% 5.1f°", static_cast<double>(_pfc_settings.net_params.U_phase_C)));
+    _ui->valuePhaseAB->setText(QString().sprintf("% 5.1f°", static_cast<double>(_pfc_settings->net_params.U_phase_B)));
+    _ui->valuePhaseBC->setText(QString().sprintf("% 5.1f°", static_cast<double>(_pfc_settings->net_params.U_phase_C)));
 
-    _ui->valueTHDUA->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.net_params.thdu_A)));
-    _ui->valueTHDUB->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.net_params.thdu_B)));
-    _ui->valueTHDUC->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings.net_params.thdu_C)));
+    _ui->valueTHDUA->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings->net_params.thdu_A)));
+    _ui->valueTHDUB->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings->net_params.thdu_B)));
+    _ui->valueTHDUC->setText(QString().sprintf("% 5.2f°", static_cast<double>(_pfc_settings->net_params.thdu_C)));
 
-    _ui->valueFrequency->setText(QString().sprintf("% 6.3f Hz", static_cast<double>(1.0f / (_pfc_settings.net_params.period_fact / 1000000.0f))));
+    _ui->valueFrequency->setText(QString().sprintf("% 6.3f Hz", static_cast<double>(1.0f / (_pfc_settings->net_params.period_fact / 1000000.0f))));
 }
 
 void MainWindow::ansSettingsCalibrations(bool writed)
@@ -767,18 +766,13 @@ void MainWindow::ansSettingsCapacitors(bool writed)
     Q_UNUSED(writed)
 }
 
-void MainWindow::ansSettingsFilters(bool writed)
-{
-    Q_UNUSED(writed)
-}
-
 void MainWindow::stopClicked(void)
 {
-    emit writeSwitchOnOff(pfc_commands_t::COMMAND_WORK_OFF, 0);
+    emit writeSwitchOnOff(PFCCommands::COMMAND_WORK_OFF, 0);
 }
 void MainWindow::startClicked(void)
 {
-    emit writeSwitchOnOff(pfc_commands_t::COMMAND_WORK_ON, 0);
+    emit writeSwitchOnOff(PFCCommands::COMMAND_WORK_ON, 0);
 }
 void MainWindow::setSwitchOnOff(uint32_t result)
 {
@@ -786,7 +780,7 @@ void MainWindow::setSwitchOnOff(uint32_t result)
 }
 void MainWindow::saveClicked(void)
 {
-    writeSwitchOnOff(pfc_commands_t::COMMAND_SETTINGS_SAVE, 0);
+    writeSwitchOnOff(PFCCommands::COMMAND_SETTINGS_SAVE, 0);
 }
 void MainWindow::actionClearTriggered(void)
 {
@@ -795,25 +789,25 @@ void MainWindow::actionClearTriggered(void)
 
 void MainWindow::channelACheckToggled(bool checked)
 {
-    emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHANNEL0_DATA, checked);
+    emit writeSwitchOnOff(PFCCommands::COMMAND_CHANNEL0_DATA, checked);
 }
 
 void MainWindow::channelBCheckToggled(bool checked)
 {
-    emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHANNEL1_DATA, checked);
+    emit writeSwitchOnOff(PFCCommands::COMMAND_CHANNEL1_DATA, checked);
 }
 
 void MainWindow::channelCCheckToggled(bool checked)
 {
-    emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHANNEL2_DATA, checked);
+    emit writeSwitchOnOff(PFCCommands::COMMAND_CHANNEL2_DATA, checked);
 }
 
 void MainWindow::chargeOnClicked(void)
 {
-    emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHARGE_ON, 0);
+    emit writeSwitchOnOff(PFCCommands::COMMAND_CHARGE_ON, 0);
 }
 
 void MainWindow::chargeOffClicked(void)
 {
-    emit writeSwitchOnOff(pfc_commands_t::COMMAND_CHARGE_OFF, 0);
+    emit writeSwitchOnOff(PFCCommands::COMMAND_CHARGE_OFF, 0);
 }

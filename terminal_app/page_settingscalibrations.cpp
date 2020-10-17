@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "settingsdialog.h"
+#include "interface_definitions.h"
 #include <QMessageBox>
 #include <QMessageBox>
 #include <QDateTime>
@@ -15,6 +16,7 @@ using namespace PFCconfig;
 using namespace PFCconfig::ADC;
 using namespace PFCconfig::Interface;
 using namespace PFCconfig::Events;
+using namespace InterfaceDefinitions;
 
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS
@@ -55,14 +57,14 @@ void MainWindow::pageSettingsCalibrationsInit(void)
     }
     connect(_ui->tableSettingsCalibrations, &QTableWidget::cellChanged,
             this, &MainWindow::tableSettingsCalibrationsChanged);
-    _pfc_settings.settings.calibrations.calibration.resize(ADC_CHANNEL_NUMBER);
-    _pfc_settings.settings.calibrations.offset.resize(ADC_CHANNEL_NUMBER);
+    _pfc_settings->settings.calibrations.calibration.resize(ADC_CHANNEL_NUMBER);
+    _pfc_settings->settings.calibrations.offset.resize(ADC_CHANNEL_NUMBER);
 }
 
 
 float MainWindow::CALC_AUTO_COEF(ADCchannel CALIB, float NOW, float NOMINAL)
 {
-    return _pfc_settings.settings.calibrations.calibration[enum_uint(CALIB)] / NOW * NOMINAL;
+    return _pfc_settings->settings.calibrations.calibration[enum_uint(CALIB)] / NOW * NOMINAL;
 }
 
 void MainWindow::tableSettingsCalibrationsSetAutoSettings(void)
@@ -74,22 +76,22 @@ void MainWindow::tableSettingsCalibrationsSetAutoSettings(void)
         autoval=0;
         switch(row){
             case TableCalibrationRows::table_calibrations_row_offset_U_A:
-                autoval=_pfc_settings.adc_raw.ADC_U_A-ADC_UREF;
+                autoval=_pfc_settings->adc_raw.ADC_U_A-ADC_UREF;
             break;
             case TableCalibrationRows::table_calibrations_row_offset_U_B:
-                autoval=_pfc_settings.adc_raw.ADC_U_B-ADC_UREF;
+                autoval=_pfc_settings->adc_raw.ADC_U_B-ADC_UREF;
             break;
             case TableCalibrationRows::table_calibrations_row_offset_U_C:
-                autoval=_pfc_settings.adc_raw.ADC_U_C-ADC_UREF;
+                autoval=_pfc_settings->adc_raw.ADC_U_C-ADC_UREF;
             break;
             case TableCalibrationRows::table_calibrations_row_offset_I_A:
-                autoval=_pfc_settings.adc_raw.ADC_I_A-ADC_UREF;
+                autoval=_pfc_settings->adc_raw.ADC_I_A-ADC_UREF;
             break;
             case TableCalibrationRows::table_calibrations_row_offset_I_B:
-                autoval=_pfc_settings.adc_raw.ADC_I_B-ADC_UREF;
+                autoval=_pfc_settings->adc_raw.ADC_I_B-ADC_UREF;
             break;
             case TableCalibrationRows::table_calibrations_row_offset_I_C:
-                autoval=_pfc_settings.adc_raw.ADC_I_C-ADC_UREF;
+                autoval=_pfc_settings->adc_raw.ADC_I_C-ADC_UREF;
             break;
             case TableCalibrationRows::table_calibrations_row_offset_U_EMS_A:
             break;
@@ -100,25 +102,25 @@ void MainWindow::tableSettingsCalibrationsSetAutoSettings(void)
             case TableCalibrationRows::table_calibrations_row_offset_U_EMS_I:
             break;
             case TableCalibrationRows::table_calibrations_row_multiplier_U_A:
-                autoval = CALC_AUTO_COEF(ADCchannel::ADC_U_A, _pfc_settings.adc.ADC_U_A, PFC_NOMINAL_VOLTAGE);
+                autoval = CALC_AUTO_COEF(ADCchannel::ADC_U_A, _pfc_settings->adc.ADC_U_A, PFC_NOMINAL_VOLTAGE);
             break;
             case TableCalibrationRows::table_calibrations_row_multiplier_U_B:
-                autoval = CALC_AUTO_COEF(ADCchannel::ADC_U_B, _pfc_settings.adc.ADC_U_B, PFC_NOMINAL_VOLTAGE);
+                autoval = CALC_AUTO_COEF(ADCchannel::ADC_U_B, _pfc_settings->adc.ADC_U_B, PFC_NOMINAL_VOLTAGE);
             break;
             case TableCalibrationRows::table_calibrations_row_multiplier_U_C:
-                autoval = CALC_AUTO_COEF(ADCchannel::ADC_U_C, _pfc_settings.adc.ADC_U_C, PFC_NOMINAL_VOLTAGE);
+                autoval = CALC_AUTO_COEF(ADCchannel::ADC_U_C, _pfc_settings->adc.ADC_U_C, PFC_NOMINAL_VOLTAGE);
             break;
             case TableCalibrationRows::table_calibrations_row_multiplier_I_A:
-                autoval = CALC_AUTO_COEF(ADCchannel::ADC_I_A, _pfc_settings.adc.ADC_I_A, PFC_CALIBRATION_CURRENT);
+                autoval = CALC_AUTO_COEF(ADCchannel::ADC_I_A, _pfc_settings->adc.ADC_I_A, PFC_CALIBRATION_CURRENT);
             break;
             case TableCalibrationRows::table_calibrations_row_multiplier_I_B:
-                autoval = CALC_AUTO_COEF(ADCchannel::ADC_I_B, _pfc_settings.adc.ADC_I_B, PFC_CALIBRATION_CURRENT);
+                autoval = CALC_AUTO_COEF(ADCchannel::ADC_I_B, _pfc_settings->adc.ADC_I_B, PFC_CALIBRATION_CURRENT);
             break;
             case TableCalibrationRows::table_calibrations_row_multiplier_I_C:
-                autoval = CALC_AUTO_COEF(ADCchannel::ADC_I_C, _pfc_settings.adc.ADC_I_C, PFC_CALIBRATION_CURRENT);
+                autoval = CALC_AUTO_COEF(ADCchannel::ADC_I_C, _pfc_settings->adc.ADC_I_C, PFC_CALIBRATION_CURRENT);
             break;
             case TableCalibrationRows::table_calibrations_row_multiplier_I_et:
-                autoval = CALC_AUTO_COEF(ADCchannel::ADC_I_ET, _pfc_settings.adc.ADC_I_ET, PFC_CALIBRATION_CURRENT);
+                autoval = CALC_AUTO_COEF(ADCchannel::ADC_I_ET, _pfc_settings->adc.ADC_I_ET, PFC_CALIBRATION_CURRENT);
             break;
             case TableCalibrationRows::table_calibrations_row_multiplier_U_cap:
             case TableCalibrationRows::table_calibrations_row_multiplier_temperature_1:
@@ -132,16 +134,16 @@ void MainWindow::tableSettingsCalibrationsSetAutoSettings(void)
                 autoval = 0.0f;
             break;
             case TableCalibrationRows::table_calibrations_row_multiplier_U_EMS_A:
-                autoval = CALC_AUTO_COEF(ADCchannel::ADC_EMS_A, _pfc_settings.adc.ADC_EMS_A, PFC_NOMINAL_VOLTAGE);
+                autoval = CALC_AUTO_COEF(ADCchannel::ADC_EMS_A, _pfc_settings->adc.ADC_EMS_A, PFC_NOMINAL_VOLTAGE);
             break;
             case TableCalibrationRows::table_calibrations_row_multiplier_U_EMS_B:
-                autoval = CALC_AUTO_COEF(ADCchannel::ADC_EMS_B, _pfc_settings.adc.ADC_EMS_B, PFC_NOMINAL_VOLTAGE);
+                autoval = CALC_AUTO_COEF(ADCchannel::ADC_EMS_B, _pfc_settings->adc.ADC_EMS_B, PFC_NOMINAL_VOLTAGE);
             break;
             case TableCalibrationRows::table_calibrations_row_multiplier_U_EMS_C:
-                autoval = CALC_AUTO_COEF(ADCchannel::ADC_EMS_C, _pfc_settings.adc.ADC_EMS_C, PFC_NOMINAL_VOLTAGE);
+                autoval = CALC_AUTO_COEF(ADCchannel::ADC_EMS_C, _pfc_settings->adc.ADC_EMS_C, PFC_NOMINAL_VOLTAGE);
             break;
             case TableCalibrationRows::table_calibrations_row_multiplier_U_EMS_I:
-                autoval = CALC_AUTO_COEF(ADCchannel::ADC_EMS_I, _pfc_settings.adc.ADC_EMS_I, PFC_CALIBRATION_CURRENT);
+                autoval = CALC_AUTO_COEF(ADCchannel::ADC_EMS_I, _pfc_settings->adc.ADC_EMS_I, PFC_CALIBRATION_CURRENT);
             break;
             default:
             break;
@@ -182,15 +184,15 @@ void MainWindow::tableSettingsCalibrationsChanged(int row, int col)
     float value = item->text().toFloat();
     if (row < static_cast<int>(ADC_CHANNEL_NUMBER))
     {
-        _pfc_settings.settings.calibrations.offset[static_cast<uint>(row)] = value;
+        _pfc_settings->settings.calibrations.offset[static_cast<uint>(row)] = value;
     }
     else
     {
-        _pfc_settings.settings.calibrations.calibration[static_cast<uint>(row - static_cast<int>(ADC_CHANNEL_NUMBER))] = value;
+        _pfc_settings->settings.calibrations.calibration[static_cast<uint>(row - static_cast<int>(ADC_CHANNEL_NUMBER))] = value;
     }
     writeSettingsCalibrations(
-        _pfc_settings.settings.calibrations.calibration,
-        _pfc_settings.settings.calibrations.offset);
+        _pfc_settings->settings.calibrations.calibration,
+        _pfc_settings->settings.calibrations.offset);
 }
 
 void MainWindow::setSettingsCalibrations(
@@ -204,7 +206,7 @@ void MainWindow::setSettingsCalibrations(
         _ui->tableSettingsCalibrations->item(i, 0)->setText(QString().sprintf("%.2f", static_cast<double>(offset[static_cast<uint>(i)])));
     }
     _ui->tableSettingsCalibrations->blockSignals(false);
-    _pfc_settings.settings.calibrations.calibration = calibration;
-    _pfc_settings.settings.calibrations.offset = offset;
+    _pfc_settings->settings.calibrations.calibration = calibration;
+    _pfc_settings->settings.calibrations.offset = offset;
     tableSettingsCalibrationsSetAutoSettings();
 }

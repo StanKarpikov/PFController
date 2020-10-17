@@ -83,11 +83,52 @@ namespace PFCconfig {
             float value;
         };
         auto const TIME_MAX_VALUE = 4133894400000ULL; /**< Maximum time constant (used to exclude wrong packets) */
+
+        /** Event types: main */
+        enum class EventType
+        {
+            EVENT_TYPE_POWER,       /**< Power parameters has been changed */
+            EVENT_TYPE_CHANGESTATE, /**< The PFC state has been changed */
+            EVENT_TYPE_PROTECTION,  /**< The protection has been activated */
+            EVENT_TYPE_EVENT        /**< An other event */
+        };
+
+        /** brief Event types: subevents for power control */
+        enum class SubEventPower
+        {
+            SUB_EVENT_TYPE_POWER_ON
+        };
+
+        /** Event types: subevents for protection */
+        enum class SubEventProtection
+        {
+            SUB_EVENT_TYPE_PROTECTION_UCAP_MIN,
+            SUB_EVENT_TYPE_PROTECTION_UCAP_MAX,
+            SUB_EVENT_TYPE_PROTECTION_TEMPERATURE,
+            SUB_EVENT_TYPE_PROTECTION_U_MIN,
+            SUB_EVENT_TYPE_PROTECTION_U_MAX,
+            SUB_EVENT_TYPE_PROTECTION_F_MIN,
+            SUB_EVENT_TYPE_PROTECTION_F_MAX,
+            SUB_EVENT_TYPE_PROTECTION_IPFC_MAX_RMS,
+            SUB_EVENT_TYPE_PROTECTION_IAFG_MAX_PEAK,
+            SUB_EVENT_TYPE_PROTECTION_PHASES,
+            SUB_EVENT_TYPE_PROTECTION_ADC_OVERLOAD,
+            SUB_EVENT_TYPE_PROTECTION_BAD_SYNC,
+            SUB_EVENT_TYPE_PROTECTION_IGBT,
+        };
+
+        /** Protection event types */
+        enum class ProtectionActions
+        {
+            PROTECTION_IGNORE,
+            PROTECTION_WARNING_STOP,
+            PROTECTION_ERROR_STOP
+        };
     }
 
     namespace Interface {
 
-        enum PFCOscillogCnannel{
+        enum OscillogCnannel{
             OSC_UD,
             OSC_U_A,
             OSC_U_B,
@@ -107,49 +148,8 @@ namespace PFCconfig {
         /** The maximum number of events that can be transferred */
         auto const MAX_NUM_TRANSFERED_EVENTS = (MAX_EVENTS_PACKET_SIZE / (sizeof(Events::EventRecord)));
 
-        /** Event types: main */
-        enum event_type_t
-        {
-            EVENT_TYPE_POWER,       /**< Power parameters has been changed */
-            EVENT_TYPE_CHANGESTATE, /**< The PFC state has been changed */
-            EVENT_TYPE_PROTECTION,  /**< The protection has been activated */
-            EVENT_TYPE_EVENT        /**< An other event */
-        };
-
-        /** brief Event types: subevents for power control */
-        enum
-        {
-            SUB_EVENT_TYPE_POWER_ON
-        };
-
-        /** Event types: subevents for protection */
-        enum
-        {
-            SUB_EVENT_TYPE_PROTECTION_UCAP_MIN,
-            SUB_EVENT_TYPE_PROTECTION_UCAP_MAX,
-            SUB_EVENT_TYPE_PROTECTION_TEMPERATURE,
-            SUB_EVENT_TYPE_PROTECTION_U_MIN,
-            SUB_EVENT_TYPE_PROTECTION_U_MAX,
-            SUB_EVENT_TYPE_PROTECTION_F_MIN,
-            SUB_EVENT_TYPE_PROTECTION_F_MAX,
-            SUB_EVENT_TYPE_PROTECTION_IPFC_MAX_RMS,
-            SUB_EVENT_TYPE_PROTECTION_IAFG_MAX_PEAK,
-            SUB_EVENT_TYPE_PROTECTION_PHASES,
-            SUB_EVENT_TYPE_PROTECTION_ADC_OVERLOAD,
-            SUB_EVENT_TYPE_PROTECTION_BAD_SYNC,
-            SUB_EVENT_TYPE_PROTECTION_IGBT,
-        };
-
-        /** Protection event types */
-        enum
-        {
-            PROTECTION_IGNORE,
-            PROTECTION_WARNING_STOP,
-            PROTECTION_ERROR_STOP
-        };
-
         /** PFC commands fromt the panel */
-        enum class pfc_commands_t
+        enum class PFCCommands
         {
             COMMAND_WORK_ON = 1,   /**< Switch on the PFC operation */
             COMMAND_WORK_OFF,      /**< Switch off the PFC operation */
@@ -162,7 +162,7 @@ namespace PFCconfig {
         };
 
         /** Protocol commands list */
-        enum class pfc_interface_commands_t
+        enum class InterfaceCommands
         {
             PFC_COMMAND_TEST,               /**< Test the connection */
             PFC_COMMAND_SWITCH_ON_OFF,      /**< PFC switch on and off */
@@ -206,6 +206,104 @@ namespace PFCconfig {
         PFC_STATE_STOPPING,          /**< Stoping work: disable sensitive and power peripheral */
         PFC_STATE_FAULTBLOCK,        /**< Fault state */
         PFC_STATE_COUNT              /**< The count of the states */
+    };
+
+    class PFCsettings{
+        /* TODO: is not thread safe */
+    public:
+        struct {
+            float ADC_UD;
+            float ADC_U_A;
+            float ADC_U_B;
+            float ADC_U_C;
+            float ADC_I_A;
+            float ADC_I_B;
+            float ADC_I_C;
+            float ADC_I_ET;
+            float ADC_I_TEMP1;
+            float ADC_I_TEMP2;
+            float ADC_EMS_A;
+            float ADC_EMS_B;
+            float ADC_EMS_C;
+            float ADC_EMS_I;
+            float ADC_MATH_A;
+            float ADC_MATH_B;
+            float ADC_MATH_C;
+        }adc;
+        struct {
+            float ADC_UD;
+            float ADC_U_A;
+            float ADC_U_B;
+            float ADC_U_C;
+            float ADC_I_A;
+            float ADC_I_B;
+            float ADC_I_C;
+            float ADC_I_ET;
+            float ADC_I_TEMP1;
+            float ADC_I_TEMP2;
+            float ADC_EMS_A;
+            float ADC_EMS_B;
+            float ADC_EMS_C;
+            float ADC_EMS_I;
+        }adc_raw;
+        struct {
+            float period_fact;
+            float U0Hz_A;
+            float U0Hz_B;
+            float U0Hz_C;
+            float I0Hz_A;
+            float I0Hz_B;
+            float I0Hz_C;
+            float thdu_A;
+            float thdu_B;
+            float thdu_C;
+            float U_phase_A;
+            float U_phase_B;
+            float U_phase_C;
+        }net_params;
+        struct {
+            struct {
+                std::vector<float> calibration;
+                std::vector<float> offset;
+            }calibrations;
+            struct {
+                float Ud_min;
+                float Ud_max;
+                float temperature;
+                float U_min;
+                float U_max;
+                float Fnet_min;
+                float Fnet_max;
+                float I_max_rms;
+                float I_max_peak;
+            }protection;
+            struct {
+                float ctrlUd_Kp;
+                float ctrlUd_Ki;
+                float ctrlUd_Kd;
+                float Ud_nominal;
+                float Ud_precharge;
+            }capacitors;
+            struct{
+                float K_I;
+                float K_U;
+                float K_Ud;
+            }filters;
+        }settings;
+        uint32_t status;
+        uint32_t active_channels[PFCconfig::PFC_NCHAN];
+
+        PFCsettings(void)
+        {
+            memset(&adc, 0, sizeof(adc));
+            memset(&adc_raw, 0, sizeof(adc_raw));
+            memset(&net_params, 0, sizeof(net_params));
+            memset(&settings.protection, 0, sizeof(settings.protection));
+            memset(&settings.capacitors, 0, sizeof(settings.capacitors));
+            memset(&settings.filters, 0, sizeof(settings.filters));
+            status = 0;
+            memset(&active_channels, 0, sizeof(active_channels));
+        }
     };
 }
 

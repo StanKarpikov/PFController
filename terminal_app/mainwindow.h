@@ -15,7 +15,6 @@
                        INCLUDES
 --------------------------------------------------------------*/
 
-#include "types.h"
 #include <QtCore/QtGlobal>
 #include <QDebug>
 #include <QMainWindow>
@@ -24,7 +23,7 @@
 #include <device.h>
 #include <QThread>
 #include <QSignalSpy>
-
+#include "page_filters.h"
 #include "qcustomplot.h"
 #include "device_definition.h"
 
@@ -47,103 +46,6 @@ class PFC;
                        CLASSES
 --------------------------------------------------------------*/
 
-class PFCsettings{
-    /* TODO: is not thread safe */
-public:
-    struct {
-        float ADC_UD;
-        float ADC_U_A;
-        float ADC_U_B;
-        float ADC_U_C;
-        float ADC_I_A;
-        float ADC_I_B;
-        float ADC_I_C;
-        float ADC_I_ET;
-        float ADC_I_TEMP1;
-        float ADC_I_TEMP2;
-        float ADC_EMS_A;
-        float ADC_EMS_B;
-        float ADC_EMS_C;
-        float ADC_EMS_I;
-        float ADC_MATH_A;
-        float ADC_MATH_B;
-        float ADC_MATH_C;
-    }adc;
-    struct {
-        float ADC_UD;
-        float ADC_U_A;
-        float ADC_U_B;
-        float ADC_U_C;
-        float ADC_I_A;
-        float ADC_I_B;
-        float ADC_I_C;
-        float ADC_I_ET;
-        float ADC_I_TEMP1;
-        float ADC_I_TEMP2;
-        float ADC_EMS_A;
-        float ADC_EMS_B;
-        float ADC_EMS_C;
-        float ADC_EMS_I;
-    }adc_raw;
-    struct {
-        float period_fact;
-        float U0Hz_A;
-        float U0Hz_B;
-        float U0Hz_C;
-        float I0Hz_A;
-        float I0Hz_B;
-        float I0Hz_C;
-        float thdu_A;
-        float thdu_B;
-        float thdu_C;
-        float U_phase_A;
-        float U_phase_B;
-        float U_phase_C;
-    }net_params;
-    struct {
-        struct {
-            std::vector<float> calibration;
-            std::vector<float> offset;
-        }calibrations;
-        struct {
-            float Ud_min;
-            float Ud_max;
-            float temperature;
-            float U_min;
-            float U_max;
-            float Fnet_min;
-            float Fnet_max;
-            float I_max_rms;
-            float I_max_peak;
-        }protection;
-        struct {
-            float ctrlUd_Kp;
-            float ctrlUd_Ki;
-            float ctrlUd_Kd;
-            float Ud_nominal;
-            float Ud_precharge;
-        }capacitors;
-        struct{
-            float K_I;
-            float K_U;
-            float K_Ud;
-        }filters;
-    }settings;
-    uint32_t status;
-    uint32_t active_channels[PFCconfig::PFC_NCHAN];
-
-    PFCsettings(void)
-    {
-        memset(&adc, 0, sizeof(adc));
-        memset(&adc_raw, 0, sizeof(adc_raw));
-        memset(&net_params, 0, sizeof(net_params));
-        memset(&settings.protection, 0, sizeof(settings.protection));
-        memset(&settings.capacitors, 0, sizeof(settings.capacitors));
-        memset(&settings.filters, 0, sizeof(settings.filters));
-        status = 0;
-        memset(&active_channels, 0, sizeof(active_channels));
-    }
-};
 
 class MainWindow : public QMainWindow
 {
@@ -151,34 +53,12 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = Q_NULLPTR);
-    ~MainWindow();
+    ~MainWindow(void);
 
     /*--------------------------------------------------------------
                            PRIVATE DATA
     --------------------------------------------------------------*/
 private:
-    /* Constants */
-    inline static const std::string DARK_GREY = "#808080";
-    inline static const std::string DARK_RED = "#800000";
-    inline static const std::string LIGHT_GREY = "#c0c0c0";
-    inline static const std::string DARK_GREEN = "#008000";
-
-    inline static const std::string STRING_PFC_STATE_INIT = "Initialization";
-    inline static const std::string STRING_PFC_STATE_STOP = "Stopped";
-    inline static const std::string STRING_PFC_STATE_SYNC = "Syncronisation";
-    inline static const std::string STRING_PFC_STATE_PRECHARGE_PREPARE = "Precharge prepare";
-    inline static const std::string STRING_PFC_STATE_PRECHARGE = "Precharge";
-    inline static const std::string STRING_PFC_STATE_MAIN = "Main switch";
-    inline static const std::string STRING_PFC_STATE_PRECHARGE_DISABLE = "Precharge off";
-    inline static const std::string STRING_PFC_STATE_WORK = "Work";
-    inline static const std::string STRING_PFC_STATE_CHARGE = "Charge";
-    inline static const std::string STRING_PFC_STATE_TEST = "Test";
-    inline static const std::string STRING_PFC_STATE_STOPPING = "Stopping..";
-    inline static const std::string STRING_PFC_STATE_FAULTBLOCK = " Fault ";
-    inline static const std::string STRING_PFC_STATE_UNKNOWN = "Unknown state";
-
-    static const QBrush editableCellBrush;
-
     static constexpr auto FCOEFF = 0.9f;
 
     static constexpr auto TIMEOUT_UPDATE_MAIN_PARAMS = static_cast<std::chrono::milliseconds>(300);
@@ -195,7 +75,7 @@ private:
     const static auto EVENTS_TIMER_TIMEOUT = 1000;    
     const static auto UD_MAX_VALUE = 500;
 
-    enum class OscillogChannels
+    enum class DiagramOscillogChannels
     {
         OSCILLOG_I_A,
         OSCILLOG_I_B,
@@ -227,12 +107,6 @@ private:
         ROW_I_MAX_PEAK
     };
 
-    enum class TableFiltersRows
-    {
-        table_filters_row_K_I,
-        table_filters_row_K_U,
-        table_filters_row_K_Ud
-    };
 
     enum class TableCalibrationRows
     {
@@ -278,13 +152,14 @@ private:
 
     /* Data */
     Ui::MainWindow *_ui;
-    PFC *_pfc;
-    PFCsettings _pfc_settings;
+    PFC *_pfc; /*TODO: Replace by a smart pointer */
+    PFCconfig::PFCsettings *_pfc_settings; /*TODO: Replace by a smart pointer */
+    PageFilters _page_filters;
     std::vector<double> _oscillog_xval, _harmonics_xval;
     std::vector<std::vector<double>> _oscillog_data;
     std::list<QPushButton*> _buttons_edit;
     uint64_t _last_index_events;
-    QMap<PFCconfig::Interface::PFCOscillogCnannel,OscillogChannels> _oscillog_array;
+    QMap<PFCconfig::Interface::OscillogCnannel,DiagramOscillogChannels> _oscillog_array;
     SettingsDialog *_port_settings;
     QTimer _timer_main_params;
     QTimer _timer_raw;
@@ -311,7 +186,6 @@ private:
     void pageSettingsCalibrationsInit(void);
     void pageSettingsCapacitorsInit(void);
     void pageSettingsProtectionInit(void);
-    void pageSettingsFiltersInit(void);
     void setTableProtectionsVal(TableProtectionRows row, float value);
     void updateSpinVal(QDoubleSpinBox *spinbox, float value);
     void updateCheckboxVal(QCheckBox* checkbox, bool value);
@@ -354,7 +228,7 @@ public slots:
     void deviceDisconnected(void);
 
     /* Interface commands */
-    void setOscillog(PFCconfig::Interface::PFCOscillogCnannel channel, std::vector<double> data);
+    void setOscillog(PFCconfig::Interface::OscillogCnannel channel, std::vector<double> data);
     void setNetVoltage( float ADC_UD,
                         float ADC_U_A,
                         float ADC_U_B,
@@ -418,10 +292,7 @@ public slots:
             std::vector<float> calibration,
             std::vector<float> offset
             );
-    void setSettingsFilters(
-            float K_I,
-            float K_U,
-            float K_Ud);
+
     void setSettingsProtection(
             float Ud_min,
             float Ud_max,
@@ -442,7 +313,6 @@ public slots:
     void ansSettingsCalibrations(bool writed);
     void ansSettingsProtection(bool writed);
     void ansSettingsCapacitors(bool writed);
-    void ansSettingsFilters(bool writed);
 
     /* Timer events callbacks */
     void timerOscillog();
@@ -451,8 +321,8 @@ public slots:
     void timerVersion();
     void timerSettingsCalibrations();
     void timerSettingsCapacitors();
+    void timerSettingsProtection();
     void timerSettingsFilters();
-    void timerSettingsProtection();    
     void timerupdateNetVoltage();
     void timerupdateNetVoltageRaw();
     void timerEvents();
@@ -463,7 +333,6 @@ public slots:
 
     void tableSettingsCalibrationsChanged(int row, int col);
     void tableSettingsProtectionChanged(int row, int col);
-    void tableSettingsFiltersChanged(int row, int col);
 
 signals:
     void updateNetVoltage();
@@ -471,7 +340,7 @@ signals:
     void updateVersionInfo();
     void updateNetVoltageRAW();
     void updateNetParams();
-    void updateOscillog(PFCconfig::Interface::PFCOscillogCnannel channel);
+    void updateOscillog(PFCconfig::Interface::OscillogCnannel channel);
     void updateEvents(uint64_t afterIndex);
     void updateSettingsCalibrations();
     void updateSettingsProtection();
@@ -497,11 +366,7 @@ signals:
             float ctrlUd_Kd,
             float Ud_nominal,
             float Ud_precharge);
-    void writeSettingsFilters(
-            float K_I,
-            float K_U,
-            float K_Ud);
-    void writeSwitchOnOff(PFCconfig::Interface::pfc_commands_t command,uint32_t data);
+    void writeSwitchOnOff(PFCconfig::Interface::PFCCommands command,uint32_t data);
 };
 
 /** @} */

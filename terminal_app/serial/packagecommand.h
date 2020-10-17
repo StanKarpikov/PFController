@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include "deviceserialmessage.h"
-#include "types.h"
 
 class InterfacePackage : public QObject
 {

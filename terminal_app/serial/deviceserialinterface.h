@@ -11,7 +11,7 @@
 #include <QSerialPort>
 #include <functional>
 #include <map>
-#include "types.h"
+
 class QSerialPort;
 class QTimer;
 

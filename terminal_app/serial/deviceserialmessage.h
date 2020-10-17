@@ -2,7 +2,6 @@
 #define DEVICE_SERIAL_MESSAGE_H_
 
 #include <vector>
-#include "types.h"
 #include <QtGlobal>
 #include <QDateTime>
 

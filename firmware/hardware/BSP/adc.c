@@ -21,6 +21,8 @@
 
 #ifdef ADC_MOCKING
 #include "adc_logic.h"
+#include "math.h"
+#include "stdlib.h"
 #endif
 /*--------------------------------------------------------------
                        DEFINES
@@ -40,11 +42,54 @@ static ADC_TRANSFER_CALLBACK adc_half_cplt_callback = 0; /**< ADC DMA half compl
 
 #ifdef ADC_MOCKING
 static uint16_t* mocking_buffer = 0; /**< ADC buffer to mock data */
+
+static uint16_t sin_buffer[ADC_VAL_NUM] = {0}; /**< ADC buffer to mock data */
+
+static const float ADC_MOCK_SIN_AMPLITUDE = 2000.0f; /**< Amplitude for sinus measurement imitation */
+static const float ADC_MOCK_SIN_OFFSET = 2000.0f; /**< Offset for sinus measurement imitation */
+
+static const float ADC_MOCK_ADC_I_ET = 2000.0f; /**< ADC_I_ET imitated value */
+static const float ADC_MOCK_ADC_I_TEMP1 = 2000.0f; /**< ADC_I_TEMP1 imitated value */
+static const float ADC_MOCK_ADC_I_TEMP2 = 2000.0f; /**< ADC_I_TEMP2 imitated value */
+static const float ADC_MOCK_ADC_EDC_I = 2000.0f; /**< ADC_EDC_I imitated value */
+static const float ADC_MOCK_ADC_UCAP = 2000.0f; /**< ADC_UCAP imitated value */
+
+static const float ADC_MOCK_RAND_RANGE = 50.0f; /**< Range of the rendom addition to the imitated measurements */
+
+static const uint32_t SHIFT_120DEG = ADC_VAL_NUM/3;/**< 120 degrees phase shift into ADC sinus buffer */
+static const uint32_t SHIFT_240DEG = 2*ADC_VAL_NUM/3;/**< 240 degrees phase shift into ADC sinus buffer */
 #endif
 
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS
 --------------------------------------------------------------*/
+
+#ifdef ADC_MOCKING
+/**
+  * @brief  Generate a float random number
+  *
+	* @param range The range
+	*
+  * @return The random number [0..range]
+  */
+static float randf(float range)
+{
+	float x = (float)rand()/(float)(RAND_MAX/range);
+	return x;
+}
+
+/**
+  * @brief Calculate a position in the sinus buffer
+  *
+  * @position Required absolute position
+  *
+  * @return Sinus buffer position
+  */
+static uint32_t sin_period(uint32_t position)
+{
+	return position%ADC_VAL_NUM;
+}
+#endif
 
 /*
  * @brief Set callbacks for the ADC module
@@ -318,11 +363,16 @@ status_t adc_init(void)
     {
         error_handler();
     }
+#else
+	for(int i=0;i<ADC_VAL_NUM;i++)
+	{
+		float alpha = (float)i/ADC_VAL_NUM*2.0f*MATH_PI;
+		sin_buffer[i] = sinf(alpha)*ADC_MOCK_SIN_AMPLITUDE+ADC_MOCK_SIN_OFFSET;
+	}
 #endif
     return PFC_SUCCESS;
 }
 
-#include "math.h"
 
 /**
   * @brief  Period elapsed callback in non blocking mode 
@@ -334,7 +384,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 #ifdef ADC_MOCKING
 		static uint32_t period=0;
-	  static float alpha = 0;
 
 		period++;
 		if(period >= ADC_VAL_NUM)
@@ -345,30 +394,26 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		ENTER_CRITICAL();
 		if(mocking_buffer)
 		{
-			#define ADC_MOCK_ADC_I_ET 2000
-			#define ADC_MOCK_ADC_I_TEMP1 2000
-			#define ADC_MOCK_ADC_I_TEMP2 2000
-			#define ADC_MOCK_ADC_EDC_A 2000
-			#define ADC_MOCK_ADC_EDC_B 2000
-			#define ADC_MOCK_ADC_EDC_C 2000
-			#define ADC_MOCK_ADC_EDC_I 2000
+			int rand_pos = randf(3);
 			
-			alpha = (float)period/ADC_VAL_NUM*2.0f*MATH_PI;
-			(void)alpha;
-		
-			mocking_buffer[ADC_U_A]  = sinf(alpha)*2000+2000;
-			mocking_buffer[ADC_U_B]  = sinf(alpha + MATH_PI/3.0f)*2000+2000;
-			mocking_buffer[ADC_U_C]  = sinf(alpha + MATH_PI/3.0f*2.0f)*2000+2000;
-			mocking_buffer[ADC_I_A]  = sinf(alpha)*2000+2000;
-			mocking_buffer[ADC_I_B]  = sinf(alpha + MATH_PI/3.0f)*2000+2000;
-			mocking_buffer[ADC_I_C]  = sinf(alpha + MATH_PI/3.0f*2.0f)*2000+2000;
-			mocking_buffer[ADC_I_ET] = ADC_MOCK_ADC_I_ET;
-			mocking_buffer[ADC_I_TEMP1] = ADC_MOCK_ADC_I_TEMP1;
-			mocking_buffer[ADC_I_TEMP2] = ADC_MOCK_ADC_I_TEMP2;
-			mocking_buffer[ADC_EDC_A] = sinf(alpha)*2000+2000;
-			mocking_buffer[ADC_EDC_B]   = sinf(alpha + MATH_PI/3.0f)*2000+2000;
-			mocking_buffer[ADC_EDC_C]   = sinf(alpha + MATH_PI/3.0f*2.0f)*2000+2000;
-			mocking_buffer[ADC_EDC_I] = ADC_MOCK_ADC_EDC_I;
+			mocking_buffer[ADC_U_A]  = sin_buffer[sin_period(period + rand_pos)];
+			mocking_buffer[ADC_U_B]  = sin_buffer[sin_period(period + SHIFT_120DEG + rand_pos)];
+			mocking_buffer[ADC_U_C]  = sin_buffer[sin_period(period + SHIFT_240DEG + rand_pos)];
+			
+			mocking_buffer[ADC_EDC_A] = sin_buffer[sin_period(period + rand_pos)];
+			mocking_buffer[ADC_EDC_B] = sin_buffer[sin_period(period + SHIFT_120DEG + rand_pos)];
+			mocking_buffer[ADC_EDC_C] = sin_buffer[sin_period(period + SHIFT_240DEG + rand_pos)];
+			
+			mocking_buffer[ADC_I_A]  = sin_buffer[sin_period(period + rand_pos)];
+			mocking_buffer[ADC_I_B]  = sin_buffer[sin_period(period + SHIFT_120DEG + rand_pos)];
+			mocking_buffer[ADC_I_C]  = sin_buffer[sin_period(period + SHIFT_240DEG + rand_pos)];
+			
+			mocking_buffer[ADC_I_ET] = ADC_MOCK_ADC_I_ET+randf(ADC_MOCK_RAND_RANGE);
+			mocking_buffer[ADC_I_TEMP1] = ADC_MOCK_ADC_I_TEMP1+randf(ADC_MOCK_RAND_RANGE);
+			mocking_buffer[ADC_I_TEMP2] = ADC_MOCK_ADC_I_TEMP2+randf(ADC_MOCK_RAND_RANGE);
+			mocking_buffer[ADC_EDC_I] = ADC_MOCK_ADC_EDC_I+randf(ADC_MOCK_RAND_RANGE);
+			
+			mocking_buffer[ADC_UCAP] = ADC_MOCK_ADC_UCAP+randf(ADC_MOCK_RAND_RANGE);
 			
 			EXIT_CRITICAL();
 			HAL_ADC_ConvCpltCallback(&hadc);

@@ -70,12 +70,12 @@ enum
     ADC_I_B,               /**< CH1 Current I, phase B */
     ADC_I_C,               /**< CH2 Current I, phase C */
     ADC_I_ET,              /**< CH3 Current I, load */
-    ADC_I_TEMP1,           /**< CH5 */
-    ADC_I_TEMP2,           /**< CH6 */
-    ADC_EDC_A,             /**< CH14 EMS A */
-    ADC_EDC_B,             /**< CH15 EMS B */
-    ADC_EDC_C,             /**< CH8 EMS C */
-    ADC_EDC_I,             /**< CH9 EMS I */
+    ADC_I_TEMP1,           /**< CH5 Temperature channel 1 */
+    ADC_I_TEMP2,           /**< CH6 Temperature channel 2 */
+    ADC_EDC_A,             /**< CH14 EDC A */
+    ADC_EDC_B,             /**< CH15 EDC B */
+    ADC_EDC_C,             /**< CH8 EDC C */
+    ADC_EDC_I,             /**< CH9 EDC I */
     ADC_MATH_A,            /**< MATH channel A */
     ADC_MATH_B,            /**< MATH channel B */
     ADC_MATH_C,            /**< MATH channel C */

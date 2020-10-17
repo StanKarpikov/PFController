@@ -658,7 +658,7 @@ eeprom_status_t eeprom_update_variable(uint16_t address, uint16_t data)
         }
         if (curent_data == data)
         {
-            return EEPROM_SAME_VALUE;
+						return EEPROM_OK; /* TODO: Consider return EEPROM_SAME_VALUE;*/
         }
     }
     return eeprom_write(address, data);

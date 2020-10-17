@@ -26,7 +26,7 @@
                        PRIVATE DATA
 --------------------------------------------------------------*/
 
-static uint32_t current_time = 0; /**< Time accumulator variable, 64-bit Unix timestamp (with us) */
+static uint64_t current_time = 0; /**< Time accumulator variable, 64-bit Unix timestamp (with us) */
 
 /*--------------------------------------------------------------
                        PUBLIC FUNCTIONS

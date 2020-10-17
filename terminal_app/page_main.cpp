@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "settingsdialog.h"
+#include "interface_definitions.h"
 #include <QMessageBox>
 #include <QMessageBox>
 #include <QDateTime>
@@ -15,6 +16,7 @@ using namespace PFCconfig;
 using namespace PFCconfig::ADC;
 using namespace PFCconfig::Interface;
 using namespace PFCconfig::Events;
+using namespace InterfaceDefinitions; /* For GUI text strings, GUI parameters, constants */
 
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS
@@ -51,12 +53,12 @@ void MainWindow::setConnection(bool connected)
 }
 void MainWindow::setWorkState(uint32_t state, uint32_t ch_a, uint32_t ch_b, uint32_t ch_c)
 {
-    _pfc_settings.status = state;
-    _pfc_settings.active_channels[PFC_ACHAN] = ch_a;
-    _pfc_settings.active_channels[PFC_BCHAN] = ch_b;
-    _pfc_settings.active_channels[PFC_CCHAN] = ch_c;
+    _pfc_settings->status = state;
+    _pfc_settings->active_channels[PFC_ACHAN] = ch_a;
+    _pfc_settings->active_channels[PFC_BCHAN] = ch_b;
+    _pfc_settings->active_channels[PFC_CCHAN] = ch_c;
 
-    if (static_cast<PFCstate>(_pfc_settings.status) != PFCstate::PFC_STATE_STOP)
+    if (static_cast<PFCstate>(_pfc_settings->status) != PFCstate::PFC_STATE_STOP)
     {
         _ui->buttonSave->setDisabled(true);
     }
@@ -69,7 +71,7 @@ void MainWindow::setWorkState(uint32_t state, uint32_t ch_a, uint32_t ch_b, uint
     updateCheckboxVal(_ui->checkBoxChannelB, ch_b);
     updateCheckboxVal(_ui->checkBoxChannelC, ch_c);
 
-    switch (static_cast<PFCstate>(_pfc_settings.status))
+    switch (static_cast<PFCstate>(_pfc_settings->status))
     {
         case PFCstate::PFC_STATE_INIT:
             _ui->valueWorkState->setText(QString::fromStdString(STRING_PFC_STATE_INIT));

@@ -6,11 +6,14 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "settingsdialog.h"
+#include "interface_definitions.h"
 #include <QMessageBox>
 #include <QMessageBox>
 #include <QDateTime>
 #include <QGraphicsDropShadowEffect>
 #include <QListWidgetItem>
+
+using namespace InterfaceDefinitions;
 
 /*--------------------------------------------------------------
                        PRIVATE FUNCTIONS
@@ -43,43 +46,43 @@ void MainWindow::tableSettingsProtectionChanged(int row, int col)
     switch (static_cast<TableProtectionRows>(row))
     {
         case TableProtectionRows::ROW_UD_MIN:
-            _pfc_settings.settings.protection.Ud_min = value;
+            _pfc_settings->settings.protection.Ud_min = value;
             break;
         case TableProtectionRows::ROW_UD_MAX:
-            _pfc_settings.settings.protection.Ud_max = value;
+            _pfc_settings->settings.protection.Ud_max = value;
             break;
         case TableProtectionRows::ROW_TEMPERATURE:
-            _pfc_settings.settings.protection.temperature = value;
+            _pfc_settings->settings.protection.temperature = value;
             break;
         case TableProtectionRows::ROW_U_MIN:
-            _pfc_settings.settings.protection.U_min = value;
+            _pfc_settings->settings.protection.U_min = value;
             break;
         case TableProtectionRows::ROW_U_MAX:
-            _pfc_settings.settings.protection.U_max = value;
+            _pfc_settings->settings.protection.U_max = value;
             break;
         case TableProtectionRows::ROW_F_MIN:
-            _pfc_settings.settings.protection.Fnet_min = value;
+            _pfc_settings->settings.protection.Fnet_min = value;
             break;
         case TableProtectionRows::ROW_F_MAX:
-            _pfc_settings.settings.protection.Fnet_max = value;
+            _pfc_settings->settings.protection.Fnet_max = value;
             break;
         case TableProtectionRows::ROW_I_MAX_RMS:
-            _pfc_settings.settings.protection.I_max_rms = value;
+            _pfc_settings->settings.protection.I_max_rms = value;
             break;
         case TableProtectionRows::ROW_I_MAX_PEAK:
-            _pfc_settings.settings.protection.I_max_peak = value;
+            _pfc_settings->settings.protection.I_max_peak = value;
             break;
     }
     writeSettingsProtection(
-        _pfc_settings.settings.protection.Ud_min,
-        _pfc_settings.settings.protection.Ud_max,
-        _pfc_settings.settings.protection.temperature,
-        _pfc_settings.settings.protection.U_min,
-        _pfc_settings.settings.protection.U_max,
-        _pfc_settings.settings.protection.Fnet_min,
-        _pfc_settings.settings.protection.Fnet_max,
-        _pfc_settings.settings.protection.I_max_rms,
-        _pfc_settings.settings.protection.I_max_peak);
+        _pfc_settings->settings.protection.Ud_min,
+        _pfc_settings->settings.protection.Ud_max,
+        _pfc_settings->settings.protection.temperature,
+        _pfc_settings->settings.protection.U_min,
+        _pfc_settings->settings.protection.U_max,
+        _pfc_settings->settings.protection.Fnet_min,
+        _pfc_settings->settings.protection.Fnet_max,
+        _pfc_settings->settings.protection.I_max_rms,
+        _pfc_settings->settings.protection.I_max_peak);
 }
 
 void MainWindow::setSettingsProtection(
@@ -93,15 +96,15 @@ void MainWindow::setSettingsProtection(
     float I_max_rms,
     float I_max_peak)
 {
-    _pfc_settings.settings.protection.Ud_min = Ud_min;
-    _pfc_settings.settings.protection.Ud_max = Ud_max;
-    _pfc_settings.settings.protection.temperature = temperature;
-    _pfc_settings.settings.protection.U_min = U_min;
-    _pfc_settings.settings.protection.U_max = U_max;
-    _pfc_settings.settings.protection.Fnet_min = Fnet_min;
-    _pfc_settings.settings.protection.Fnet_max = Fnet_max;
-    _pfc_settings.settings.protection.I_max_rms = I_max_rms;
-    _pfc_settings.settings.protection.I_max_peak = I_max_peak;
+    _pfc_settings->settings.protection.Ud_min = Ud_min;
+    _pfc_settings->settings.protection.Ud_max = Ud_max;
+    _pfc_settings->settings.protection.temperature = temperature;
+    _pfc_settings->settings.protection.U_min = U_min;
+    _pfc_settings->settings.protection.U_max = U_max;
+    _pfc_settings->settings.protection.Fnet_min = Fnet_min;
+    _pfc_settings->settings.protection.Fnet_max = Fnet_max;
+    _pfc_settings->settings.protection.I_max_rms = I_max_rms;
+    _pfc_settings->settings.protection.I_max_peak = I_max_peak;
 
     setTableProtectionsVal(TableProtectionRows::ROW_UD_MIN, Ud_min);
     setTableProtectionsVal(TableProtectionRows::ROW_UD_MAX, Ud_max);
