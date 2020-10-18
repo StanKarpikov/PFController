@@ -25,12 +25,6 @@ using namespace InterfaceDefinitions;
 PageFilters::PageFilters(Ui::MainWindow *ui, PFCconfig::PFCsettings *pfc_settings, PFC *pfc):
     _ui(ui), _pfc_settings(pfc_settings), _pfc(pfc)
 {
-    connect(_pfc, &PFC::setSettingsFilters,
-            this, &PageFilters::setSettingsFilters);
-    connect(_pfc, &PFC::ansSettingsFilters,
-            this, &PageFilters::ansSettingsFilters);
-    connect(this, &PageFilters::writeSettingsFilters,
-            _pfc, &PFC::writeSettingsFilters);
 }
 
 PageFilters::~PageFilters(void)
@@ -40,6 +34,15 @@ PageFilters::~PageFilters(void)
 
 void PageFilters::pageSettingsFiltersInit(void)
 {
+    connect(_pfc, &PFC::setSettingsFilters,
+            this, &PageFilters::setSettingsFilters);
+    connect(_pfc, &PFC::ansSettingsFilters,
+            this, &PageFilters::ansSettingsFilters);
+    connect(this, &PageFilters::writeSettingsFilters,
+            _pfc, &PFC::writeSettingsFilters);
+    connect(this, &PageFilters::updateSettingsFilters,
+            _pfc, &PFC::updateSettingsFilters);
+
     for (int i = 0; i < _ui->tableSettingsFilters->rowCount(); i++)
     {
         _ui->tableSettingsFilters->item(i, 0)->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
@@ -90,4 +93,9 @@ void PageFilters::setSettingsFilters(
 void PageFilters::ansSettingsFilters(bool writed)
 {
     Q_UNUSED(writed)
+}
+
+void PageFilters::update(void)
+{
+    emit updateSettingsFilters();
 }

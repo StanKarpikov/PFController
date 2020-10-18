@@ -24,6 +24,11 @@
 #include <QThread>
 #include <QSignalSpy>
 #include "page_filters.h"
+#include "page_oscillog.h"
+#include "page_main.h"
+#include "page_settingscalibrations.h"
+#include "page_settingsprotection.h"
+#include "page_settingscapacitors.h"
 #include "qcustomplot.h"
 #include "device_definition.h"
 
@@ -75,24 +80,7 @@ private:
     const static auto EVENTS_TIMER_TIMEOUT = 1000;    
     const static auto UD_MAX_VALUE = 500;
 
-    enum class DiagramOscillogChannels
-    {
-        OSCILLOG_I_A,
-        OSCILLOG_I_B,
-        OSCILLOG_I_C,
 
-        OSCILLOG_U_A,
-        OSCILLOG_U_B,
-        OSCILLOG_U_C,
-
-        OSCILLOG_UD,
-
-        OSCILLOG_COMP_A,
-        OSCILLOG_COMP_B,
-        OSCILLOG_COMP_C,
-
-        OSCILLOG_SIZE
-    };
 
     enum class TableProtectionRows
     {
@@ -155,11 +143,11 @@ private:
     PFC *_pfc; /*TODO: Replace by a smart pointer */
     PFCconfig::PFCsettings *_pfc_settings; /*TODO: Replace by a smart pointer */
     PageFilters _page_filters;
-    std::vector<double> _oscillog_xval, _harmonics_xval;
-    std::vector<std::vector<double>> _oscillog_data;
+    PageOscillog _page_oscillog;
+
     std::list<QPushButton*> _buttons_edit;
     uint64_t _last_index_events;
-    QMap<PFCconfig::Interface::OscillogCnannel,DiagramOscillogChannels> _oscillog_array;
+
     SettingsDialog *_port_settings;
     QTimer _timer_main_params;
     QTimer _timer_raw;
@@ -173,7 +161,7 @@ private:
     QTimer _timer_settings_protection;
     QTimer _timer_settings_filters;
     bool _connected;
-    QSharedPointer<QCPAxisTickerFixed> _fixed_ticker;
+
     std::vector<QPushButton*> _btns_edit;
 
     /*--------------------------------------------------------------
@@ -182,7 +170,7 @@ private:
 private:
     bool eventFilter(QObject *object, QEvent *event);
     void pageMainInit(void);
-    void pageOscillogInit(void);
+
     void pageSettingsCalibrationsInit(void);
     void pageSettingsCapacitorsInit(void);
     void pageSettingsProtectionInit(void);
@@ -198,7 +186,7 @@ private:
 
 private slots:
     /* Interface slots */
-    void buttonAutoConfigOscClicked(void);
+
     void capacitorsKpValueChanged(double arg);
     void capacitorsKiValueChanged(double arg);
     void capacitorsKdValueChanged(double arg);
@@ -228,7 +216,7 @@ public slots:
     void deviceDisconnected(void);
 
     /* Interface commands */
-    void setOscillog(PFCconfig::Interface::OscillogCnannel channel, std::vector<double> data);
+
     void setNetVoltage( float ADC_UD,
                         float ADC_U_A,
                         float ADC_U_B,
@@ -328,8 +316,6 @@ public slots:
     void timerEvents();
 
     /* Other functions */
-    void xAxisRangeChanged( QCPRange newRange ,QCPRange oldRange);
-    void mouseWheel(QWheelEvent *event);
 
     void tableSettingsCalibrationsChanged(int row, int col);
     void tableSettingsProtectionChanged(int row, int col);
@@ -340,12 +326,10 @@ signals:
     void updateVersionInfo();
     void updateNetVoltageRAW();
     void updateNetParams();
-    void updateOscillog(PFCconfig::Interface::OscillogCnannel channel);
     void updateEvents(uint64_t afterIndex);
     void updateSettingsCalibrations();
     void updateSettingsProtection();
     void updateSettingsCapacitors();
-    void updateSettingsFilters();    
 
     void writeSettingsCalibrations(
             std::vector<float> calibration,

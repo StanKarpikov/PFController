@@ -1,12 +1,14 @@
-#include "mainwindow.h"
+
 #include "ui_mainwindow.h"
 #include "settingsdialog.h"
+#include "page_oscillog.h"
 #include <QMessageBox>
 #include <QMessageBox>
 #include <QDateTime>
 #include <QGraphicsDropShadowEffect>
 #include <QListWidgetItem>
 #include <QMap>
+
 /*--------------------------------------------------------------
                        NAMESPACES
 --------------------------------------------------------------*/
@@ -20,8 +22,23 @@ using namespace PFCconfig::Events;
                        RIVATE FUNCTIONS
 --------------------------------------------------------------*/
 
-void MainWindow::pageOscillogInit(void)
+PageOscillog::PageOscillog(Ui::MainWindow *ui, PFCconfig::PFCsettings *pfc_settings, PFC *pfc):
+    _ui(ui), _pfc_settings(pfc_settings), _pfc(pfc),
+    _oscillog_data(static_cast<int>(DiagramOscillogChannels::OSCILLOG_SIZE))
 {
+}
+
+PageOscillog::~PageOscillog(void)
+{
+}
+
+void PageOscillog::pageOscillogInit(void)
+{
+    connect(_pfc, &PFC::setOscillog, this, &PageOscillog::setOscillog);
+    connect(this, &PageOscillog::updateOscillog,
+            _pfc, &PFC::updateOscillog);
+    connect(_ui->buttonAutoConfigOsc, &QPushButton::clicked, this, &PageOscillog::buttonAutoConfigOscClicked);
+
     _oscillog_array[OscillogCnannel::OSC_U_A] = DiagramOscillogChannels::OSCILLOG_U_A;
     _oscillog_array[OscillogCnannel::OSC_U_B] = DiagramOscillogChannels::OSCILLOG_U_B;
     _oscillog_array[OscillogCnannel::OSC_U_C] = DiagramOscillogChannels::OSCILLOG_U_C;
@@ -68,7 +85,7 @@ void MainWindow::pageOscillogInit(void)
 
     _ui->OscillogPlot->yAxis2->setVisible(true);
     // give the axes some labels:
-    _ui->OscillogPlot->xAxis->setLabel("мс");
+    _ui->OscillogPlot->xAxis->setLabel("ms");
     _ui->OscillogPlot->yAxis->setLabel("А");
     _ui->OscillogPlot->yAxis2->setLabel("В");
     // make left and bottom axes transfer their ranges to right and top axes:
@@ -93,9 +110,10 @@ void MainWindow::pageOscillogInit(void)
     _ui->OscillogPlot->replot();
 
     connect(_ui->OscillogPlot->xAxis, static_cast<void(QCPAxis::*)(const QCPRange &, const QCPRange &)>(&QCPAxis::rangeChanged),
-            this, &MainWindow::xAxisRangeChanged);
+            this, &PageOscillog::xAxisRangeChanged);
 }
-void MainWindow::xAxisRangeChanged(QCPRange newRange, QCPRange oldRange)
+
+void PageOscillog::xAxisRangeChanged(QCPRange newRange, QCPRange oldRange)
 {
     Q_UNUSED(newRange)
     Q_UNUSED(oldRange)
@@ -108,18 +126,21 @@ void MainWindow::xAxisRangeChanged(QCPRange newRange, QCPRange oldRange)
         _ui->OscillogPlot->xAxis->setRangeUpper(20);
     }
 }
-void MainWindow::mouseWheel(QWheelEvent *event)
+
+void PageOscillog::mouseWheel(QWheelEvent *event)
 {
     double factor;
     double wheelSteps = event->delta() / 120.0;  // a single step delta is +/-120 usually
     factor = qPow(_ui->OscillogPlot->axisRect()->rangeZoomFactor(Qt::Vertical), wheelSteps);
     _ui->OscillogPlot->yAxis2->scaleRange(factor, _ui->OscillogPlot->yAxis2->pixelToCoord(event->pos().y()));
 }
-void MainWindow::buttonAutoConfigOscClicked(void)
+
+void PageOscillog::buttonAutoConfigOscClicked()
 {
     _ui->OscillogPlot->rescaleAxes(true);
 }
-void MainWindow::setOscillog(OscillogCnannel channel, std::vector<double> data)
+
+void PageOscillog::setOscillog(OscillogCnannel channel, std::vector<double> data)
 {
     double K1 = (static_cast<double>(_ui->sliderOscFilter->value())) / 1000.0;
     //qDebug()<<data;
@@ -142,4 +163,35 @@ void MainWindow::setOscillog(OscillogCnannel channel, std::vector<double> data)
     {
         qDebug() << "Channel error 2";
     }
+}
+
+void PageOscillog::update(void)
+{
+    if (_ui->checkOscIa->isChecked()) emit updateOscillog(OscillogCnannel::OSC_I_A);
+    if (_ui->checkOscIb->isChecked()) emit updateOscillog(OscillogCnannel::OSC_I_B);
+    if (_ui->checkOscIc->isChecked()) emit updateOscillog(OscillogCnannel::OSC_I_C);
+
+    if (_ui->checkOscUa->isChecked()) emit updateOscillog(OscillogCnannel::OSC_U_A);
+    if (_ui->checkOscUb->isChecked()) emit updateOscillog(OscillogCnannel::OSC_U_B);
+    if (_ui->checkOscUc->isChecked()) emit updateOscillog(OscillogCnannel::OSC_U_C);
+
+    if (_ui->checkOscUd->isChecked()) emit updateOscillog(OscillogCnannel::OSC_UD);
+
+    if (_ui->checkOscICompA->isChecked()) emit updateOscillog(OscillogCnannel::OSC_COMP_A);
+    if (_ui->checkOscICompB->isChecked()) emit updateOscillog(OscillogCnannel::OSC_COMP_B);
+    if (_ui->checkOscICompC->isChecked()) emit updateOscillog(OscillogCnannel::OSC_COMP_C);
+
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_I_A))->setVisible(_ui->checkOscIa->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_I_B))->setVisible(_ui->checkOscIb->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_I_C))->setVisible(_ui->checkOscIc->isChecked());
+
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_U_A))->setVisible(_ui->checkOscUa->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_U_B))->setVisible(_ui->checkOscUb->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_U_C))->setVisible(_ui->checkOscUc->isChecked());
+
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_UD))->setVisible(_ui->checkOscUd->isChecked());
+
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_COMP_A))->setVisible(_ui->checkOscICompA->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_COMP_B))->setVisible(_ui->checkOscICompB->isChecked());
+    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_COMP_C))->setVisible(_ui->checkOscICompC->isChecked());
 }

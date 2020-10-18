@@ -35,11 +35,14 @@ public slots:
             float K_Ud);
     void ansSettingsFilters(bool writed);
     void tableSettingsFiltersChanged(int row, int col);
+    void update(void);
+
 signals:
     void writeSettingsFilters(
             float K_I,
             float K_U,
             float K_Ud);
+    void updateSettingsFilters(void);
 };
 
 

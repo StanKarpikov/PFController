@@ -30,6 +30,11 @@ HEADERS += \
     interface_messaging.h \
     mainwindow.h \
     page_filters.h \
+    page_main.h \
+    page_oscillog.h \
+    page_settingscalibrations.h \
+    page_settingscapacitors.h \
+    page_settingsprotection.h \
     serial/deviceserialinterface.h \
     serial/deviceserialmessage.h \
     settingsdialog.h \

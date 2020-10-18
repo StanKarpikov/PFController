@@ -64,7 +64,7 @@ MainWindow::MainWindow(QWidget* parent)
       _pfc(new PFC),
       _pfc_settings(new PFCsettings),
       _page_filters(_ui, _pfc_settings, _pfc),
-      _oscillog_data(static_cast<int>(DiagramOscillogChannels::OSCILLOG_SIZE)),
+      _page_oscillog(_ui, _pfc_settings, _pfc),
       _last_index_events(0),
       _port_settings(new SettingsDialog),
       _connected(false),
@@ -105,7 +105,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(_pfc, &PFC::interfaceDisconnected, this, &MainWindow::deviceDisconnected);
 
     connect(_pfc, &PFC::setConnection, this, &MainWindow::setConnection);
-    connect(_pfc, &PFC::setOscillog, this, &MainWindow::setOscillog);
+
     connect(_pfc, &PFC::setNetVoltage, this, &MainWindow::setNetVoltage);
     connect(_pfc, &PFC::setSwitchOnOff, this, &MainWindow::setSwitchOnOff);
     connect(_pfc, &PFC::setNetVoltageRAW, this, &MainWindow::setNetVoltageRAW);
@@ -136,8 +136,7 @@ MainWindow::MainWindow(QWidget* parent)
             _pfc, &PFC::updateNetVoltageRAW);
     connect(this, &MainWindow::updateNetParams,
             _pfc, &PFC::updateNetParams);
-    connect(this, &MainWindow::updateOscillog,
-            _pfc, &PFC::updateOscillog);
+
     connect(this, &MainWindow::updateWorkState,
             _pfc, &PFC::updateWorkState);
     connect(this, &MainWindow::updateVersionInfo,
@@ -151,8 +150,6 @@ MainWindow::MainWindow(QWidget* parent)
             _pfc, &PFC::updateSettingsProtection);
     connect(this, &MainWindow::updateSettingsCapacitors,
             _pfc, &PFC::updateSettingsCapacitors);
-    connect(this, &MainWindow::updateSettingsFilters,
-            _pfc, &PFC::updateSettingsFilters);
 
     connect(this, &MainWindow::writeSettingsCalibrations,
             _pfc, &PFC::writeSettingsCalibrations);
@@ -189,7 +186,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     /* Init window pages */
     pageMainInit();
-    pageOscillogInit();
+    _page_oscillog.pageOscillogInit();
     pageSettingsCalibrationsInit();
     pageSettingsCapacitorsInit();
     pageSettingsProtectionInit();
@@ -248,7 +245,7 @@ void MainWindow::timerSettingsProtection(void)
 }
 void MainWindow::timerSettingsFilters(void)
 {
-    if (_connected) emit updateSettingsFilters();
+    if (_connected) emit _page_filters.update();
 }
 void MainWindow::timerSettingsCalibrations(void)
 {
@@ -275,35 +272,7 @@ void MainWindow::timerNetParams(void)
 
 void MainWindow::timerOscillog(void)
 {
-    if (!_connected) return;
-
-    if (_ui->checkOscIa->isChecked()) emit updateOscillog(OscillogCnannel::OSC_I_A);
-    if (_ui->checkOscIb->isChecked()) emit updateOscillog(OscillogCnannel::OSC_I_B);
-    if (_ui->checkOscIc->isChecked()) emit updateOscillog(OscillogCnannel::OSC_I_C);
-
-    if (_ui->checkOscUa->isChecked()) emit updateOscillog(OscillogCnannel::OSC_U_A);
-    if (_ui->checkOscUb->isChecked()) emit updateOscillog(OscillogCnannel::OSC_U_B);
-    if (_ui->checkOscUc->isChecked()) emit updateOscillog(OscillogCnannel::OSC_U_C);
-
-    if (_ui->checkOscUd->isChecked()) emit updateOscillog(OscillogCnannel::OSC_UD);
-
-    if (_ui->checkOscICompA->isChecked()) emit updateOscillog(OscillogCnannel::OSC_COMP_A);
-    if (_ui->checkOscICompB->isChecked()) emit updateOscillog(OscillogCnannel::OSC_COMP_B);
-    if (_ui->checkOscICompC->isChecked()) emit updateOscillog(OscillogCnannel::OSC_COMP_C);
-
-    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_I_A))->setVisible(_ui->checkOscIa->isChecked());
-    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_I_B))->setVisible(_ui->checkOscIb->isChecked());
-    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_I_C))->setVisible(_ui->checkOscIc->isChecked());
-
-    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_U_A))->setVisible(_ui->checkOscUa->isChecked());
-    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_U_B))->setVisible(_ui->checkOscUb->isChecked());
-    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_U_C))->setVisible(_ui->checkOscUc->isChecked());
-
-    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_UD))->setVisible(_ui->checkOscUd->isChecked());
-
-    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_COMP_A))->setVisible(_ui->checkOscICompA->isChecked());
-    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_COMP_B))->setVisible(_ui->checkOscICompB->isChecked());
-    _ui->OscillogPlot->graph(static_cast<int>(DiagramOscillogChannels::OSCILLOG_COMP_C))->setVisible(_ui->checkOscICompC->isChecked());
+    if (_connected) _page_oscillog.update();
 }
 
 bool MainWindow::eventFilter(QObject* object, QEvent* event)
@@ -606,7 +575,7 @@ void MainWindow::initInterfaceConnections(void)
     connect(_ui->actionAboutQt, &QAction::triggered, qApp, &QApplication::aboutQt);
     connect(_port_settings, &SettingsDialog::Appl, this, &MainWindow::openSerialPort);
 
-    connect(_ui->buttonAutoConfigOsc, &QPushButton::clicked, this, &MainWindow::buttonAutoConfigOscClicked);
+
     connect(_ui->valueCapacitorsKp, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &MainWindow::capacitorsKpValueChanged);
     connect(_ui->valueCapacitorsKi, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &MainWindow::capacitorsKiValueChanged);
     connect(_ui->valueCapacitorsKd, static_cast<void(QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this, &MainWindow::capacitorsKdValueChanged);
