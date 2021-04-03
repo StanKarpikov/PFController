@@ -65,6 +65,7 @@ MainWindow::MainWindow(QWidget* parent)
       _pfc_settings(new PFCsettings),
       _page_filters(_ui, _pfc_settings, _pfc),
       _page_oscillog(_ui, _pfc_settings, _pfc),
+      _page_main(_ui, _pfc_settings, _pfc),
       _last_index_events(0),
       _port_settings(new SettingsDialog),
       _connected(false),
@@ -110,8 +111,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(_pfc, &PFC::setSwitchOnOff, this, &MainWindow::setSwitchOnOff);
     connect(_pfc, &PFC::setNetVoltageRAW, this, &MainWindow::setNetVoltageRAW);
     connect(_pfc, &PFC::setNetParams, this, &MainWindow::setNetParams);
-    connect(_pfc, &PFC::setVersionInfo, this, &MainWindow::setVersionInfo);
-    connect(_pfc, &PFC::setWorkState, this, &MainWindow::setWorkState);
+
     connect(_pfc, &PFC::setEvents, this, &MainWindow::setEvents);
 
     connect(_pfc, &PFC::message, this, &MainWindow::message);
@@ -137,10 +137,6 @@ MainWindow::MainWindow(QWidget* parent)
     connect(this, &MainWindow::updateNetParams,
             _pfc, &PFC::updateNetParams);
 
-    connect(this, &MainWindow::updateWorkState,
-            _pfc, &PFC::updateWorkState);
-    connect(this, &MainWindow::updateVersionInfo,
-            _pfc, &PFC::updateVersionInfo);
     connect(this, &MainWindow::updateEvents,
             _pfc, &PFC::updateEvents);
 
@@ -185,7 +181,7 @@ MainWindow::MainWindow(QWidget* parent)
             this, &MainWindow::timerEvents);
 
     /* Init window pages */
-    pageMainInit();
+    _page_main.pageMainInit();
     _page_oscillog.pageOscillogInit();
     pageSettingsCalibrationsInit();
     pageSettingsCapacitorsInit();
@@ -220,6 +216,15 @@ std::string MainWindow::stringWithColor(std::string str, std::string color)
     std::string ret_str;
     ret_str = "<font color=" + color + ">" + str + "</font>";
     return ret_str;
+}
+
+void MainWindow::setConnection(bool connected)
+{
+    _connected = connected;
+    if (!_connected)
+    {
+        _last_index_events = 0;
+    }
 }
 
 void MainWindow::filterApply(float &A, float B)
@@ -259,12 +264,16 @@ void MainWindow::timerEvents(void)
 
 void MainWindow::timerWorkState(void)
 {
-    if (_connected) emit updateWorkState(static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch()));
+    /* Frequent update */
+    if (_connected) _page_main.update();
 }
+
 void MainWindow::timerVersion(void)
 {
-    emit updateVersionInfo();
+    /* Low frequency update update */
+    _page_main.update();
 }
+
 void MainWindow::timerNetParams(void)
 {
     if (_connected) emit updateNetParams();

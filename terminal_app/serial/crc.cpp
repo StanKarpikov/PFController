@@ -25,7 +25,7 @@ uint16_t crc16(const std::vector<uint8_t> &block)
     uint16_t crc = CRC16_INITIAL_VALUE;  // initial value
     uint16_t polynomial = 0x1021;        // 0001 0000 0010 0001  (0, 5, 12)
 
-    for (int b = 0; b < block.size(); b++)
+    for (size_t b = 0; b < block.size(); b++)
     {
         for (int i = 0; i < 8; i++)
         {

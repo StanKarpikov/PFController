@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+
 #include "ui_mainwindow.h"
 #include "settingsdialog.h"
 #include "interface_definitions.h"
@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QGraphicsDropShadowEffect>
 #include <QListWidgetItem>
+#include "page_main.h"
 
 /*--------------------------------------------------------------
                        NAMESPACES
@@ -22,36 +23,59 @@ using namespace InterfaceDefinitions; /* For GUI text strings, GUI parameters, c
                        PRIVATE FUNCTIONS
 --------------------------------------------------------------*/
 
-void MainWindow::updateCheckboxVal(QCheckBox* checkbox, bool value)
+PageMain::PageMain(Ui::MainWindow *ui, PFCconfig::PFCsettings *pfc_settings, PFC *pfc):
+    _ui(ui), _pfc_settings(pfc_settings), _pfc(pfc)
+{
+}
+
+PageMain::~PageMain(void)
+{
+
+}
+
+void PageMain::updateCheckboxVal(QCheckBox* checkbox, bool value)
 {
     checkbox->blockSignals(true);
     checkbox->setChecked(value);
     checkbox->blockSignals(false);
 }
 
-void MainWindow::pageMainInit(void)
+void PageMain::pageMainInit(void)
 {
+    connect(_pfc, &PFC::setVersionInfo, this, &PageMain::setVersionInfo);
+    connect(_pfc, &PFC::setWorkState, this, &PageMain::setWorkState);
+    connect(this, &PageMain::updateWorkState,
+         _pfc, &PFC::updateWorkState);
+    connect(this, &PageMain::updateVersionInfo,
+         _pfc, &PFC::updateVersionInfo);
     _ui->radioConnection->setDisabled(true);
 }
-void MainWindow::setConnection(bool connected)
+
+void PageMain::update(void)
+{
+    _ui->radioConnection->setDisabled(true);
+    emit updateWorkState(static_cast<uint64_t>(QDateTime::currentMSecsSinceEpoch()));
+    emit updateVersionInfo();
+}
+
+void PageMain::setConnection(bool connected)
 {
     _ui->radioConnection->setChecked(connected);
     _ui->groupState->setDisabled(!connected);
     _ui->groupNetworkParameters->setDisabled(!connected);
     _ui->tabWidget->setDisabled(!connected);
 
-    _connected = connected;
     if (connected)
     {
         _ui->radioConnection->setText("Connected");
     }
     else
     {
-        _last_index_events = 0;
         _ui->radioConnection->setText("Disconnected");
     }
 }
-void MainWindow::setWorkState(uint32_t state, uint32_t ch_a, uint32_t ch_b, uint32_t ch_c)
+
+void PageMain::setWorkState(uint32_t state, uint32_t ch_a, uint32_t ch_b, uint32_t ch_c)
 {
     _pfc_settings->status = state;
     _pfc_settings->active_channels[PFC_ACHAN] = ch_a;
@@ -114,7 +138,8 @@ void MainWindow::setWorkState(uint32_t state, uint32_t ch_a, uint32_t ch_b, uint
             break;
     }
 }
-void MainWindow::setVersionInfo(
+
+void PageMain::setVersionInfo(
     uint32_t major,
     uint32_t minor,
     uint32_t micro,

@@ -144,6 +144,7 @@ private:
     PFCconfig::PFCsettings *_pfc_settings; /*TODO: Replace by a smart pointer */
     PageFilters _page_filters;
     PageOscillog _page_oscillog;
+    PageMain _page_main;
 
     std::list<QPushButton*> _buttons_edit;
     uint64_t _last_index_events;
@@ -169,14 +170,12 @@ private:
     --------------------------------------------------------------*/
 private:
     bool eventFilter(QObject *object, QEvent *event);
-    void pageMainInit(void);
 
     void pageSettingsCalibrationsInit(void);
     void pageSettingsCapacitorsInit(void);
     void pageSettingsProtectionInit(void);
     void setTableProtectionsVal(TableProtectionRows row, float value);
     void updateSpinVal(QDoubleSpinBox *spinbox, float value);
-    void updateCheckboxVal(QCheckBox* checkbox, bool value);
     void initInterfaceConnections(void);
     void filterApply(float &A, float B);
     void setFilter(QEvent* event, QObject* object, QWidget* ui_obj, QTimer* obj, std::chrono::milliseconds timeout);
@@ -214,7 +213,7 @@ public slots:
     void message(uint8_t type, uint8_t level, uint8_t target, std::string message);
     void deviceConnected(void);
     void deviceDisconnected(void);
-
+    void setConnection(bool connected);
     /* Interface commands */
 
     void setNetVoltage( float ADC_UD,
@@ -248,21 +247,11 @@ public slots:
                            float ADC_EMS_B,
                            float ADC_EMS_C,
                            float ADC_EMS_I);
-    void setWorkState(uint32_t state, uint32_t ch_a, uint32_t ch_b, uint32_t ch_c);
+
     void setSwitchOnOff(uint32_t result);
     void setEvents(std::list<PFCconfig::Events::EventRecord> ev);
-    void setVersionInfo(
-            uint32_t major,
-            uint32_t minor,
-            uint32_t micro,
-            uint32_t build,
-            uint32_t day,
-            uint32_t month,
-            uint32_t year,
-            uint32_t hour,
-            uint32_t minute,
-            uint32_t second);
-    void setConnection(bool _connected);
+
+
     void setNetParams(float period_fact,
                     float U0Hz_A,
                     float U0Hz_B,
@@ -322,8 +311,6 @@ public slots:
 
 signals:
     void updateNetVoltage();
-    void updateWorkState(uint64_t currentTime);
-    void updateVersionInfo();
     void updateNetVoltageRAW();
     void updateNetParams();
     void updateEvents(uint64_t afterIndex);
